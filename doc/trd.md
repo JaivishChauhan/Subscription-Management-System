@@ -18,16 +18,16 @@
    - 3.4 [Form Handling — React Hook Form + Zod](#34-form-handling--react-hook-form--zod)
    - 3.5 [Theme System — next-themes](#35-theme-system--next-themes)
 4. [Backend Stack](#4-backend-stack)
-   - 4.1 [Payload CMS Overview](#41-payload-cms-overview)
-   - 4.2 [Why Payload CMS](#42-why-payload-cms)
-   - 4.3 [Payload Collections Architecture](#43-payload-collections-architecture)
-   - 4.4 [Access Control in Payload](#44-access-control-in-payload)
-   - 4.5 [Payload REST & Local API](#45-payload-rest--local-api)
-   - 4.6 [Payload Hooks — Business Logic Layer](#46-payload-hooks--business-logic-layer)
-   - 4.7 [Admin Panel — Payload UI](#47-admin-panel--payload-ui)
+   - 4.1 [Node.js API / CMS Overview](#41-backend-cms-overview)
+   - 4.2 [Why Node.js API / CMS](#42-why-backend-cms)
+   - 4.3 [backend Collections Architecture](#43-backend-collections-architecture)
+   - 4.4 [Access Control in backend](#44-access-control-in-backend)
+   - 4.5 [backend REST & Local API](#45-backend-rest--local-api)
+   - 4.6 [backend Hooks — Business Logic Layer](#46-backend-hooks--business-logic-layer)
+   - 4.7 [Admin Panel — backend UI](#47-admin-panel--backend-ui)
 5. [Database — PostgreSQL](#5-database--postgresql)
    - 5.1 [Why PostgreSQL](#51-why-postgresql)
-   - 5.2 [Docker Setup](#52-docker-setup)
+   - 5.2 [local environment Setup](#52-local environment-setup)
    - 5.3 [Database Schema — Collections & Tables](#53-database-schema--collections--tables)
    - 5.4 [Entity Relationship Overview](#54-entity-relationship-overview)
    - 5.5 [Indexes & Performance](#55-indexes--performance)
@@ -49,7 +49,7 @@
 │                                                                     │
 │   ┌──────────────────────────┐    ┌──────────────────────────────┐  │
 │   │   Customer Portal         │    │   Admin / Backend Panel       │  │
-│   │   Next.js App Router      │    │   Payload CMS Admin UI        │  │
+│   │   Next.js App Router      │    │   Node.js API / CMS Admin UI        │  │
 │   │   React · Tailwind CSS    │    │   (built-in, auto-generated)  │  │
 │   └──────────────┬───────────┘    └──────────────┬───────────────┘  │
 └──────────────────┼──────────────────────────────────┼───────────────┘
@@ -60,7 +60,7 @@
 │                         SERVER LAYER                                │
 │                                                                     │
 │   ┌────────────────────────────────────────────────────────────┐    │
-│   │                    Payload CMS (Node.js)                    │    │
+│   │                    Node.js API / CMS (Node.js)                    │    │
 │   │                                                            │    │
 │   │   Collections · Access Control · Hooks · REST API          │    │
 │   │   Local API (server-side) · Admin Panel                    │    │
@@ -72,14 +72,14 @@
 │   └─────────────────────────────┴───────────────────────────────┘   │
 └─────────────────────────────────┬───────────────────────────────────┘
                                   │
-                   Drizzle ORM / Payload DB Adapter
+                   Drizzle ORM / backend DB Adapter
                                   │
                                   ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                         DATA LAYER                                  │
 │                                                                     │
 │   ┌──────────────────────────────────────────────────────────────┐  │
-│   │              PostgreSQL (Docker — Local)                      │  │
+│   │              PostgreSQL (local environment — Local)                      │  │
 │   │                                                              │  │
 │   │   users · contacts · products · plans · subscriptions        │  │
 │   │   invoices · payments · discounts · taxes · attributes       │  │
@@ -119,7 +119,7 @@ subscription-management/
 │   │   │   ├── portal/             # Portal-specific components
 │   │   │   └── shared/             # Shared across portal and admin
 │   │   ├── lib/
-│   │   │   ├── payload.ts          # Payload Local API client (server-side)
+│   │   │   ├── backend.ts          # backend Local API client (server-side)
 │   │   │   ├── stripe.ts           # Stripe client setup
 │   │   │   └── validations/        # Zod schemas
 │   │   ├── hooks/                  # Custom React hooks
@@ -128,9 +128,9 @@ subscription-management/
 │   │   ├── next.config.ts
 │   │   └── package.json
 │   │
-│   └── cms/                        # Payload CMS — Backend + Admin Panel
+│   └── cms/                        # Node.js API / CMS — Backend + Admin Panel
 │       ├── src/
-│       │   ├── collections/        # All Payload collection definitions
+│       │   ├── collections/        # All backend collection definitions
 │       │   │   ├── Users.ts
 │       │   │   ├── Contacts.ts
 │       │   │   ├── Products.ts
@@ -142,22 +142,22 @@ subscription-management/
 │       │   │   ├── Discounts.ts
 │       │   │   ├── Taxes.ts
 │       │   │   └── Attributes.ts
-│       │   ├── hooks/              # Payload lifecycle hooks (business logic)
+│       │   ├── hooks/              # backend lifecycle hooks (business logic)
 │       │   │   ├── subscriptions/
 │       │   │   ├── invoices/
 │       │   │   └── discounts/
 │       │   ├── access/             # RBAC access control functions
-│       │   ├── payload.config.ts   # Main Payload configuration
+│       │   ├── backend.config.ts   # Main backend configuration
 │       │   └── server.ts           # Express/Node server entry
 │       └── package.json
 │
 ├── packages/
-│   └── types/                      # Shared TypeScript types (generated by Payload)
-│       └── payload-types.ts
+│   └── types/                      # Shared TypeScript types (generated by backend)
+│       └── schema-types.ts
 │
 ├── .github/
 │   └── workflows/                  # CI/CD pipelines
-├── docker-compose.yml              # PostgreSQL local setup
+├── database-config.yml              # PostgreSQL local setup
 ├── .env.example
 ├── .gitignore
 ├── turbo.json                      # Turborepo build config (optional)
@@ -175,7 +175,7 @@ subscription-management/
 | Version | Next.js 14+ |
 | Router | App Router (not Pages Router) |
 | Rendering | RSC (React Server Components) by default; `'use client'` where interactivity needed |
-| Data Fetching | Server Components fetch directly via Payload Local API; Client Components use SWR or fetch |
+| Data Fetching | Server Components fetch directly via backend Local API; Client Components use SWR or fetch |
 
 **Route groups used:**
 
@@ -288,17 +288,17 @@ export type SignupInput = z.infer<typeof signupSchema>
 
 ## 4. Backend Stack
 
-### 4.1 Payload CMS Overview
+### 4.1 Node.js API / CMS Overview
 
 | Property | Value |
 |----------|-------|
-| Version | Payload CMS 2.x |
+| Version | Node.js API / CMS 2.x |
 | Runtime | Node.js |
-| Framework | Express.js (Payload wraps it internally) |
-| ORM / DB Adapter | `@payloadcms/db-postgres` (Drizzle under the hood) |
+| Framework | Express.js (backend wraps it internally) |
+| ORM / DB Adapter | `Postgres Adapter` (Drizzle under the hood) |
 | Language | TypeScript |
 
-Payload CMS serves as the **entire backend** for this project:
+Node.js API / CMS serves as the **entire backend** for this project:
 - Defines the data models (called **Collections**)
 - Provides a **REST API** and **Local API** automatically
 - Handles **authentication, sessions, and access control**
@@ -307,27 +307,27 @@ Payload CMS serves as the **entire backend** for this project:
 
 ---
 
-### 4.2 Why Payload CMS
+### 4.2 Why Node.js API / CMS
 
-| Requirement | How Payload Solves It |
+| Requirement | How backend Solves It |
 |-------------|-----------------------|
 | Admin panel for Internal Users | Auto-generated, zero-cost admin UI from collection definitions |
 | RBAC — 3 roles with different permissions | Native `access` functions per collection and per operation |
 | Complex data models with relationships | `relationship` field type with full join support |
 | Business logic hooks (auto-invoice, lifecycle) | `beforeChange`, `afterChange`, `beforeOperation` hooks |
 | REST API for frontend | Auto-generated REST endpoints for every collection |
-| TypeScript types shared with frontend | `payload generate:types` outputs `payload-types.ts` |
-| Self-hosted, local/offline capability | Runs as Node.js process; pairs with local PostgreSQL via Docker |
+| TypeScript types shared with frontend | `backend generate:types` outputs `schema-types.ts` |
+| Self-hosted, local/offline capability | Runs as Node.js process; pairs with local PostgreSQL via local environment |
 | No vendor lock-in | Open source, deployable anywhere Node.js runs |
 
 ---
 
-### 4.3 Payload Collections Architecture
+### 4.3 backend Collections Architecture
 
-Every data model in the system maps to a **Payload Collection**. Each collection auto-generates:
+Every data model in the system maps to a **backend Collection**. Each collection auto-generates:
 - A database table in PostgreSQL
 - REST API endpoints (`GET /api/[collection]`, `POST`, `PATCH`, `DELETE`)
-- Local API methods (`payload.find()`, `payload.create()`, etc.)
+- Local API methods (`backend.find()`, `backend.create()`, etc.)
 - Admin UI pages (list view + form view)
 
 **Full collection list:**
@@ -349,15 +349,15 @@ Every data model in the system maps to a **Payload Collection**. Each collection
 
 ---
 
-### 4.4 Access Control in Payload
+### 4.4 Access Control in backend
 
-Payload uses **per-collection, per-operation** access functions written in TypeScript.
+backend uses **per-collection, per-operation** access functions written in TypeScript.
 
 **Role resolution pattern:**
 
 ```ts
 // access/isAdmin.ts
-import { Access } from 'payload/types'
+import { Access } from 'backend/types'
 
 export const isAdmin: Access = ({ req: { user } }) =>
   user?.role === 'admin'
@@ -388,7 +388,7 @@ export const isSelf: Access = ({ req: { user }, id }) =>
 
 ---
 
-### 4.5 Payload REST & Local API
+### 4.5 backend REST & Local API
 
 **REST API** (used by Next.js Client Components and external calls):
 
@@ -405,18 +405,18 @@ GET    /api/invoices?where[subscription][equals]=:id    Filter invoices by subsc
 **Local API** (used by Next.js Server Components — no HTTP overhead):
 
 ```ts
-// lib/payload.ts — Server-side only
-import payload from 'payload'
+// lib/backend.ts — Server-side only
+import backend from 'backend'
 
 // Fetch subscriptions for a portal user
-const { docs } = await payload.find({
+const { docs } = await backend.find({
   collection: 'subscriptions',
   where: { customer: { equals: userId } },
   user: currentUser,   // access control enforced automatically
 })
 
 // Create an invoice
-const invoice = await payload.create({
+const invoice = await backend.create({
   collection: 'invoices',
   data: { subscription: subId, customer: customerId, ... },
   user: adminUser,
@@ -430,7 +430,7 @@ The **Local API is preferred in Server Components** because:
 
 ---
 
-### 4.6 Payload Hooks — Business Logic Layer
+### 4.6 backend Hooks — Business Logic Layer
 
 Hooks are TypeScript functions that run at specific points in a collection's lifecycle. All core business rules are implemented as hooks — not scattered across frontend code.
 
@@ -458,7 +458,7 @@ hooks: {
         doc.status === 'confirmed' &&
         previousDoc.status !== 'confirmed'
       ) {
-        await req.payload.create({
+        await req.backend.create({
           collection: 'invoices',
           data: {
             subscription: doc.id,
@@ -494,15 +494,15 @@ hooks: {
 
 ---
 
-### 4.7 Admin Panel — Payload UI
+### 4.7 Admin Panel — backend UI
 
-Payload auto-generates a full admin UI at `/admin` from the collection configuration. No separate admin frontend needs to be built.
+backend auto-generates a full admin UI at `/admin` from the collection configuration. No separate admin frontend needs to be built.
 
-**Customizations applied to the Payload Admin Panel:**
+**Customizations applied to the backend Admin Panel:**
 
 | Customization | Implementation |
 |---------------|----------------|
-| Brand colors | `payload.config.ts` → `admin.css` override with indigo/violet tokens |
+| Brand colors | `backend.config.ts` → `admin.css` override with indigo/violet tokens |
 | Custom logo | `admin.components.graphics.Logo` |
 | Grouped navigation | Collections organized under `Subscriptions`, `Configuration`, `Users` nav groups |
 | Status bar on Subscriptions | Custom `Cell` component showing lifecycle step badges |
@@ -517,19 +517,19 @@ Payload auto-generates a full admin UI at `/admin` from the collection configura
 | Requirement | PostgreSQL Advantage |
 |-------------|---------------------|
 | Complex relational data | Native foreign keys, JOINs, referential integrity |
-| Offline / local capability | Runs fully in Docker with zero cloud dependency |
+| Offline / local capability | Runs fully in local environment with zero cloud dependency |
 | JSON support | `jsonb` columns for flexible order line structures |
 | Transactions | ACID-compliant; critical for invoice + payment atomicity |
-| Payload compatibility | First-class support via `@payloadcms/db-postgres` |
+| backend compatibility | First-class support via `Postgres Adapter` |
 | Performance at scale | Battle-tested for thousands of concurrent records |
-| Type safety | Drizzle ORM (used by Payload) provides typed query results |
+| Type safety | Drizzle ORM (used by backend) provides typed query results |
 
 ---
 
-### 5.2 Docker Setup
+### 5.2 local environment Setup
 
 ```yaml
-# docker-compose.yml
+# database-config.yml
 version: '3.9'
 
 services:
@@ -552,7 +552,7 @@ volumes:
 
 **Start database:**
 ```bash
-docker-compose up -d
+npm run start:db
 ```
 
 **Connection string:**
@@ -564,7 +564,7 @@ DATABASE_URI=postgresql://${DB_USER}:${DB_PASSWORD}@localhost:5432/${DB_NAME}
 
 ### 5.3 Database Schema — Collections & Tables
 
-Payload auto-generates and manages the PostgreSQL schema from collection definitions. Below is the logical schema for each table.
+backend auto-generates and manages the PostgreSQL schema from collection definitions. Below is the logical schema for each table.
 
 ---
 
@@ -1006,9 +1006,9 @@ DB_USER=sms_user
 DB_PASSWORD=sms_pass
 DB_NAME=sms_db
 
-# ── Payload CMS ────────────────────────────────────────
-PAYLOAD_SECRET=your-super-secret-payload-key-min-32-chars
-PAYLOAD_PUBLIC_SERVER_URL=http://localhost:3001
+# ── Node.js API / CMS ────────────────────────────────────────
+BACKEND_SECRET=your-super-secret-backend-key-min-32-chars
+BACKEND_PUBLIC_SERVER_URL=http://localhost:3001
 
 # ── Next.js Frontend ───────────────────────────────────
 NEXT_PUBLIC_API_URL=http://localhost:3001/api
@@ -1039,11 +1039,11 @@ NODE_ENV=development
 
 ```
 1. Browser → GET /shop
-      Payload Local API: payload.find({ collection: 'products' })
+      backend Local API: backend.find({ collection: 'products' })
       → Products fetched from PostgreSQL
 
 2. Browser → Product Detail Page
-      Payload Local API: payload.findByID({ collection: 'products', id })
+      backend Local API: backend.findByID({ collection: 'products', id })
       → Variants, prices loaded
 
 3. User adds to cart → Cart state held in React state / localStorage
@@ -1060,9 +1060,9 @@ NODE_ENV=development
       → Success webhook received by /api/stripe/webhook
 
 7. Webhook handler:
-      a. payload.create({ collection: 'subscriptions', data: {...} })
-      b. afterChange hook fires → payload.create({ collection: 'invoices' })
-      c. payload.create({ collection: 'payments', data: { invoice, amount, method } })
+      a. backend.create({ collection: 'subscriptions', data: {...} })
+      b. afterChange hook fires → backend.create({ collection: 'invoices' })
+      c. backend.create({ collection: 'payments', data: { invoice, amount, method } })
       d. afterChange hook fires → invoice.status = 'paid', amount_due = 0
 
 8. Browser → Redirect to /thank-you with order number
@@ -1071,7 +1071,7 @@ NODE_ENV=development
 ### Admin Creates Subscription Manually
 
 ```
-1. Admin logs in → /admin (Payload Admin UI)
+1. Admin logs in → /admin (backend Admin UI)
 
 2. Admin opens Subscriptions → New
       Fills: Customer, Template, Plan, Payment Term, Order Lines
@@ -1087,7 +1087,7 @@ NODE_ENV=development
       invoice.status = 'confirmed'
 
 6. Admin clicks Pay → Payment popup
-      payload.create({ collection: 'payments', ... })
+      backend.create({ collection: 'payments', ... })
       afterChange hook: invoice.paid = true, amount_due = 0
 ```
 
@@ -1097,13 +1097,13 @@ NODE_ENV=development
 
 | Layer | Mechanism |
 |-------|-----------|
-| **Authentication** | Payload CMS built-in — JWT + HTTP-only cookies |
-| **Password hashing** | bcrypt (handled by Payload automatically) |
-| **Role enforcement** | Payload `access` functions per collection and operation |
+| **Authentication** | Node.js API / CMS built-in — JWT + HTTP-only cookies |
+| **Password hashing** | bcrypt (handled by backend automatically) |
+| **Role enforcement** | backend `access` functions per collection and operation |
 | **Order line lock** | `beforeChange` hook throws error if modification attempted post-confirm |
 | **Admin-only operations** | `isAdmin` access function on Discounts, Payments, User creation |
-| **CSRF protection** | Payload handles CSRF token for admin panel; API routes use SameSite cookies |
-| **Input validation** | Zod schemas validated on client (React Hook Form) and server (Payload field validation + API route handlers) |
+| **CSRF protection** | backend handles CSRF token for admin panel; API routes use SameSite cookies |
+| **Input validation** | Zod schemas validated on client (React Hook Form) and server (backend field validation + API route handlers) |
 | **Environment secrets** | All keys in `.env`; never committed to Git |
 | **Stripe** | Webhook signature verified via `stripe.webhooks.constructEvent(rawBody, sig, secret)` |
 | **SQL injection** | Not possible — Drizzle ORM uses parameterized queries exclusively |
@@ -1123,10 +1123,10 @@ npm install
 # 3. Copy environment file and fill in values
 cp .env.example .env
 
-# 4. Start PostgreSQL via Docker
-docker-compose up -d
+# 4. Start PostgreSQL via local environment
+npm run start:db
 
-# 5. Start Payload CMS (backend + admin panel)
+# 5. Start Node.js API / CMS (backend + admin panel)
 cd apps/cms
 npm run dev        # Starts on http://localhost:3001
                    # Admin panel at http://localhost:3001/admin
@@ -1135,7 +1135,7 @@ npm run dev        # Starts on http://localhost:3001
 cd apps/web
 npm run dev        # Starts on http://localhost:3000
 
-# 7. Payload auto-runs migrations on first start.
+# 7. backend auto-runs migrations on first start.
 #    Seed the default Admin user if not already present:
 cd apps/cms
 npm run seed
@@ -1174,11 +1174,11 @@ Password: Admin@1234!
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| `payload` | 2.x | CMS framework + API + admin |
-| `@payloadcms/db-postgres` | latest | PostgreSQL adapter for Payload |
-| `@payloadcms/bundler-webpack` | latest | Admin UI bundler |
-| `@payloadcms/richtext-slate` | latest | Rich text support |
-| `express` | 4.x | HTTP server (wrapped by Payload) |
+| `backend` | 2.x | CMS framework + API + admin |
+| `Postgres Adapter` | latest | PostgreSQL adapter for backend |
+| `Admin Bundler` | latest | Admin UI bundler |
+| `Rich Text Support` | latest | Rich text support |
+| `express` | 4.x | HTTP server (wrapped by backend) |
 | `stripe` | latest | Payment processing |
 | `nodemailer` | latest | Transactional email sending |
 | `typescript` | 5.x | Type safety |
@@ -1188,7 +1188,7 @@ Password: Admin@1234!
 
 | Package | Purpose |
 |---------|---------|
-| `payload` | Type generation source (`payload generate:types`) |
+| `backend` | Type generation source (`backend generate:types`) |
 | `typescript` | Shared type compilation |
 
 ---

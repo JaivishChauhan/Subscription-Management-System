@@ -438,7 +438,7 @@ Draft ──► Confirmed ──► Paid
 | **Security** | Role-based permissions enforced on all routes and API endpoints; secure authentication required |
 | **Usability** | UI must be simple, intuitive, and consistent across all pages |
 | **Reliability** | High availability architecture is mandatory; no single point of failure |
-| **Offline Capability** | Database must be locally deployable (Docker) for offline development and demo scenarios |
+| **Offline Capability** | Database must be locally deployable  for offline development and demo scenarios |
 | **Version Control** | Git monorepo via GitHub; mandatory pull request reviews; strict branch protection enforced |
 
 ---
@@ -449,16 +449,16 @@ Draft ──► Confirmed ──► Paid
 |-------|------------|
 | **Frontend** | Next.js (App Router), React, Tailwind CSS |
 | **Form Handling** | React Hook Form, Zod (validation) |
-| **Backend / Admin CMS** | Payload CMS (Node.js) |
-| **Database** | PostgreSQL (local Docker deployment) |
+| **Backend / Admin CMS** | Node.js API |
+| **Database** | PostgreSQL (local deployment) |
 | **Payment Gateway** | Stripe (Test / Beta Mode) |
 | **Version Control** | Git monorepo via GitHub |
 
 ### Key Tech Decisions
 
 - **Next.js App Router** is used for server-side rendering, nested layouts, and route-based code splitting.
-- **Payload CMS** serves as the backend admin control panel and API layer — managing collections, access control, and content.
-- **PostgreSQL via Docker** enables offline capability without reliance on cloud-hosted databases.
+- **Node.js API** serves as the backend admin control panel and API layer — managing collections, access control, and content.
+- **PostgreSQL** enables offline capability without reliance on cloud-hosted databases.
 - **Stripe Test Mode** is integrated for payment gateway simulation without processing real transactions.
 - **Zod** is used for both client-side and server-side schema validation to ensure robust input handling.
 
@@ -468,12 +468,12 @@ Draft ──► Confirmed ──► Paid
 
 ### Constraints
 - Payment gateway is limited to **Stripe Test Mode** — no real transactions are processed.
-- PostgreSQL must run locally via Docker; no external database cloud services are required for core functionality.
+- PostgreSQL must run locally; no external database cloud services are required for core functionality.
 - All AI-generated or third-party code snippets must be understood and adapted — no blind copy-paste.
 - Trendy technologies should only be adopted if they add genuine, demonstrable value.
 
 ### Assumptions
-- All users have a stable local development environment with Node.js, Docker, and Git installed.
+- All users have a stable local development environment with Node.js, and Git installed.
 - Stripe test keys will be provided to all team members for local integration testing.
 - The platform is not multi-tenant in v1 — all data exists within a single organizational context.
 - Email notifications (password reset, invoice delivery) assume an SMTP or transactional email provider is configured.

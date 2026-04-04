@@ -1,7 +1,7 @@
 ### Production Application Tech Stack
 
 * **Frontend Interface:** Next.js (App Router), React, Tailwind CSS, React Hook Form, Zod.
-* **Backend & Admin Control Panel:** Payload CMS (Node.js).
+* **Backend & Admin Control Panel:** Node.js API.
 * **Database:** PostgreSQL (Local deployment for offline capability).
 * **Payment Gateway:** Stripe Test Mode (Beta/Testing gateway).
 * **Version Control:** Git monorepo via GitHub with mandatory pull request reviews and strict branch protection.
