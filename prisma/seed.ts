@@ -1,7 +1,5 @@
-import { prisma } from "../lib/db";
-import * as dotenv from "dotenv";
-
-dotenv.config();
+import "dotenv/config"
+import { prisma } from "../lib/db"
 
 // ============================================================================
 // 50 MAJOR REAL-WORLD SERVICES — 10 categories
@@ -16,7 +14,8 @@ const SERVICES = [
     color: "#E50914",
     monthlyPrice: 649,
     yearlyPrice: 6490,
-    logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg",
+    logoUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg",
     iconKey: null,
     description: "Movies, TV shows & award-winning originals",
   },
@@ -27,7 +26,8 @@ const SERVICES = [
     color: "#113CCF",
     monthlyPrice: 299,
     yearlyPrice: 2990,
-    logoUrl: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg",
+    logoUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg",
     iconKey: null,
     description: "Disney, Marvel, Star Wars, Pixar & National Geographic",
   },
@@ -93,7 +93,8 @@ const SERVICES = [
     color: "#FF0000",
     monthlyPrice: 139,
     yearlyPrice: 1390,
-    logoUrl: "https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg",
+    logoUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg",
     iconKey: null,
     description: "Ad-free YouTube + YouTube Music",
   },
@@ -106,7 +107,8 @@ const SERVICES = [
     color: "#1DB954",
     monthlyPrice: 119,
     yearlyPrice: 1189,
-    logoUrl: "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg",
+    logoUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg",
     iconKey: null,
     description: "Music, podcasts & audiobooks",
   },
@@ -577,7 +579,551 @@ const SERVICES = [
     iconKey: "IconRun",
     description: "Live fitness classes & gym access across India",
   },
-] as const;
+
+  // ── ODOO FINANCE ──────────────────────────────────────────────────────────
+  {
+    name: "Accounting",
+    slug: "accounting",
+    category: "finance",
+    color: "#875A7B",
+    monthlyPrice: 499,
+    yearlyPrice: 4990,
+    logoUrl: null,
+    iconKey: "IconReceipt",
+    description: "Manage your finances effortlessly",
+  },
+  {
+    name: "Invoicing",
+    slug: "invoicing",
+    category: "finance",
+    color: "#875A7B",
+    monthlyPrice: 299,
+    yearlyPrice: 2990,
+    logoUrl: null,
+    iconKey: "IconFileInvoice",
+    description: "Create and send invoices",
+  },
+  {
+    name: "Expenses",
+    slug: "expenses",
+    category: "finance",
+    color: "#875A7B",
+    monthlyPrice: 199,
+    yearlyPrice: 1990,
+    logoUrl: null,
+    iconKey: "IconReceipt2",
+    description: "Streamline expense reporting",
+  },
+  {
+    name: "Spreadsheet (BI)",
+    slug: "spreadsheet-bi",
+    category: "finance",
+    color: "#875A7B",
+    monthlyPrice: 399,
+    yearlyPrice: 3990,
+    logoUrl: null,
+    iconKey: "IconChartBar",
+    description: "Business Intelligence and analysis",
+  },
+  {
+    name: "Documents",
+    slug: "documents",
+    category: "finance",
+    color: "#875A7B",
+    monthlyPrice: 199,
+    yearlyPrice: 1990,
+    logoUrl: null,
+    iconKey: "IconFolders",
+    description: "Paperless document management",
+  },
+  {
+    name: "Sign",
+    slug: "sign",
+    category: "finance",
+    color: "#875A7B",
+    monthlyPrice: 249,
+    yearlyPrice: 2490,
+    logoUrl: null,
+    iconKey: "IconSignature",
+    description: "Send and sign documents online",
+  },
+
+  // ── ODOO SALES ────────────────────────────────────────────────────────────
+  {
+    name: "CRM",
+    slug: "crm",
+    category: "sales",
+    color: "#E05A65",
+    monthlyPrice: 350,
+    yearlyPrice: 3500,
+    logoUrl: null,
+    iconKey: "IconUsers",
+    description: "Track leads and close opportunities",
+  },
+  {
+    name: "Sales",
+    slug: "sales",
+    category: "sales",
+    color: "#E05A65",
+    monthlyPrice: 250,
+    yearlyPrice: 2500,
+    logoUrl: null,
+    iconKey: "IconCash",
+    description: "From quotes to sales orders",
+  },
+  {
+    name: "POS Shop",
+    slug: "pos-shop",
+    category: "sales",
+    color: "#E05A65",
+    monthlyPrice: 450,
+    yearlyPrice: 4500,
+    logoUrl: null,
+    iconKey: "IconBuildingStore",
+    description: "Point of Sale for Retail",
+  },
+  {
+    name: "POS Restaurant",
+    slug: "pos-restaurant",
+    category: "sales",
+    color: "#E05A65",
+    monthlyPrice: 450,
+    yearlyPrice: 4500,
+    logoUrl: null,
+    iconKey: "IconSoup",
+    description: "Point of Sale for Restaurants",
+  },
+  {
+    name: "Subscriptions",
+    slug: "subscriptions",
+    category: "sales",
+    color: "#E05A65",
+    monthlyPrice: 350,
+    yearlyPrice: 3500,
+    logoUrl: null,
+    iconKey: "IconRepeat",
+    description: "Manage recurring billing",
+  },
+  {
+    name: "Rental",
+    slug: "rental",
+    category: "sales",
+    color: "#E05A65",
+    monthlyPrice: 250,
+    yearlyPrice: 2500,
+    logoUrl: null,
+    iconKey: "IconKey",
+    description: "Manage rental contracts",
+  },
+
+  // ── ODOO WEBSITES ─────────────────────────────────────────────────────────
+  {
+    name: "Website Builder",
+    slug: "website-builder",
+    category: "websites",
+    color: "#1D9AA6",
+    monthlyPrice: 300,
+    yearlyPrice: 3000,
+    logoUrl: null,
+    iconKey: "IconBrowser",
+    description: "Build stunning websites",
+  },
+  {
+    name: "eCommerce",
+    slug: "ecommerce",
+    category: "websites",
+    color: "#1D9AA6",
+    monthlyPrice: 400,
+    yearlyPrice: 4000,
+    logoUrl: null,
+    iconKey: "IconShoppingCart",
+    description: "Sell your products online",
+  },
+  {
+    name: "Blog",
+    slug: "blog",
+    category: "websites",
+    color: "#1D9AA6",
+    monthlyPrice: 150,
+    yearlyPrice: 1500,
+    logoUrl: null,
+    iconKey: "IconArticle",
+    description: "Publish blog posts",
+  },
+  {
+    name: "Forum",
+    slug: "forum",
+    category: "websites",
+    color: "#1D9AA6",
+    monthlyPrice: 150,
+    yearlyPrice: 1500,
+    logoUrl: null,
+    iconKey: "IconMessageCircle",
+    description: "Manage discussion forums",
+  },
+  {
+    name: "Live Chat",
+    slug: "live-chat",
+    category: "websites",
+    color: "#1D9AA6",
+    monthlyPrice: 200,
+    yearlyPrice: 2000,
+    logoUrl: null,
+    iconKey: "IconMessageDots",
+    description: "Chat with visitors in real-time",
+  },
+  {
+    name: "eLearning",
+    slug: "elearning",
+    category: "websites",
+    color: "#1D9AA6",
+    monthlyPrice: 350,
+    yearlyPrice: 3500,
+    logoUrl: null,
+    iconKey: "IconSchool",
+    description: "Manage online courses",
+  },
+
+  // ── ODOO SUPPLY CHAIN ─────────────────────────────────────────────────────
+  {
+    name: "Inventory",
+    slug: "inventory",
+    category: "supply_chain",
+    color: "#544D6C",
+    monthlyPrice: 500,
+    yearlyPrice: 5000,
+    logoUrl: null,
+    iconKey: "IconBoxSeam",
+    description: "Warehouse management",
+  },
+  {
+    name: "Manufacturing",
+    slug: "manufacturing",
+    category: "supply_chain",
+    color: "#544D6C",
+    monthlyPrice: 600,
+    yearlyPrice: 6000,
+    logoUrl: null,
+    iconKey: "IconTool",
+    description: "MRP and work center management",
+  },
+  {
+    name: "PLM",
+    slug: "plm",
+    category: "supply_chain",
+    color: "#544D6C",
+    monthlyPrice: 450,
+    yearlyPrice: 4500,
+    logoUrl: null,
+    iconKey: "IconEngine",
+    description: "Product Lifecycle Management",
+  },
+  {
+    name: "Purchase",
+    slug: "purchase",
+    category: "supply_chain",
+    color: "#544D6C",
+    monthlyPrice: 250,
+    yearlyPrice: 2500,
+    logoUrl: null,
+    iconKey: "IconShoppingBag",
+    description: "Manage purchase orders",
+  },
+  {
+    name: "Maintenance",
+    slug: "maintenance",
+    category: "supply_chain",
+    color: "#544D6C",
+    monthlyPrice: 300,
+    yearlyPrice: 3000,
+    logoUrl: null,
+    iconKey: "IconWrench",
+    description: "Equipment maintenance",
+  },
+  {
+    name: "Quality",
+    slug: "quality",
+    category: "supply_chain",
+    color: "#544D6C",
+    monthlyPrice: 350,
+    yearlyPrice: 3500,
+    logoUrl: null,
+    iconKey: "IconCheckupList",
+    description: "Quality control management",
+  },
+
+  // ── ODOO HUMAN RESOURCES ──────────────────────────────────────────────────
+  {
+    name: "Employees",
+    slug: "employees",
+    category: "human_resources",
+    color: "#6A4A76",
+    monthlyPrice: 200,
+    yearlyPrice: 2000,
+    logoUrl: null,
+    iconKey: "IconUsersGroup",
+    description: "Employee directory",
+  },
+  {
+    name: "Recruitment",
+    slug: "recruitment",
+    category: "human_resources",
+    color: "#6A4A76",
+    monthlyPrice: 300,
+    yearlyPrice: 3000,
+    logoUrl: null,
+    iconKey: "IconUserPlus",
+    description: "Applicant tracking system",
+  },
+  {
+    name: "Time Off",
+    slug: "time-off",
+    category: "human_resources",
+    color: "#6A4A76",
+    monthlyPrice: 150,
+    yearlyPrice: 1500,
+    logoUrl: null,
+    iconKey: "IconPlaneDeparture",
+    description: "Manage leaves and absence",
+  },
+  {
+    name: "Appraisals",
+    slug: "appraisals",
+    category: "human_resources",
+    color: "#6A4A76",
+    monthlyPrice: 250,
+    yearlyPrice: 2500,
+    logoUrl: null,
+    iconKey: "IconStar",
+    description: "Employee performance reviews",
+  },
+  {
+    name: "Referrals",
+    slug: "referrals",
+    category: "human_resources",
+    color: "#6A4A76",
+    monthlyPrice: 100,
+    yearlyPrice: 1000,
+    logoUrl: null,
+    iconKey: "IconHeartHandshake",
+    description: "Employee referral program",
+  },
+  {
+    name: "Fleet",
+    slug: "fleet",
+    category: "human_resources",
+    color: "#6A4A76",
+    monthlyPrice: 250,
+    yearlyPrice: 2500,
+    logoUrl: null,
+    iconKey: "IconCar",
+    description: "Vehicle tracking and management",
+  },
+
+  // ── ODOO MARKETING ────────────────────────────────────────────────────────
+  {
+    name: "Social Marketing",
+    slug: "social-marketing",
+    category: "marketing",
+    color: "#EE7158",
+    monthlyPrice: 300,
+    yearlyPrice: 3000,
+    logoUrl: null,
+    iconKey: "IconSpeakerphone",
+    description: "Manage social media posts",
+  },
+  {
+    name: "Email Marketing",
+    slug: "email-marketing",
+    category: "marketing",
+    color: "#EE7158",
+    monthlyPrice: 250,
+    yearlyPrice: 2500,
+    logoUrl: null,
+    iconKey: "IconMail",
+    description: "Design and send email campaigns",
+  },
+  {
+    name: "SMS Marketing",
+    slug: "sms-marketing",
+    category: "marketing",
+    color: "#EE7158",
+    monthlyPrice: 200,
+    yearlyPrice: 2000,
+    logoUrl: null,
+    iconKey: "IconDeviceMobileMessage",
+    description: "Send bulk SMS campaigns",
+  },
+  {
+    name: "Events",
+    slug: "events",
+    category: "marketing",
+    color: "#EE7158",
+    monthlyPrice: 350,
+    yearlyPrice: 3500,
+    logoUrl: null,
+    iconKey: "IconCalendarStats",
+    description: "Organize and promote events",
+  },
+  {
+    name: "Marketing Automation",
+    slug: "marketing-automation",
+    category: "marketing",
+    color: "#EE7158",
+    monthlyPrice: 400,
+    yearlyPrice: 4000,
+    logoUrl: null,
+    iconKey: "IconRobot",
+    description: "Automated marketing workflows",
+  },
+  {
+    name: "Surveys",
+    slug: "surveys",
+    category: "marketing",
+    color: "#EE7158",
+    monthlyPrice: 150,
+    yearlyPrice: 1500,
+    logoUrl: null,
+    iconKey: "IconClipboardList",
+    description: "Create and share surveys",
+  },
+
+  // ── ODOO SERVICES ─────────────────────────────────────────────────────────
+  {
+    name: "Project",
+    slug: "project",
+    category: "services",
+    color: "#EFA643",
+    monthlyPrice: 350,
+    yearlyPrice: 3500,
+    logoUrl: null,
+    iconKey: "IconBriefcase",
+    description: "Organize tasks and track progress",
+  },
+  {
+    name: "Timesheets",
+    slug: "timesheets",
+    category: "services",
+    color: "#EFA643",
+    monthlyPrice: 200,
+    yearlyPrice: 2000,
+    logoUrl: null,
+    iconKey: "IconClock",
+    description: "Track time spent on tasks",
+  },
+  {
+    name: "Field Service",
+    slug: "field-service",
+    category: "services",
+    color: "#EFA643",
+    monthlyPrice: 400,
+    yearlyPrice: 4000,
+    logoUrl: null,
+    iconKey: "IconMapPin",
+    description: "Manage field workers and schedules",
+  },
+  {
+    name: "Helpdesk",
+    slug: "helpdesk",
+    category: "services",
+    color: "#EFA643",
+    monthlyPrice: 300,
+    yearlyPrice: 3000,
+    logoUrl: null,
+    iconKey: "IconLifebuoy",
+    description: "Customer support ticketing",
+  },
+  {
+    name: "Planning",
+    slug: "planning",
+    category: "services",
+    color: "#EFA643",
+    monthlyPrice: 250,
+    yearlyPrice: 2500,
+    logoUrl: null,
+    iconKey: "IconCalendarCheck",
+    description: "Schedule resources and tasks",
+  },
+  {
+    name: "Appointments",
+    slug: "appointments",
+    category: "services",
+    color: "#EFA643",
+    monthlyPrice: 150,
+    yearlyPrice: 1500,
+    logoUrl: null,
+    iconKey: "IconCalendarTime",
+    description: "Manage online bookings",
+  },
+
+  // ── ODOO PRODUCTIVITY ─────────────────────────────────────────────────────
+  {
+    name: "Discuss",
+    slug: "discuss",
+    category: "productivity",
+    color: "#7B658C",
+    monthlyPrice: 150,
+    yearlyPrice: 1500,
+    logoUrl: null,
+    iconKey: "IconMessages",
+    description: "Internal communication",
+  },
+  {
+    name: "Approvals",
+    slug: "approvals",
+    category: "productivity",
+    color: "#7B658C",
+    monthlyPrice: 200,
+    yearlyPrice: 2000,
+    logoUrl: null,
+    iconKey: "IconThumbUp",
+    description: "Manage approval workflows",
+  },
+  {
+    name: "IoT",
+    slug: "iot",
+    category: "productivity",
+    color: "#7B658C",
+    monthlyPrice: 450,
+    yearlyPrice: 4500,
+    logoUrl: null,
+    iconKey: "IconDeviceAccessTv",
+    description: "Internet of Things integration",
+  },
+  {
+    name: "VoIP",
+    slug: "voip",
+    category: "productivity",
+    color: "#7B658C",
+    monthlyPrice: 350,
+    yearlyPrice: 3500,
+    logoUrl: null,
+    iconKey: "IconPhoneCall",
+    description: "Voice over IP integration",
+  },
+  {
+    name: "Knowledge",
+    slug: "knowledge",
+    category: "productivity",
+    color: "#7B658C",
+    monthlyPrice: 250,
+    yearlyPrice: 2500,
+    logoUrl: null,
+    iconKey: "IconBook",
+    description: "Internal knowledge base",
+  },
+  {
+    name: "WhatsApp",
+    slug: "whatsapp",
+    category: "productivity",
+    color: "#7B658C",
+    monthlyPrice: 300,
+    yearlyPrice: 3000,
+    logoUrl: null,
+    iconKey: "IconBrandWhatsapp",
+    description: "WhatsApp business integration",
+  },
+] as const
 
 // ============================================================================
 // 7 BUNDLES (4 predefined + 3 suggested)
@@ -612,7 +1158,13 @@ const BUNDLES = [
     discountType: "percentage",
     discountValue: 30,
     isFeatured: true,
-    serviceSlugs: ["github-copilot", "chatgpt-plus", "notion", "linear", "slack-pro"],
+    serviceSlugs: [
+      "github-copilot",
+      "chatgpt-plus",
+      "notion",
+      "linear",
+      "slack-pro",
+    ],
   },
   {
     name: "Privacy & Security Pro",
@@ -632,7 +1184,12 @@ const BUNDLES = [
     discountType: "percentage",
     discountValue: 20,
     isFeatured: true,
-    serviceSlugs: ["chatgpt-plus", "claude-pro", "midjourney", "perplexity-pro"],
+    serviceSlugs: [
+      "chatgpt-plus",
+      "claude-pro",
+      "midjourney",
+      "perplexity-pro",
+    ],
   },
   {
     name: "Gaming Essentials",
@@ -652,16 +1209,27 @@ const BUNDLES = [
     discountType: "percentage",
     discountValue: 15,
     isFeatured: true,
-    serviceSlugs: ["google-workspace", "zoom-pro", "slack-pro", "dropbox-plus", "grammarly-premium"],
+    serviceSlugs: [
+      "google-workspace",
+      "zoom-pro",
+      "slack-pro",
+      "dropbox-plus",
+      "grammarly-premium",
+    ],
   },
-] as const;
+] as const
 
 const FEATURED_SLUGS = new Set([
-  "netflix", "spotify", "chatgpt-plus", "canva-pro", "github-copilot", "disney-plus",
-]);
+  "netflix",
+  "spotify",
+  "chatgpt-plus",
+  "canva-pro",
+  "github-copilot",
+  "disney-plus",
+])
 
 async function main() {
-  console.log("🌱 Seeding 50 services...");
+  console.log("🌱 Seeding 50 services...")
 
   for (const s of SERVICES) {
     await prisma.service.upsert({
@@ -680,23 +1248,23 @@ async function main() {
         isActive: true,
         isFeatured: FEATURED_SLUGS.has(s.slug),
       },
-    });
-    process.stdout.write(".");
+    })
+    process.stdout.write(".")
   }
 
-  console.log(`\n✅ ${SERVICES.length} services seeded`);
-  console.log("🌱 Seeding 7 bundles...");
+  console.log(`\n✅ ${SERVICES.length} services seeded`)
+  console.log("🌱 Seeding 7 bundles...")
 
   for (const b of BUNDLES) {
     // Resolve service IDs from slugs — skip any not found (guard against typos)
     const serviceRecords = await prisma.service.findMany({
       where: { slug: { in: [...b.serviceSlugs] } },
       select: { id: true, slug: true },
-    });
+    })
 
     const validServices = b.serviceSlugs
       .map((slug) => serviceRecords.find((s) => s.slug === slug))
-      .filter((s): s is { id: string; slug: string } => s !== undefined);
+      .filter((s): s is { id: string; slug: string } => s !== undefined)
 
     await prisma.bundle.upsert({
       where: { slug: b.slug },
@@ -717,16 +1285,16 @@ async function main() {
           })),
         },
       },
-    });
-    process.stdout.write(".");
+    })
+    process.stdout.write(".")
   }
 
-  console.log(`\n✅ ${BUNDLES.length} bundles seeded`);
+  console.log(`\n✅ ${BUNDLES.length} bundles seeded`)
 }
 
 main()
   .catch((e) => {
-    console.error(e);
-    process.exit(1);
+    console.error(e)
+    process.exit(1)
   })
-  .finally(() => prisma.$disconnect());
+  .finally(() => prisma.$disconnect())

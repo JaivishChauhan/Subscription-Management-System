@@ -12,18 +12,24 @@ export default async function AdminSettingsPage() {
   await requireAdminPage()
 
   const [users, paymentTerms, taxes, plans] = await prisma.$transaction([
-    prisma.user.groupBy({
-      by: ["role"],
-      _count: { _all: true },
+    prisma.user.findMany({
+      select: {
+        role: true,
+      },
     }),
     prisma.paymentTerms.count(),
     prisma.tax.count(),
     prisma.recurringPlan.count(),
   ])
 
+  const roleCounts = users.reduce<Record<string, number>>((acc, user) => {
+    acc[user.role] = (acc[user.role] ?? 0) + 1
+    return acc
+  }, {})
+
   return (
     <div className="space-y-8">
-      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-white via-indigo-50/70 to-violet-50/80 p-6 shadow-sm dark:from-card dark:via-card dark:to-card">
+      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-card via-card to-indigo-500/5 p-6 shadow-sm">
         <p className="text-xs font-semibold tracking-[0.28em] text-indigo-600 uppercase">
           Settings
         </p>
@@ -37,13 +43,13 @@ export default async function AdminSettingsPage() {
         <section className="rounded-[2rem] border border-border bg-card p-6 shadow-sm">
           <h2 className="text-lg font-semibold">User Roles</h2>
           <div className="mt-5 space-y-3">
-            {users.map((row) => (
+            {Object.entries(roleCounts).map(([role, count]) => (
               <div
-                key={row.role}
+                key={role}
                 className="flex items-center justify-between rounded-2xl border border-border p-4"
               >
-                <span className="capitalize text-muted-foreground">{row.role}</span>
-                <span className="text-xl font-semibold">{row._count._all}</span>
+                <span className="capitalize text-muted-foreground">{role}</span>
+                <span className="text-xl font-semibold">{count}</span>
               </div>
             ))}
           </div>

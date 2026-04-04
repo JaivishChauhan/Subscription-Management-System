@@ -1,7 +1,11 @@
 "use client"
 
 import { useBundleStore } from "@/store/bundle"
-import { IconChevronRight, IconShoppingCartPlus, IconApps } from "@tabler/icons-react"
+import {
+  IconChevronRight,
+  IconShoppingCartPlus,
+  IconApps,
+} from "@tabler/icons-react"
 import * as TablerIcons from "@tabler/icons-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -33,16 +37,16 @@ export function BundleBottomBar() {
               const IconComponent =
                 svc.iconKey && (TablerIcons as any)[svc.iconKey]
                   ? (TablerIcons as any)[svc.iconKey]
-                  : IconApps;
-              
+                  : IconApps
+
               return (
                 <div
                   key={svc.id}
-                  className="border-card z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 shadow-sm relative overflow-hidden"
-                  style={{ 
+                  className="border-card relative z-10 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 shadow-sm"
+                  style={{
                     zIndex: 10 - i,
                     backgroundColor: svc.color || "#6366f1",
-                    color: "#ffffff"
+                    color: "#ffffff",
                   }}
                   title={svc.name}
                 >
@@ -57,7 +61,7 @@ export function BundleBottomBar() {
                     <IconComponent className="h-5 w-5" />
                   )}
                 </div>
-              );
+              )
             })}
             {services.length > maxAvatars && (
               <div className="border-card z-0 flex h-10 w-10 items-center justify-center rounded-full border-2 bg-indigo-100 shadow-sm dark:bg-indigo-900/50">
@@ -109,4 +113,3 @@ export function BundleBottomBar() {
     </div>
   )
 }
-

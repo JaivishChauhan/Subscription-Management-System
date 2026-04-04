@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { IconArrowRight, IconPackage, IconPlus, IconSearch } from "@tabler/icons-react";
+import {
+  IconApps,
+  IconArrowRight,
+  IconPackage,
+  IconPlus,
+  IconSearch,
+} from "@tabler/icons-react";
 import { prisma } from "@/lib/db";
 import { requireAdminPage } from "@/lib/admin";
 import { productFiltersSchema } from "@/lib/validations/product";
@@ -45,7 +51,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     ...(status === "all" ? {} : { isActive: status === "active" }),
   };
 
-  const [products, totalProducts, activeCount, inactiveCount] = await prisma.$transaction([
+  const [products, totalProducts, activeCount, inactiveCount, services, totalServices] =
+    await prisma.$transaction([
     prisma.product.findMany({
       where,
       orderBy: { updatedAt: "desc" },
@@ -63,13 +70,50 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     prisma.product.count({ where }),
     prisma.product.count({ where: { isActive: true } }),
     prisma.product.count({ where: { isActive: false } }),
+    prisma.service.findMany({
+      where: {
+        ...(q
+          ? {
+              name: {
+                contains: q,
+                mode: "insensitive" as const,
+              },
+            }
+          : {}),
+        ...(status === "all" ? {} : { isActive: status === "active" }),
+      },
+      orderBy: [{ isFeatured: "desc" }, { updatedAt: "desc" }],
+      take: 50,
+      select: {
+        id: true,
+        name: true,
+        category: true,
+        monthlyPrice: true,
+        isActive: true,
+        isFeatured: true,
+        updatedAt: true,
+      },
+    }),
+    prisma.service.count({
+      where: {
+        ...(q
+          ? {
+              name: {
+                contains: q,
+                mode: "insensitive" as const,
+              },
+            }
+          : {}),
+        ...(status === "all" ? {} : { isActive: status === "active" }),
+      },
+    }),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalProducts / pageSize));
 
   return (
     <div className="space-y-8">
-      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-white via-indigo-50/70 to-violet-50/80 p-6 shadow-sm dark:from-card dark:via-card dark:to-card">
+      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-card via-card to-indigo-500/5 p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold tracking-[0.28em] text-indigo-600 uppercase">
@@ -77,9 +121,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             </p>
             <h1 className="mt-2 text-3xl font-bold tracking-tight">Catalog foundation</h1>
             <p className="text-muted-foreground mt-3 text-sm sm:text-base">
-              Products are the base layer for recurring pricing, subscriptions, invoice lines,
-              and future variant configuration. This is the first feature slice from the tracker,
-              so the focus here is getting the CRUD path working end to end.
+              Core products power subscriptions and invoices, while marketplace services power the
+              shop catalog. This view now surfaces both so the full catalog is easier to manage.
             </p>
           </div>
 
@@ -95,7 +138,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <SummaryCard label="Active Products" value={activeCount} tone="indigo" />
           <SummaryCard label="Inactive Products" value={inactiveCount} tone="slate" />
-          <SummaryCard label="Filtered Results" value={totalProducts} tone="emerald" />
+          <SummaryCard label="Marketplace Services" value={totalServices} tone="emerald" />
         </div>
       </section>
 
@@ -230,6 +273,94 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             >
               Next
             </PaginationLink>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-[2rem] border border-border bg-card p-6 shadow-sm">
+        <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold tracking-[0.24em] text-indigo-600 uppercase">
+              Marketplace Services
+            </p>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight">
+              Streaming, music, AI, productivity, and more
+            </h2>
+            <p className="text-muted-foreground mt-2 text-sm">
+              Services like YouTube Premium, Spotify, Netflix, and ChatGPT Plus are stored in the
+              marketplace catalog, so they appear here as well.
+            </p>
+          </div>
+          <Link
+            href="/admin/services"
+            className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-3 text-sm font-semibold transition-colors hover:bg-muted"
+          >
+            <IconApps className="h-4 w-4" />
+            Open Services Page
+          </Link>
+        </div>
+
+        <div className="overflow-hidden rounded-3xl border border-border">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/40">
+                <tr className="text-left text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                  <th className="px-5 py-4">Service</th>
+                  <th className="px-5 py-4">Category</th>
+                  <th className="px-5 py-4">Monthly Price</th>
+                  <th className="px-5 py-4">Status</th>
+                  <th className="px-5 py-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border bg-card">
+                {services.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-5 py-14 text-center">
+                      <div className="mx-auto max-w-md">
+                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
+                          <IconApps className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <h2 className="mt-4 text-lg font-semibold">No marketplace services found</h2>
+                        <p className="text-muted-foreground mt-2 text-sm">
+                          Seeded services will appear here when the marketplace catalog is available.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  services.map((service) => (
+                    <tr key={service.id} className="hover:bg-muted/20">
+                      <td className="px-5 py-4">
+                        <div>
+                          <p className="font-semibold">{service.name}</p>
+                          <p className="text-muted-foreground text-sm">
+                            {service.isFeatured ? "Featured marketplace service" : "Marketplace service"}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 text-sm capitalize text-muted-foreground">
+                        {service.category}
+                      </td>
+                      <td className="px-5 py-4 text-sm font-medium">
+                        {currencyFormatter.format(service.monthlyPrice)}
+                      </td>
+                      <td className="px-5 py-4">
+                        <StatusPill active={service.isActive} />
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        <Link
+                          href="/admin/services"
+                          className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400"
+                        >
+                          Open
+                          <IconArrowRight className="h-4 w-4" />
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </section>

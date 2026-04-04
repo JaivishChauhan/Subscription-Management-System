@@ -79,7 +79,7 @@ export default async function InternalInvoicesPage({ searchParams }: InvoicesPag
 
   return (
     <div className="space-y-8">
-      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-white via-sky-50/70 to-cyan-50/80 p-6 shadow-sm dark:from-card dark:via-card dark:to-card">
+      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-card via-card to-sky-500/5 p-6 shadow-sm">
         <div className="max-w-2xl">
           <p className="text-xs font-semibold tracking-[0.28em] text-sky-600 uppercase">
             Internal Invoices

@@ -81,7 +81,7 @@ export default async function PlansPage({ searchParams }: PlansPageProps) {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-white via-indigo-50/70 to-violet-50/80 p-6 shadow-sm dark:from-card dark:via-card dark:to-card">
+      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-card via-card to-indigo-500/5 p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold tracking-[0.28em] text-indigo-600 uppercase">
