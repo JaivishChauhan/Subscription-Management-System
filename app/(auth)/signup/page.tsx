@@ -75,8 +75,9 @@ export default function SignupPage() {
   async function handleGoogleSignIn() {
     setIsGoogleLoading(true)
     try {
-      toast.info("Google Sign-In is temporarily disabled for migration. Please use the Demo Registration.")
-    } finally {
+      window.location.href = `/api/auth/google/init?callbackUrl=/auth/redirect`
+    } catch {
+      toast.error("Failed to sign in with Google")
       setIsGoogleLoading(false)
     }
   }

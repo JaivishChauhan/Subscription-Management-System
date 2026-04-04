@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { requireAdminApi } from "@/lib/admin";
+import { requireAdminApi, requireApiRole } from "@/lib/admin";
 import { productUpdateSchema } from "@/lib/validations/product";
 
 type RouteContext = {
@@ -9,7 +9,8 @@ type RouteContext = {
 };
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
-  const { error } = await requireAdminApi();
+  // Internal users can update products (view/update per RBAC spec)
+  const { error } = await requireApiRole(["admin", "internal"]);
   if (error) {
     return error;
   }

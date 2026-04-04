@@ -9,6 +9,11 @@ import {
   IconLogout,
   IconRepeat,
   IconRocket,
+  IconPackage,
+  IconCalendar,
+  IconUsers,
+  IconCreditCard,
+  IconChartBar,
 } from "@tabler/icons-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
@@ -18,8 +23,13 @@ export const metadata: Metadata = {
 
 const NAV_ITEMS = [
   { href: "/internal", icon: IconLayoutDashboard, label: "Dashboard" },
+  { href: "/internal/contacts", icon: IconUsers, label: "Contacts" },
+  { href: "/internal/products", icon: IconPackage, label: "Products" },
+  { href: "/internal/plans", icon: IconCalendar, label: "Plans" },
   { href: "/internal/subscriptions", icon: IconRepeat, label: "Subscriptions" },
   { href: "/internal/invoices", icon: IconFileInvoice, label: "Invoices" },
+  { href: "/internal/payments", icon: IconCreditCard, label: "Payments" },
+  { href: "/internal/reports", icon: IconChartBar, label: "Reports" },
 ] as const
 
 export default async function InternalLayout({

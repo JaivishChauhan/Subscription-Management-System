@@ -118,9 +118,10 @@ function LoginContent() {
   async function handleGoogleSignIn() {
     setIsGoogleLoading(true)
     try {
-      // Temporarily disabled while we complete the custom auth migration
-      toast.info("Google Sign-In is temporarily disabled for migration. Please use the Demo Login.")
-    } finally {
+      // Redirect to the Google OAuth initiation endpoint
+      window.location.href = `/api/auth/google/init?callbackUrl=${encodeURIComponent(callbackUrl)}`
+    } catch {
+      toast.error("Failed to sign in with Google")
       setIsGoogleLoading(false)
     }
   }

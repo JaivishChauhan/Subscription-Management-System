@@ -1,30 +1,86 @@
-﻿import { redirect } from "next/navigation";
-import Link from "next/link";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { redirect } from "next/navigation"
+import Link from "next/link"
+import type { Metadata } from "next"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/db"
 import {
   IconCalendar,
   IconCreditCard,
   IconCheck,
-  IconX,
-} from "@tabler/icons-react";
+  IconClock,
+  IconCircleX,
+  IconArrowRight,
+} from "@tabler/icons-react"
 
-export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: "My Subscriptions",
+  description: "View and manage your active subscriptions",
+}
+
+export const dynamic = "force-dynamic"
+
+const INR = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 })
+
+const STATUS_CONFIG: Record<string, { label: string; colorClass: string; icon: React.ElementType }> = {
+  active: {
+    label: "Active",
+    colorClass: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+    icon: IconCheck,
+  },
+  confirmed: {
+    label: "Confirmed",
+    colorClass: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400",
+    icon: IconCheck,
+  },
+  quotation: {
+    label: "Quotation",
+    colorClass: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+    icon: IconClock,
+  },
+  draft: {
+    label: "Draft",
+    colorClass: "bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400",
+    icon: IconClock,
+  },
+  closed: {
+    label: "Closed",
+    colorClass: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+    icon: IconCircleX,
+  },
+}
+
+type Subscription = {
+  id: string
+  status: string
+  startDate: Date | null
+  expirationDate: Date | null
+  recurringPlan: {
+    name: string
+    price: number
+    billingPeriod: string
+  }
+}
 
 export default async function SubscriptionsPage() {
-  const session = await auth();
+  const session = await auth()
 
   if (!session?.user) {
-    redirect("/login");
+    redirect("/login")
   }
 
   const subscriptions = await prisma.subscription.findMany({
     where: { userId: session.user.id },
     include: {
-      recurringPlan: true,
+      recurringPlan: {
+        select: {
+          name: true,
+          price: true,
+          billingPeriod: true,
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
-  });
+  })
 
   return (
     <div className="min-h-screen bg-background">
@@ -32,7 +88,7 @@ export default async function SubscriptionsPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold">My Subscriptions</h1>
           <p className="mt-2 text-muted-foreground">
-            Manage all your active and past subscriptions
+            Manage and track all your active and past subscriptions
           </p>
         </div>
 
@@ -43,7 +99,7 @@ export default async function SubscriptionsPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-lg border border-border bg-card p-12 text-center">
+          <div className="rounded-2xl border border-border bg-card p-12 text-center">
             <p className="text-lg text-muted-foreground">
               You don&apos;t have any subscriptions yet.
             </p>
@@ -57,82 +113,71 @@ export default async function SubscriptionsPage() {
         )}
       </main>
     </div>
-  );
+  )
 }
 
-function SubscriptionCard({
-  subscription,
-}: {
-  subscription: {
-    id: string;
-    status: string;
-    startDate: Date | null;
-    expirationDate: Date | null;
-    recurringPlan: {
-      name: string;
-      price: number;
-      billingPeriod: string;
-    };
-  };
-}) {
-  const isActive = subscription.status === "active";
-  const statusColor = isActive
-    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-    : subscription.status === "pending"
-    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-    : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+function SubscriptionCard({ subscription }: { subscription: Subscription }) {
+  const config = STATUS_CONFIG[subscription.status] ?? STATUS_CONFIG["draft"]
+  const StatusIcon = config.icon
 
   return (
-    <div className="rounded-lg border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md">
-      <div className="mb-4 flex items-start justify-between">
-        <h3 className="text-lg font-bold">{subscription.recurringPlan.name}</h3>
+    <div className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md">
+      <div className="mb-4 flex items-start justify-between gap-2">
+        <h3 className="text-lg font-bold leading-snug">{subscription.recurringPlan.name}</h3>
         <span
-          className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${statusColor}`}
+          className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${config.colorClass}`}
         >
-          {isActive ? (
-            <IconCheck className="h-3 w-3" />
-          ) : (
-            <IconX className="h-3 w-3" />
-          )}
-          {subscription.status}
+          <StatusIcon className="h-3 w-3" />
+          {config.label}
         </span>
       </div>
 
-      <div className="space-y-3 text-sm">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <IconCreditCard className="h-4 w-4" />
+      <div className="space-y-2.5 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <IconCreditCard className="h-4 w-4 shrink-0" />
           <span>
-            â‚¹{subscription.recurringPlan.price} / {subscription.recurringPlan.billingPeriod}
+            {INR.format(subscription.recurringPlan.price)} /{" "}
+            {subscription.recurringPlan.billingPeriod}
           </span>
         </div>
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <IconCalendar className="h-4 w-4" />
-          <span>Started: {subscription.startDate ? new Date(subscription.startDate).toLocaleDateString() : "Pending"}</span>
+        <div className="flex items-center gap-2">
+          <IconCalendar className="h-4 w-4 shrink-0" />
+          <span>
+            Started:{" "}
+            {subscription.startDate
+              ? new Date(subscription.startDate).toLocaleDateString("en-IN", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })
+              : "Pending"}
+          </span>
         </div>
         {subscription.expirationDate && (
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <IconCalendar className="h-4 w-4" />
-            <span>Ends: {new Date(subscription.expirationDate).toLocaleDateString()}</span>
+          <div className="flex items-center gap-2">
+            <IconCalendar className="h-4 w-4 shrink-0" />
+            <span>
+              Ends:{" "}
+              {new Date(subscription.expirationDate).toLocaleDateString("en-IN", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
           </div>
         )}
       </div>
 
-      <div className="mt-6 flex gap-2">
+      {/* View Details only — cancellation must be requested via contact/admin per RBAC spec */}
+      <div className="mt-6 flex-1 flex items-end">
         <Link
           href={`/subscriptions/${subscription.id}`}
-          className="flex-1 rounded-full border border-border bg-card px-4 py-2 text-center text-sm font-semibold transition-colors hover:bg-muted"
+          className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold transition-colors hover:bg-muted"
         >
           View Details
+          <IconArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
         </Link>
-        {isActive && (
-          <button
-            type="button"
-            className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 dark:border-red-900 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
-          >
-            Cancel
-          </button>
-        )}
       </div>
     </div>
-  );
+  )
 }

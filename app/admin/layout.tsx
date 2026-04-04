@@ -17,6 +17,8 @@ import {
   IconRepeat,
   IconApps,
   IconPuzzle,
+  IconTag,
+  IconShieldLock,
 } from "@tabler/icons-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -80,6 +82,9 @@ const NAV_ITEMS = [
   { href: "/admin/invoices", icon: IconFileInvoice, label: "Invoices" },
   { href: "/admin/payments", icon: IconCreditCard, label: "Payments" },
   { href: "/admin/reports", icon: IconChartBar, label: "Reports" },
+  // Admin-exclusive modules
+  { href: "/admin/users", icon: IconShieldLock, label: "Users" },
+  { href: "/admin/discounts", icon: IconTag, label: "Discounts" },
   { href: "/admin/settings", icon: IconSettings, label: "Settings" },
 ] as const;
 

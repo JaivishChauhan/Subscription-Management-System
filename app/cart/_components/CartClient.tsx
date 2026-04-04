@@ -14,6 +14,7 @@ export function CartClient() {
   const applyDiscount = useCartStore((s) => s.applyDiscount);
   const removeDiscount = useCartStore((s) => s.removeDiscount);
   const [promoInput, setPromoInput] = useState("");
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const tax = Math.round(subtotal * 0.18);
@@ -29,6 +30,25 @@ export function CartClient() {
       applyDiscount({ code: "SUMMER10", type: "percent", value: 10 });
     }
     setPromoInput("");
+  };
+
+  const handleCheckout = async () => {
+    setIsCheckingAuth(true);
+    try {
+      const response = await fetch("/api/auth");
+      const data = await response.json();
+
+      if (data.session) {
+        router.push("/checkout");
+      } else {
+        router.push("/login?callbackUrl=/checkout");
+      }
+    } catch (error) {
+      console.error("Auth check failed:", error);
+      router.push("/login?callbackUrl=/checkout");
+    } finally {
+      setIsCheckingAuth(false);
+    }
   };
 
   return (
@@ -203,11 +223,11 @@ export function CartClient() {
 
               <button
                 type="button"
-                onClick={() => router.push("/checkout")}
-                disabled={items.length === 0}
+                onClick={handleCheckout}
+                disabled={items.length === 0 || isCheckingAuth}
                 className="f-syne mt-6 w-full rounded-full bg-indigo-600 py-4 text-[14px] font-extrabold tracking-wide text-white shadow-md transition-all hover:bg-indigo-700 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
               >
-                PROCEED TO CHECKOUT →
+                {isCheckingAuth ? "CHECKING..." : "PROCEED TO CHECKOUT →"}
               </button>
             </div>
           </div>
