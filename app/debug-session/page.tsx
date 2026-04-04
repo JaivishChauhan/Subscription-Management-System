@@ -1,16 +1,20 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession } from "@/hooks/use-session";
 import Link from "next/link";
 
+/**
+ * Debug page — shows current session data (dev only).
+ * Uses our custom useSession hook, not next-auth/react.
+ */
 export default function DebugSessionPage() {
-  const { data: session, status } = useSession();
+  const { session, status } = useSession();
 
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="mx-auto max-w-2xl">
         <h1 className="mb-6 text-3xl font-bold">Session Debug</h1>
-        
+
         <div className="space-y-4">
           <div className="rounded-lg border border-border bg-card p-6">
             <h2 className="mb-2 text-xl font-semibold">Status</h2>
@@ -29,10 +33,10 @@ export default function DebugSessionPage() {
           </div>
 
           <div className="rounded-lg border border-border bg-card p-6">
-            <h2 className="mb-2 text-xl font-semibold">Cookies</h2>
-            <pre className="overflow-auto rounded bg-muted p-4 text-xs">
-              {typeof document !== "undefined" ? document.cookie : "N/A"}
-            </pre>
+            <h2 className="mb-2 text-xl font-semibold">Auth Cookie</h2>
+            <p className="font-mono text-xs text-muted-foreground">
+              sms.session cookie is httpOnly — not visible to JS (this is correct).
+            </p>
           </div>
 
           <div className="flex gap-4">

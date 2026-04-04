@@ -3,19 +3,26 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut } from "@/hooks/use-session";
 import { IconRocket, IconShoppingCart, IconUser, IconLogout, IconMenu2, IconX } from "@tabler/icons-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useCartStore } from "@/store/cart";
 import { toast } from "sonner";
 import { getDefaultPortalPath, getPortalLabel } from "@/lib/roles";
 
+/**
+ * Main public navigation header.
+ * Renders auth state (sign in / user info) and cart badge.
+ * Uses our custom useSession hook — no next-auth/react dependency.
+ *
+ * @client Required for hooks, router, and interactive state.
+ */
 export function Header() {
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const items = useCartStore((s) => s.items);
-  const { data: session, status } = useSession();
+  const { session, status } = useSession();
   const isLoading = status === "loading";
 
   useEffect(() => {
@@ -26,15 +33,11 @@ export function Header() {
     setMobileMenuOpen(false);
   }, [pathname]);
 
+  /** Signs out via our custom API then navigates home. */
   const handleSignOut = async () => {
     try {
-      await signOut({ 
-        callbackUrl: "/",
-        redirect: true 
-      });
-      toast.success("Signed out successfully");
-    } catch (error) {
-      console.error("Sign out error:", error);
+      await signOut({ callbackUrl: "/" });
+    } catch {
       toast.error("Failed to sign out");
     }
   };
@@ -66,7 +69,7 @@ export function Header() {
     );
   }
 
-  const userRole = session?.user?.role;
+  const userRole = session?.user.role ?? null;
   const portalHref = getDefaultPortalPath(userRole);
   const portalLabel = getPortalLabel(userRole);
   const showCart = userRole !== "admin" && userRole !== "internal";
@@ -106,7 +109,7 @@ export function Header() {
         {/* Desktop Auth Buttons + Theme Toggle + Cart */}
         <div className="hidden items-center gap-3 md:flex">
           <ThemeToggle />
-          
+
           {/* Cart Icon with Badge */}
           {showCart ? (
             <Link
@@ -136,6 +139,7 @@ export function Header() {
                 <span className="max-w-[100px] truncate">{session.user.name || "Profile"}</span>
               </Link>
               <button
+                type="button"
                 onClick={handleSignOut}
                 className="flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold text-foreground/80 transition-colors hover:text-foreground hover:bg-muted"
               >
@@ -164,7 +168,7 @@ export function Header() {
         {/* Mobile: Theme Toggle + Cart + Menu Button */}
         <div className="flex items-center gap-2 md:hidden">
           <ThemeToggle />
-          
+
           {/* Cart Icon with Badge - Mobile */}
           {showCart ? (
             <Link
@@ -204,7 +208,7 @@ export function Header() {
             <MobileNavLink href="/shop" label="Shop Apps" />
             <MobileNavLink href="/bundles" label="Bundles" />
             <MobileNavLink href="/pricing" label="Pricing" />
-            
+
             {session?.user && (
               <>
                 <div className="my-2 border-t border-border/50" />
@@ -220,11 +224,12 @@ export function Header() {
             )}
 
             <div className="my-2 border-t border-border/50" />
-            
+
             {isLoading ? (
               <div className="h-10 w-full animate-pulse rounded-lg bg-muted" />
             ) : session?.user ? (
               <button
+                type="button"
                 onClick={handleSignOut}
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
               >
@@ -256,10 +261,8 @@ export function Header() {
 
 function NavLink({ href, label }: { href: string; label: string }) {
   const pathname = usePathname();
-  const isActive = href === "/" 
-    ? pathname === "/" 
-    : pathname.startsWith(href);
-  
+  const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+
   return (
     <Link
       href={href}
@@ -276,10 +279,8 @@ function NavLink({ href, label }: { href: string; label: string }) {
 
 function MobileNavLink({ href, label }: { href: string; label: string }) {
   const pathname = usePathname();
-  const isActive = href === "/" 
-    ? pathname === "/" 
-    : pathname.startsWith(href);
-  
+  const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+
   return (
     <Link
       href={href}

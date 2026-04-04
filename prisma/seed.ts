@@ -1290,6 +1290,176 @@ async function main() {
   }
 
   console.log(`\n✅ ${BUNDLES.length} bundles seeded`)
+
+  // ============================================================================
+  // ADMIN SYSTEM SEED DATA (Products, Taxes, Plans, PaymentTerms)
+  // ============================================================================
+  console.log("🌱 Seeding Admin system data (Taxes, Plans, Terms, Products)...")
+
+  // 1. Taxes
+  const taxes = [
+    { name: "GST 18%", rate: 18.0, type: "percentage" },
+    { name: "VAT 20%", rate: 20.0, type: "percentage" },
+    { name: "Zero Tax", rate: 0.0, type: "percentage" },
+  ]
+
+  for (const t of taxes) {
+    if (!(await prisma.tax.findFirst({ where: { name: t.name } }))) {
+      await prisma.tax.create({ data: t })
+    }
+  }
+
+  // 2. Payment Terms
+  const terms = [
+    { name: "Due on Receipt", dueDays: 0 },
+    { name: "Net 15", dueDays: 15 },
+    { name: "Net 30", dueDays: 30 },
+  ]
+
+  for (const pt of terms) {
+    if (!(await prisma.paymentTerms.findFirst({ where: { name: pt.name } }))) {
+      await prisma.paymentTerms.create({ data: pt })
+    }
+  }
+
+  // 3. Recurring Plans
+  const plans = [
+    {
+      name: "Monthly Standard",
+      billingPeriod: "monthly",
+      price: 0,
+      minQuantity: 1,
+    },
+    {
+      name: "Yearly Premium",
+      billingPeriod: "yearly",
+      price: 0,
+      minQuantity: 1,
+    },
+    { name: "Weekly Flex", billingPeriod: "weekly", price: 0, minQuantity: 1 },
+  ]
+
+  for (const plan of plans) {
+    if (
+      !(await prisma.recurringPlan.findFirst({ where: { name: plan.name } }))
+    ) {
+      await prisma.recurringPlan.create({ data: plan })
+    }
+  }
+
+  // 4. Products
+  const products = [
+    {
+      name: "Consulting Hour",
+      type: "service",
+      salesPrice: 5000,
+      costPrice: 0,
+      description: "One hour of professional consulting",
+    },
+    {
+      name: "Hardware Server",
+      type: "goods",
+      salesPrice: 150000,
+      costPrice: 100000,
+      description: "Enterprise grade server hardware",
+    },
+    {
+      name: "Software License",
+      type: "service",
+      salesPrice: 12000,
+      costPrice: 0,
+      description: "Annual software usage license",
+    },
+  ]
+
+  const dbProducts = []
+  for (const p of products) {
+    let dbProd = await prisma.product.findFirst({ where: { name: p.name } })
+    if (!dbProd) {
+      dbProd = await prisma.product.create({ data: p })
+    }
+    dbProducts.push(dbProd)
+  }
+
+  // 4.5 Link Products to Plans
+  console.log("🔗 Linking Products to Recurring Plans...")
+  const monthlyPlan = await prisma.recurringPlan.findFirst({
+    where: { name: "Monthly Standard" },
+  })
+  const yearlyPlan = await prisma.recurringPlan.findFirst({
+    where: { name: "Yearly Premium" },
+  })
+
+  if (monthlyPlan && yearlyPlan) {
+    for (const prod of dbProducts) {
+      // Monthly recurrence
+      await prisma.recurringPrice.upsert({
+        where: {
+          productId_recurringPlanId: {
+            productId: prod.id,
+            recurringPlanId: monthlyPlan.id,
+          },
+        },
+        update: {},
+        create: {
+          productId: prod.id,
+          recurringPlanId: monthlyPlan.id,
+          price: prod.salesPrice,
+        },
+      })
+      // Yearly recurrence
+      await prisma.recurringPrice.upsert({
+        where: {
+          productId_recurringPlanId: {
+            productId: prod.id,
+            recurringPlanId: yearlyPlan.id,
+          },
+        },
+        update: {},
+        create: {
+          productId: prod.id,
+          recurringPlanId: yearlyPlan.id,
+          price: prod.salesPrice * 10,
+        },
+      })
+    }
+  }
+
+  // 5. Contacts
+  const contacts = [
+    {
+      firstName: "Demo",
+      lastName: "User",
+      company: "Acme Corp",
+      phone: "+1 555-0199",
+      email: "demo@acme.com",
+    },
+  ]
+
+  for (const c of contacts) {
+    const { email, ...contactData } = c
+    const userForContact = await prisma.user.findFirst({ where: { email } })
+
+    // Create user if not exists
+    if (!userForContact) {
+      const newUser = await prisma.user.create({
+        data: {
+          name: `${c.firstName} ${c.lastName}`,
+          email: c.email,
+          role: "portal",
+          password: "hashedpassword123", // dummy password for seed
+        },
+      })
+      await prisma.contact.create({
+        data: {
+          userId: newUser.id,
+          ...contactData,
+        },
+      })
+    }
+  }
+
+  console.log(`\n✅ Admin system data seeded`)
 }
 
 main()

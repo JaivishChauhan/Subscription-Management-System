@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut } from "@/hooks/use-session";
 import { IconRocket, IconShoppingCart, IconUser, IconLogout } from "@tabler/icons-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useCartStore } from "@/store/cart";
@@ -11,7 +11,7 @@ import { toast } from "sonner";
 export function Navigation() {
   const [mounted, setMounted] = useState(false);
   const items = useCartStore((s) => s.items);
-  const { data: session, status } = useSession();
+  const { session, status } = useSession();
   const isLoading = status === "loading";
 
   useEffect(() => {
@@ -21,7 +21,6 @@ export function Navigation() {
   const handleSignOut = async () => {
     try {
       await signOut({ callbackUrl: "/" });
-      toast.success("Signed out successfully");
     } catch {
       toast.error("Failed to sign out");
     }

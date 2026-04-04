@@ -1,226 +1,324 @@
-import NextAuth from "next-auth"
-import Google from "next-auth/providers/google"
-import Credentials from "next-auth/providers/credentials"
-import { PrismaAdapter } from "@auth/prisma-adapter"
+/**
+ * @fileoverview Hand-rolled JWT authentication for Next.js App Router.
+ *
+ * Architecture:
+ * - JWTs are signed with HS256 using AUTH_SECRET (via jose).
+ * - Sessions are stored in an httpOnly cookie — never accessible to JS.
+ * - The `auth()` function is safe to call in ANY context: server components,
+ *   route handlers, server actions, and middleware. No Edge/Node split.
+ *
+ * @security Passwords are hashed with bcryptjs (cost 12). JWTs are signed and
+ * verified server-side only. Cookie is httpOnly + SameSite=lax.
+ */
+
+import { SignJWT, jwtVerify, type JWTPayload } from "jose"
+import { cookies } from "next/headers"
 import { prisma } from "@/lib/db"
-import { authConfig } from "@/auth.config"
+import { compare, hash } from "bcryptjs"
+import { normalizeUserRole, type UserRole } from "@/lib/roles"
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const SESSION_COOKIE = "sms.session"
+const SESSION_MAX_AGE = 30 * 24 * 60 * 60 // 30 days in seconds
+const BCRYPT_COST = 12
+
+function getSecret(): Uint8Array {
+  const secret = process.env.AUTH_SECRET
+  if (!secret) throw new Error("AUTH_SECRET environment variable is not set.")
+  return new TextEncoder().encode(secret)
+}
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export interface SessionUser {
+  id: string
+  email: string
+  name: string
+  role: UserRole
+  image: string | null
+}
+
+export interface Session {
+  user: SessionUser
+  expires: string // ISO string
+}
+
+interface SessionJWTPayload extends JWTPayload {
+  id: string
+  email: string
+  name: string
+  role: string
+  image: string | null
+}
+
+// ─── Token Operations ─────────────────────────────────────────────────────────
 
 /**
- * NextAuth v5 (Auth.js) configuration.
- * Uses Google OAuth and Credentials for authentication with Prisma adapter.
- * RBAC role is embedded in the JWT session for proxy checks.
- *
- * NOTE: For production, install bcryptjs for password hashing:
- * pnpm add bcryptjs && pnpm add -D @types/bcryptjs
+ * Signs a JWT containing the user's session data.
+ * Expires in 30 days.
  */
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  ...authConfig,
-  adapter: PrismaAdapter(prisma) as any,
-  providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      allowDangerousEmailAccountLinking: true,
-    }),
-    Credentials({
-      name: "credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null
-        }
+async function signSessionToken(user: SessionUser): Promise<string> {
+  const payload: SessionJWTPayload = {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    image: user.image,
+  }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-        })
+  return new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime(`${SESSION_MAX_AGE}s`)
+    .setJti(crypto.randomUUID())
+    .sign(getSecret())
+}
 
-        if (!user || !user.password) {
-          return null
-        }
+/**
+ * Verifies a JWT and returns the decoded payload.
+ * Returns null if the token is invalid, expired, or tampered with.
+ */
+async function verifySessionToken(
+  token: string
+): Promise<SessionJWTPayload | null> {
+  try {
+    const { payload } = await jwtVerify<SessionJWTPayload>(
+      token,
+      getSecret(),
+      { algorithms: ["HS256"] }
+    )
+    return payload
+  } catch {
+    return null
+  }
+}
 
-        // For demo purposes - in production, use bcrypt.compare()
-        // const isPasswordValid = await compare(credentials.password as string, user.password);
-        const isPasswordValid = credentials.password === user.password
+// ─── Core Session API ─────────────────────────────────────────────────────────
 
-        if (!isPasswordValid) {
-          return null
-        }
+/**
+ * Reads and validates the session cookie.
+ * Returns the Session object or null if unauthenticated.
+ *
+ * @security This is the ONLY way to read a session server-side.
+ * Never trust client-supplied data for auth checks.
+ */
+export async function auth(): Promise<Session | null> {
+  const cookieStore = await cookies()
+  const token = cookieStore.get(SESSION_COOKIE)?.value
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          role: user.role,
-        }
-      },
-    }),
-  ],
-  callbacks: {
-    async signIn({ user }) {
-      if (!user.email) return false
+  if (!token) return null
 
-      try {
-        // Check if user exists in database
-        let existingUser = await prisma.user.findUnique({
-          where: { email: user.email },
-        })
+  const payload = await verifySessionToken(token)
+  if (!payload || !payload.id || !payload.email) return null
 
-        if (!existingUser) {
-          // Create new user with portal role
-          existingUser = await prisma.user.create({
-            data: {
-              email: user.email,
-              name: user.name || "",
-              image: user.image,
-              role: "portal",
-              password: "", // No password for OAuth users
-              emailVerified: new Date(),
-            },
-          })
+  const expiresAt = payload.exp ? new Date(payload.exp * 1000) : new Date(Date.now() + SESSION_MAX_AGE * 1000)
 
-          // Create linked Contact record
-          const nameParts = (user.name || "").trim().split(/\s+/)
-          const firstName = nameParts[0] || ""
-          const lastName = nameParts.slice(1).join(" ") || ""
-
-          await prisma.contact.create({
-            data: {
-              userId: existingUser.id,
-              firstName,
-              lastName,
-            },
-          })
-        }
-
-        // Ensure user ID is set for the session
-        user.id = existingUser.id
-
-        return true
-      } catch (error) {
-        console.error("Sign in error:", error)
-        return false
-      }
+  return {
+    user: {
+      id: payload.id,
+      email: payload.email,
+      name: payload.name ?? "",
+      role: normalizeUserRole(payload.role),
+      image: payload.image ?? null,
     },
-    async jwt({ token, user, trigger }) {
-      // On sign in, user object is available
-      if (user) {
-        console.log("[JWT] User object from authorize:", user)
+    expires: expiresAt.toISOString(),
+  }
+}
 
-        token.id = user.id as string
-        token.email = user.email
-        token.name = user.name
-        token.picture = user.image
+/**
+ * Reads the raw JWT string from the cookie for Edge/middleware use.
+ * Does NOT call `cookies()` (which requires Node.js headers API).
+ * Call this from middleware by passing the cookie value directly.
+ */
+export async function verifyTokenFromString(
+  token: string
+): Promise<Session | null> {
+  const payload = await verifySessionToken(token)
+  if (!payload || !payload.id || !payload.email) return null
 
-        // Fetch role from database
-        const dbUser = await prisma.user.findUnique({
-          where: { id: user.id },
-          select: { role: true },
-        })
-        token.role = dbUser?.role ?? "portal"
+  const expiresAt = payload.exp
+    ? new Date(payload.exp * 1000)
+    : new Date(Date.now() + SESSION_MAX_AGE * 1000)
 
-        console.log("[JWT] Token created:", {
-          id: token.id,
-          email: token.email,
-          role: token.role,
-        })
-        return token
-      }
+  return {
+    user: {
+      id: payload.id,
+      email: payload.email,
+      name: payload.name ?? "",
+      role: normalizeUserRole(payload.role),
+      image: payload.image ?? null,
+    },
+    expires: expiresAt.toISOString(),
+  }
+}
 
-      // Subsequent requests - token should already have all data
-      if ((token.id || token.sub) && token.email) {
-        console.log("[JWT] Token validated:", {
-          id: token.id || token.sub,
-          email: token.email,
-          role: token.role,
-        })
-        return token
-      }
+/**
+ * Creates a session for the user and sets the httpOnly session cookie.
+ * Call this after successful credential or OAuth verification.
+ *
+ * @security Cookie is httpOnly, SameSite=lax, Secure in production.
+ */
+export async function createSession(user: SessionUser): Promise<void> {
+  const token = await signSessionToken(user)
+  const cookieStore = await cookies()
 
-      // Token is missing data - try to restore from email
-      if (token.email && !(token.id || token.sub)) {
-        console.log("[JWT] Restoring token from email:", token.email)
-        const dbUser = await prisma.user.findUnique({
-          where: { email: token.email },
-          select: { id: true, role: true },
-        })
-        if (dbUser) {
-          token.id = dbUser.id
-          token.role = dbUser.role
-          console.log("[JWT] Token restored:", {
-            id: token.id,
-            email: token.email,
-          })
-          return token
-        }
-      }
+  cookieStore.set(SESSION_COOKIE, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: SESSION_MAX_AGE,
+  })
+}
 
-      // Invalid token - missing required fields
-      console.error("[JWT] Invalid token, missing required fields:", {
-        hasId: !!(token.id || token.sub),
-        hasEmail: !!token.email,
-        token,
+/**
+ * Destroys the session by clearing the session cookie.
+ */
+export async function destroySession(): Promise<void> {
+  const cookieStore = await cookies()
+  cookieStore.delete(SESSION_COOKIE)
+}
+
+// ─── Auth Operations ──────────────────────────────────────────────────────────
+
+/**
+ * Authenticates a user by email + password.
+ * Fetches the user from the DB, verifies bcrypt hash, and creates a session.
+ *
+ * @returns The authenticated session or an error message string.
+ */
+export async function signInWithCredentials(
+  email: string,
+  password: string
+): Promise<{ session: Session; error: null } | { session: null; error: string }> {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        image: true,
+        password: true,
+      },
+    })
+
+    if (!user || !user.password) {
+      return { session: null, error: "Invalid email or password." }
+    }
+
+    // Support legacy plain-text passwords (dev bootstrap) — upgrade on login
+    let isValid = await compare(password, user.password)
+
+    if (!isValid && user.password === password) {
+      // Legacy plain-text match — upgrade to bcrypt silently
+      const hashedPassword = await hash(password, BCRYPT_COST)
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { password: hashedPassword },
+      })
+      isValid = true
+    }
+
+    if (!isValid) {
+      return { session: null, error: "Invalid email or password." }
+    }
+
+    const sessionUser: SessionUser = {
+      id: user.id,
+      email: user.email,
+      name: user.name ?? "",
+      role: normalizeUserRole(user.role),
+      image: user.image ?? null,
+    }
+
+    await createSession(sessionUser)
+
+    return {
+      session: {
+        user: sessionUser,
+        expires: new Date(Date.now() + SESSION_MAX_AGE * 1000).toISOString(),
+      },
+      error: null,
+    }
+  } catch (error) {
+    console.error("[auth] signInWithCredentials error:", error)
+    return { session: null, error: "Authentication service error. Please try again." }
+  }
+}
+
+/**
+ * Signs in or creates a user via Google OAuth.
+ * If the user doesn't exist, creates a new `portal` role user + Contact.
+ *
+ * @returns The authenticated session or an error string.
+ */
+export async function signInWithGoogle(googleUser: {
+  id: string
+  email: string
+  name: string
+  image: string | null
+}): Promise<{ session: Session; error: null } | { session: null; error: string }> {
+  try {
+    let dbUser = await prisma.user.findUnique({
+      where: { email: googleUser.email },
+      select: { id: true, email: true, name: true, role: true, image: true },
+    })
+
+    if (!dbUser) {
+      const nameParts = (googleUser.name ?? "").trim().split(/\s+/)
+      dbUser = await prisma.user.create({
+        data: {
+          email: googleUser.email,
+          name: googleUser.name ?? "",
+          image: googleUser.image,
+          role: "portal",
+          password: await hash(crypto.randomUUID(), BCRYPT_COST), // unusable random password
+          emailVerified: new Date(),
+        },
+        select: { id: true, email: true, name: true, role: true, image: true },
       })
 
-      // Return token as-is to avoid breaking the session
-      // NextAuth will handle invalid tokens
-      return token
-    },
-    async session({ session, token }) {
-      console.log("[Session] Building session from token:", {
-        hasUser: !!session.user,
-        tokenId: token.id,
-        tokenSub: token.sub,
-        tokenEmail: token.email,
-        tokenRole: token.role,
+      await prisma.contact.create({
+        data: {
+          userId: dbUser.id,
+          firstName: nameParts[0] ?? "",
+          lastName: nameParts.slice(1).join(" ") ?? "",
+        },
       })
+    }
 
-      // Ensure we have a valid token with required fields
-      if (!(token.id || token.sub) || !token.email) {
-        console.error("[Session] Invalid token, cannot create session")
-        return { ...session, user: undefined }
-      }
+    const sessionUser: SessionUser = {
+      id: dbUser.id,
+      email: dbUser.email,
+      name: dbUser.name ?? "",
+      role: normalizeUserRole(dbUser.role),
+      image: dbUser.image ?? null,
+    }
 
-      if (session.user) {
-        session.user.id = (token.id as string) || (token.sub as string)
-        session.user.email = token.email as string
-        session.user.name = token.name as string
-        ;(session.user as { role: string }).role =
-          (token.role as string) ?? "portal"
+    await createSession(sessionUser)
 
-        console.log("[Session] Session created:", {
-          userId: session.user.id,
-          userEmail: session.user.email,
-          userRole: (session.user as { role: string }).role,
-        })
-
-        return session
-      }
-
-      console.error("[Session] No user in session object")
-      return { ...session, user: undefined }
-    },
-  },
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-    updateAge: 24 * 60 * 60, // 24 hours
-  },
-  cookies: {
-    sessionToken: {
-      name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 30 * 24 * 60 * 60, // 30 days
+    return {
+      session: {
+        user: sessionUser,
+        expires: new Date(Date.now() + SESSION_MAX_AGE * 1000).toISOString(),
       },
-    },
-  },
-  trustHost: true,
-  debug: process.env.NODE_ENV === "development",
-})
+      error: null,
+    }
+  } catch (error) {
+    console.error("[auth] signInWithGoogle error:", error)
+    return { session: null, error: "Google sign-in failed. Please try again." }
+  }
+}
+
+/**
+ * Signs the user out by destroying the session cookie.
+ */
+export async function signOut(): Promise<void> {
+  await destroySession()
+}
+
+// ─── Cookie name export for middleware ───────────────────────────────────────
+export { SESSION_COOKIE }

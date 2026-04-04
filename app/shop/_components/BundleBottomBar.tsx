@@ -28,7 +28,7 @@ export function BundleBottomBar() {
   const maxAvatars = 5
 
   return (
-    <div className="border-border bg-card fixed right-0 bottom-0 left-0 z-50 translate-y-0 border-t p-4 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] transition-transform duration-300 sm:px-6 lg:px-8">
+    <div className="fixed right-0 bottom-0 left-0 z-50 translate-y-0 border-t border-border bg-white/95 p-4 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] backdrop-blur-sm transition-transform duration-300 dark:bg-gray-950/95 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         {/* Left section: Services info */}
         <div className="flex items-center gap-4">

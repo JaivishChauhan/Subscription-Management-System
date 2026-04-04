@@ -157,6 +157,7 @@ Ensure all production environment variables are set:
 - Ensure middleware matcher excludes static files
 - Check `NEXTAUTH_URL` matches your domain
 - Verify database connection
+- **REPETITIVE ERROR FIX (NextAuth v5 Role Loss):** If you experience an infinite loop specifically between `/admin` and `/dashboard` (i.e. `GET /admin 307` and `GET /dashboard 307`), this is caused by a session mismatch between the Edge Middleware (`proxy.ts`) and Node.js Server Components (`lib/auth.ts`). When mixing `PrismaAdapter` with `strategy: "jwt"`, the `session` callback receives either `token` (Edge) or `user` (Node) properties. The `session` callback must safely extract variables using `const userRole = token?.role || user?.role || "portal"` to ensure `.role` isn't silently dropped by NextAuth, preventing the server component (`layout.tsx`) from incorrectly perceiving logged-in admins as unprivileged users.
 
 ### Google OAuth Not Working
 - Verify Google OAuth credentials

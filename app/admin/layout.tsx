@@ -42,17 +42,17 @@ export default async function AdminLayout({
     redirect("/login");
   }
 
-  const userRole = (session.user as { role?: string }).role;
-  if (userRole !== "admin") {
-    redirect(getDefaultPortalPath(userRole));
+  if (session.user.role !== "admin") {
+    redirect(getDefaultPortalPath(session.user.role));
   }
+
 
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
       <AdminSidebar
         userName={session.user.name ?? "Admin"}
-        userRole={userRole ?? "admin"}
+        userRole={session.user.role}
       />
 
       {/* Main Content */}

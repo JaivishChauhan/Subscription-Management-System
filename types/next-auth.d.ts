@@ -1,27 +1,5 @@
-import { DefaultSession, DefaultUser } from "next-auth";
-import { DefaultJWT } from "next-auth/jwt";
-
 /**
- * Extended NextAuth type declarations.
- * Adds the `role` field to User, Session, and JWT for RBAC enforcement.
+ * Global session type re-exports from lib/auth.
+ * Use SessionUser and Session directly instead of next-auth module augmentation.
  */
-
-declare module "next-auth" {
-  interface User extends DefaultUser {
-    role: string;
-  }
-
-  interface Session {
-    user: {
-      id: string;
-      role: string;
-    } & DefaultSession["user"];
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT extends DefaultJWT {
-    id: string;
-    role: string;
-  }
-}
+export type { Session, SessionUser } from "@/lib/auth"

@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { IconLoader2, IconMail, IconLock, IconUser, IconBrandGoogle } from "@tabler/icons-react"
@@ -76,9 +75,8 @@ export default function SignupPage() {
   async function handleGoogleSignIn() {
     setIsGoogleLoading(true)
     try {
-      await signIn("google", { callbackUrl: "/" })
-    } catch {
-      toast.error("Failed to sign in with Google")
+      toast.info("Google Sign-In is temporarily disabled for migration. Please use the Demo Registration.")
+    } finally {
       setIsGoogleLoading(false)
     }
   }

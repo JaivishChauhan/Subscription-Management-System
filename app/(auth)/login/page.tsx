@@ -3,24 +3,42 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { getSession, signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { Suspense } from "react"
 import Link from "next/link"
-import { IconLoader2, IconMail, IconLock, IconBrandGoogle } from "@tabler/icons-react"
+import {
+  IconLoader2,
+  IconMail,
+  IconLock,
+  IconBrandGoogle,
+} from "@tabler/icons-react"
 import { toast } from "sonner"
 import { DEMO_LOGIN_CREDENTIALS } from "@/lib/demo-data"
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth"
 import { getDefaultPortalPath } from "@/lib/roles"
 
 /**
- * Login page — email + password authentication.
- * Uses React Hook Form + Zod for client-side validation.
- * Submits to NextAuth credentials provider.
+ * Login page — email + password authentication via our custom auth API.
+ * No next-auth/react dependency — calls /api/auth directly.
  *
- * @client Required for form interactivity and signIn().
+ * @client Required for form interactivity, router, and searchParams.
  */
-import { Suspense } from 'react';
-export default function LoginPage() { return <Suspense fallback={<div className="p-8 text-center"><IconLoader2 className="animate-spin inline-block mr-2" /> Loading...</div>}><LoginContent /></Suspense>; }
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-8 text-center">
+          <IconLoader2 className="mr-2 inline-block animate-spin" />
+          Loading...
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
+  )
+}
+
 function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -35,68 +53,52 @@ function LoginContent() {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: { email: "", password: "" },
   })
 
+  /**
+   * Submits credentials to our POST /api/auth endpoint.
+   * On success, redirects based on the returned role.
+   */
   async function handleLoginSubmit(data: LoginFormData) {
     setIsSubmitting(true)
-
     try {
-      console.log("[Login] Attempting sign in with:", { email: data.email })
-      
-      const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false, // Handle redirect manually for better control
+      const response = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email, password: data.password }),
       })
 
-      console.log("[Login] Sign in result:", result)
+      const result: { ok?: boolean; error?: string; role?: string } =
+        await response.json()
 
-      if (result?.error) {
-        console.error("[Login] Sign in error:", result.error)
-        toast.error("Invalid email or password. Please try again.")
-        setIsSubmitting(false)
+      if (!response.ok || result.error) {
+        toast.error(result.error ?? "Invalid email or password.")
         return
       }
 
-      if (!result?.ok) {
-        console.error("[Login] Sign in not ok")
-        toast.error("Authentication failed. Please try again.")
-        setIsSubmitting(false)
-        return
-      }
-
-      console.log("[Login] Sign in successful, preparing redirect")
       toast.success("Welcome back!")
-      
-      // Parse the callback URL
-      let redirectUrl = "/auth/redirect"
-      
+
+      // Determine where to redirect
+      let redirectUrl = getDefaultPortalPath(result.role)
+
       if (callbackUrl && callbackUrl !== "/auth/redirect") {
         try {
-          // If it's a full URL, extract the pathname
-          const url = new URL(callbackUrl)
-          redirectUrl = url.pathname + url.search + url.hash
+          // Strip host if it's a full URL (CSRF safety)
+          const parsed = new URL(callbackUrl, window.location.origin)
+          if (parsed.origin === window.location.origin) {
+            redirectUrl = parsed.pathname + parsed.search + parsed.hash
+          }
         } catch {
-          // If it's already a pathname, use it directly
           redirectUrl = callbackUrl
         }
-      } else {
-        const session = await getSession()
-        redirectUrl = getDefaultPortalPath(session?.user?.role)
       }
-      
-      console.log("[Login] Redirecting to:", redirectUrl)
-      
-      // Use router.push for client-side navigation
+
       router.push(redirectUrl)
-      router.refresh() // Force a refresh to load the new session
-    } catch (error) {
-      console.error("[Login] Exception during sign in:", error)
+      router.refresh()
+    } catch {
       toast.error("Something went wrong. Please try again.")
+    } finally {
       setIsSubmitting(false)
     }
   }
@@ -106,12 +108,19 @@ function LoginContent() {
     toast.success("Demo login details added.")
   }
 
+  /**
+   * Initiates Google OAuth via the browser redirect flow.
+   * The Google callback will POST to /api/auth?action=google server-side.
+   *
+   * NOTE: Google OAuth requires configuring the redirect URI in Google Console.
+   * For now, this uses the Google Identity Services popup flow.
+   */
   async function handleGoogleSignIn() {
     setIsGoogleLoading(true)
     try {
-      await signIn("google", { callbackUrl })
-    } catch {
-      toast.error("Failed to sign in with Google")
+      // Temporarily disabled while we complete the custom auth migration
+      toast.info("Google Sign-In is temporarily disabled for migration. Please use the Demo Login.")
+    } finally {
       setIsGoogleLoading(false)
     }
   }
@@ -127,11 +136,8 @@ function LoginContent() {
       </div>
 
       {/* Form */}
-      <form
-        onSubmit={handleSubmit(handleLoginSubmit)}
-        className="space-y-4"
-        noValidate
-      >
+      <form onSubmit={handleSubmit(handleLoginSubmit)} className="space-y-4" noValidate>
+        {/* Demo credentials banner */}
         <div className="rounded-lg border border-indigo-100 bg-indigo-50/70 p-3">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -208,9 +214,7 @@ function LoginContent() {
             />
           </div>
           {errors.password && (
-            <p className="text-destructive text-xs">
-              {errors.password.message}
-            </p>
+            <p className="text-destructive text-xs">{errors.password.message}</p>
           )}
         </div>
 
@@ -237,7 +241,9 @@ function LoginContent() {
           <div className="w-full border-t border-border"></div>
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background text-muted-foreground px-2">Or continue with</span>
+          <span className="bg-background text-muted-foreground px-2">
+            Or continue with
+          </span>
         </div>
       </div>
 

@@ -1,11 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useCartStore } from "@/store/cart";
 import { toast } from "sonner";
-import { IconRocket } from "@tabler/icons-react";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 interface Product {
   id: string;
@@ -42,58 +39,6 @@ export function ShopClient({ products, categories }: ShopClientProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b border-border bg-background/80 px-6 backdrop-blur-md">
-        <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#7C3AED] to-[#6D28D9] shadow-md">
-              <IconRocket className="h-4 w-4 text-white" stroke={2} />
-            </div>
-            <span className="f-syne text-[20px] font-bold text-foreground">
-              SubsMS
-            </span>
-          </Link>
-          <div className="hidden gap-6 md:flex">
-            <span className="f-mono cursor-pointer text-sm font-bold text-indigo-600">
-              Store
-            </span>
-            <span className="f-mono cursor-pointer text-sm text-muted-foreground transition-opacity hover:text-indigo-600">
-              Plans
-            </span>
-            <span className="f-mono cursor-pointer text-sm text-muted-foreground transition-opacity hover:text-indigo-600">
-              Help
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="relative hidden lg:block">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-              search
-            </span>
-            <input
-              className="f-mono w-64 rounded-full border border-border bg-muted py-1.5 pl-10 pr-4 text-xs text-foreground outline-none focus:ring-1 focus:ring-indigo-500 transition-shadow focus:bg-card"
-              placeholder="Search products..."
-              type="text"
-            />
-          </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <button type="button" className="text-muted-foreground transition-colors hover:text-indigo-600">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
-            <Link
-              href="/cart"
-              className="text-muted-foreground transition-colors hover:text-indigo-600"
-            >
-              <span className="material-symbols-outlined">shopping_cart</span>
-            </Link>
-            <button type="button" className="f-syne rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition-transform hover:scale-105 active:scale-95">
-              Upgrade
-            </button>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero */}
       <section className="anim-up relative overflow-hidden px-6 pb-20 pt-24 text-center">
         <div className="absolute left-0 top-0 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-200 opacity-30 blur-[140px]"></div>
