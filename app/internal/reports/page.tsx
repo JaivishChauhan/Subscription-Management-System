@@ -25,16 +25,14 @@ export default async function InternalReportsPage() {
     paidInvoicesAgg,
     pendingInvoicesAgg,
     totalPaymentsAgg,
-    subscriptionsByStatus,
     recentPayments,
   ] = await prisma.$transaction([
     prisma.contact.count(),
     prisma.subscription.count({ where: { status: "active" } }),
     prisma.invoice.count(),
-    prisma.invoice.aggregate({ where: { status: "paid" }, _sum: { total: true }, _count: true }),
-    prisma.invoice.aggregate({ where: { status: "confirmed" }, _sum: { amountDue: true }, _count: true }),
-    prisma.payment.aggregate({ _sum: { amount: true }, _count: true }),
-    prisma.subscription.groupBy({ by: ["status"], _count: { _all: true } }),
+    prisma.invoice.aggregate({ where: { status: "paid" }, _sum: { total: true }, _count: { id: true } }),
+    prisma.invoice.aggregate({ where: { status: "confirmed" }, _sum: { amountDue: true }, _count: { id: true } }),
+    prisma.payment.aggregate({ _sum: { amount: true }, _count: { id: true } }),
     prisma.payment.findMany({
       orderBy: { paymentDate: "desc" },
       take: 10,
@@ -45,19 +43,26 @@ export default async function InternalReportsPage() {
     }),
   ])
 
+  // Subscription status breakdown — done outside the transaction to avoid groupBy TS issues
+  const subscriptionsByStatus = await prisma.subscription.groupBy({
+    by: ["status"],
+    _count: { id: true },
+  })
+
   const revenue = paidInvoicesAgg._sum.total ?? 0
   const outstanding = pendingInvoicesAgg._sum.amountDue ?? 0
   const totalCollected = totalPaymentsAgg._sum.amount ?? 0
 
+  /** Map of status → count built from groupBy result */
   const statusMap = Object.fromEntries(
-    subscriptionsByStatus.map((s) => [s.status, s._count._all])
+    subscriptionsByStatus.map((s) => [s.status, s._count.id])
   )
 
   const statCards = [
     { label: "Total Contacts", value: totalContacts, icon: IconUsers, color: "text-sky-600 bg-sky-100 dark:bg-sky-900/30" },
     { label: "Active Subscriptions", value: activeSubscriptions, icon: IconRepeat, color: "text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30" },
     { label: "Total Invoices", value: totalInvoices, icon: IconFileInvoice, color: "text-violet-600 bg-violet-100 dark:bg-violet-900/30" },
-    { label: "Payments Collected", value: totalPaymentsAgg._count, icon: IconCreditCard, color: "text-amber-600 bg-amber-100 dark:bg-amber-900/30" },
+    { label: "Payments Collected", value: totalPaymentsAgg._count.id, icon: IconCreditCard, color: "text-amber-600 bg-amber-100 dark:bg-amber-900/30" },
   ]
 
   return (
@@ -88,17 +93,17 @@ export default async function InternalReportsPage() {
         <div className="rounded-2xl border border-border bg-card p-5">
           <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">Revenue Collected</p>
           <p className="mt-3 text-3xl font-bold text-emerald-600">{INR.format(revenue)}</p>
-          <p className="mt-1 text-sm text-muted-foreground">From {paidInvoicesAgg._count} paid invoices</p>
+          <p className="mt-1 text-sm text-muted-foreground">From {paidInvoicesAgg._count.id} paid invoices</p>
         </div>
         <div className="rounded-2xl border border-border bg-card p-5">
           <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">Outstanding</p>
           <p className="mt-3 text-3xl font-bold text-amber-600">{INR.format(outstanding)}</p>
-          <p className="mt-1 text-sm text-muted-foreground">From {pendingInvoicesAgg._count} confirmed invoices</p>
+          <p className="mt-1 text-sm text-muted-foreground">From {pendingInvoicesAgg._count.id} confirmed invoices</p>
         </div>
         <div className="rounded-2xl border border-border bg-card p-5">
           <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">Total Payments</p>
           <p className="mt-3 text-3xl font-bold">{INR.format(totalCollected)}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{totalPaymentsAgg._count} payments recorded</p>
+          <p className="mt-1 text-sm text-muted-foreground">{totalPaymentsAgg._count.id} payments recorded</p>
         </div>
       </div>
 
@@ -106,7 +111,7 @@ export default async function InternalReportsPage() {
       <div className="rounded-2xl border border-border bg-card p-6">
         <h2 className="text-lg font-semibold">Subscription Status Breakdown</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {["draft", "quotation", "confirmed", "active", "closed"].map((status) => (
+          {(["draft", "quotation", "confirmed", "active", "closed"] as const).map((status) => (
             <div key={status} className="rounded-xl border border-border bg-muted/40 p-4 text-center">
               <p className="text-2xl font-bold">{statusMap[status] ?? 0}</p>
               <p className="mt-1 text-xs font-semibold capitalize text-muted-foreground">{status}</p>

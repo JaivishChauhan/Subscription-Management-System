@@ -139,7 +139,7 @@ export function CartClient() {
                   </button>
                 </div>
                 <span className="f-syne w-24 text-right text-[16px] font-bold text-foreground">
-                  ₹{(item.price * item.quantity).toLocaleString()}
+                  {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(item.price * item.quantity)}
                 </span>
                 <button
                   type="button"
@@ -161,18 +161,18 @@ export function CartClient() {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
                   <span className="text-foreground font-bold">
-                    ₹{subtotal.toLocaleString()}
+                    {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(subtotal)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Tax (GST 18%)</span>
-                  <span className="text-foreground font-bold">₹{tax.toLocaleString()}</span>
+                  <span className="text-foreground font-bold">{new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(tax)}</span>
                 </div>
                 {discount && (
                   <div className="flex justify-between">
                     <span className="text-emerald-500 font-bold">Discount</span>
                     <span className="text-emerald-500 font-bold">
-                      -₹{discountAmount.toLocaleString()}
+                      -{new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(discountAmount)}
                     </span>
                   </div>
                 )}
@@ -217,7 +217,7 @@ export function CartClient() {
                   Total / Month
                 </p>
                 <p className="f-syne text-[32px] font-extrabold tracking-tight text-indigo-600">
-                  ₹{total.toLocaleString()}
+                  {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(total)}
                 </p>
               </div>
 

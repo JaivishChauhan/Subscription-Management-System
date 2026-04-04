@@ -95,10 +95,21 @@ export default async function middleware(request: NextRequest) {
   }
 
   // ── Portal routes (portal role only) ────────────────────────────────────────
-  const portalRoutes = ["/dashboard", "/subscriptions", "/invoices", "/checkout", "/cart"]
+  const portalRoutes = [
+    "/dashboard",
+    "/subscriptions",
+    "/invoices",
+    "/checkout",
+  ]
   if (portalRoutes.some((r) => pathname.startsWith(r))) {
     if (!isLoggedIn) return redirectToLogin()
     if (userRole !== "portal") return redirectToRoleHome()
+    return NextResponse.next()
+  }
+
+  // ── Cart route ────────────────────────────────────────────────────────
+  if (pathname.startsWith("/cart")) {
+    if (isLoggedIn && userRole !== "portal") return redirectToRoleHome()
     return NextResponse.next()
   }
 

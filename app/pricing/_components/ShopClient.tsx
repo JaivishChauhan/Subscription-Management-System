@@ -141,8 +141,7 @@ export function ShopClient({ products, categories }: ShopClientProps) {
                     className="f-syne text-[36px] font-extrabold tracking-tight"
                     style={{ color: p.featured ? "#4F46E5" : "#111827" }}
                   >
-                    ₹
-                    {(billing[p.id] ? p.yearlyPrice : p.price).toLocaleString()}
+                    {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(billing[p.id] ? p.yearlyPrice : p.price)}
                   </span>
                   <span className="f-mono text-xs text-muted-foreground">
                     {" "}

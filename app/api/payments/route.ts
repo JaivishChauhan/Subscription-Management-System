@@ -3,7 +3,6 @@ import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/db"
 import { requireApiRole } from "@/lib/admin"
 import { z } from "zod"
-import { hash } from "bcryptjs"
 
 const paymentFiltersSchema = z.object({
   q: z.string().optional(),

@@ -84,7 +84,7 @@ export function ServiceCardClient({ service }: { service: Service }) {
         </div>
         <div className="text-right">
           <span className="text-foreground text-lg font-bold">
-            ₹{service.monthlyPrice}
+            {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(service.monthlyPrice)}
           </span>
           <p className="text-muted-foreground text-xs font-medium">/ month</p>
         </div>

@@ -87,14 +87,14 @@ export function BundleBottomBar() {
         <div className="flex items-center gap-4">
           <div className="text-right">
             <p className="text-foreground text-sm font-bold">
-              ₹{finalPrice}{" "}
+              {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(finalPrice)}{" "}
               <span className="text-muted-foreground text-xs font-normal">
                 / mon
               </span>
             </p>
             {getDiscount() > 0 && (
               <p className="text-xs font-medium text-green-600 dark:text-green-400">
-                Saving ₹{getDiscount()}
+                Saving {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(getDiscount())}
               </p>
             )}
           </div>

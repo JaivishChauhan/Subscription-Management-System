@@ -62,8 +62,8 @@ export default async function InternalProductsPage() {
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Variants</p>
                   {p.variants.slice(0, 5).map((v) => (
                     <div key={v.id} className="flex items-center justify-between text-sm">
-                      <span>{v.name}</span>
-                      <span className="font-semibold">{INR.format(v.price)}</span>
+                      <span className="text-muted-foreground">{v.attribute}: {v.value}</span>
+                      <span className="font-semibold">{INR.format(v.extraPrice)}</span>
                     </div>
                   ))}
                   {p.variants.length > 5 && (

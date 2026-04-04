@@ -279,9 +279,9 @@ function BundlesSection({ bundles }: { bundles: BundleWithServices[] }) {
               </p>
 
               <div className="mt-6 flex items-baseline gap-2">
-                <span className="text-4xl font-extrabold">₹{discountedPrice.toFixed(0)}</span>
+                <span className="text-4xl font-extrabold">{new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(discountedPrice)}</span>
                 <span className="text-sm text-muted-foreground line-through">
-                  ₹{basePrice.toFixed(0)}
+                  {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(basePrice)}
                 </span>
                 <span className="text-sm text-emerald-500 font-semibold">/mo</span>
               </div>

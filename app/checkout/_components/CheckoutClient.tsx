@@ -475,19 +475,19 @@ export function CheckoutClient() {
                       </span>
                     </div>
                     <span className="text-foreground font-bold">
-                      ₹{(item.price * item.quantity).toLocaleString()}
+                      {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(item.price * item.quantity)}
                     </span>
                   </div>
                 ))}
                 {discount && (
                   <div className="flex justify-between font-bold text-indigo-600">
                     <span>Discount {discount.code}</span>
-                    <span>-₹{discountAmount.toLocaleString()}</span>
+                    <span>-{new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(discountAmount)}</span>
                   </div>
                 )}
                 <div className="text-muted-foreground flex justify-between">
                   <span>GST (18%)</span>
-                  <span>₹{tax.toLocaleString()}</span>
+                  <span>{new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(tax)}</span>
                 </div>
               </div>
               <div className="border-border mt-6 border-t pt-6">
@@ -495,7 +495,7 @@ export function CheckoutClient() {
                   Monthly Total
                 </p>
                 <p className="f-syne text-[36px] font-extrabold tracking-tight text-indigo-600">
-                  ₹{total.toLocaleString()}
+                  {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(total)}
                 </p>
               </div>
               <div className="mt-4 rounded-lg border border-indigo-100 bg-indigo-50 p-3">

@@ -166,7 +166,7 @@ export default async function DashboardPage() {
                         {new Date(invoice.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        ₹{invoice.total.toFixed(2)}
+                        {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 }).format(invoice.total)}
                       </td>
                       <td className="px-6 py-4 text-sm">
                         <span

@@ -41,8 +41,8 @@ export function BundleCardClient({ bundle, originalPrice, finalPrice }: { bundle
       </p>
 
       <div className="mt-6 flex items-baseline gap-2">
-        <span className="text-4xl font-extrabold">₹{finalPrice}</span>
-        <span className="text-sm text-muted-foreground line-through">₹{originalPrice}</span>
+        <span className="text-4xl font-extrabold">{new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(finalPrice)}</span>
+        <span className="text-sm text-muted-foreground line-through">{new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(originalPrice)}</span>
         <span className="text-sm text-emerald-500 font-semibold">/mo</span>
       </div>
 
@@ -68,7 +68,7 @@ export function BundleCardClient({ bundle, originalPrice, finalPrice }: { bundle
                 )}
               </div>
               <span className="text-muted-foreground truncate flex-1">{bs.service.name}</span>
-              <span className="text-xs font-medium text-foreground/50">₹{bs.service.monthlyPrice}</span>
+              <span className="text-xs font-medium text-foreground/50">{new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(bs.service.monthlyPrice)}</span>
             </li>
           ))}
         </ul>
