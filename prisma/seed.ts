@@ -1,9 +1,6 @@
 import "dotenv/config";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
-import { PrismaBetterSQLite3 } from "@prisma/adapter-better-sqlite3";
-import Database from "better-sqlite3";
-import path from "path";
 
 /**
  * Database seed script.
@@ -12,10 +9,7 @@ import path from "path";
  * Run with: npx tsx prisma/seed.ts
  */
 
-const dbPath = path.join(process.cwd(), "prisma", "dev.db");
-const database = new Database(dbPath);
-const adapter = new PrismaBetterSQLite3(database);
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 async function seedAdminUser() {
   const existingAdmin = await prisma.user.findUnique({

@@ -16,10 +16,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Validate input
     const parsed = signupSchema.safeParse(body);
     if (!parsed.success) {
-      const firstError = parsed.error.errors[0]?.message ?? "Invalid input";
+      const firstError = parsed.error.issues[0]?.message ?? "Invalid input";
       return NextResponse.json({ error: firstError }, { status: 400 });
     }
 
@@ -54,7 +53,7 @@ export async function POST(request: NextRequest) {
     // Create linked Contact record
     const nameParts = name.trim().split(/\s+/);
     const firstName = nameParts[0] ?? "";
-    const lastName = nameParts.slice(1).join(" ") || undefined;
+    const lastName = nameParts.slice(1).join(" ") || "";
 
     await prisma.contact.create({
       data: {
