@@ -1,54 +1,226 @@
 @import "tailwindcss";
 
+/* ============================================================================
+   SUBSCRIPTION MANAGEMENT SYSTEM — Corporate Trust Design System
+   Merged: shadcn/ui base tokens + Corporate Trust branding
+   Strategy: Mobile-first · Responsive breakpoints · Dark mode
+   ============================================================================ */
+
 @theme {
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Custom animations */
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-slow: pulse-slow 4s ease-in-out infinite;
+  --animate-fade-in-up: fade-in-up 0.6s ease-out forwards;
+  --animate-slide-in-right: slide-in-right 0.4s ease-out forwards;
+  --animate-scale-in: scale-in 0.3s ease-out forwards;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
 }
+
+/* ============================================================================
+   LIGHT MODE — Corporate Trust (Indigo / Violet)
+   ============================================================================ */
 
 :root {
-  --background: oklch(1 0 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  /* Core palette */
+  --background: oklch(0.985 0.002 247);
+  --foreground: oklch(0.13 0.028 261);
+
+  /* Card & Popover */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.13 0.028 261);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.13 0.028 261);
+
+  /* Primary — Indigo 600 */
+  --primary: oklch(0.45 0.18 264);
+  --primary-foreground: oklch(0.985 0.002 247);
+
+  /* Secondary — Violet 600 */
+  --secondary: oklch(0.44 0.24 303);
+  --secondary-foreground: oklch(0.985 0.002 247);
+
+  /* Muted — Slate 100 */
+  --muted: oklch(0.96 0.005 247);
+  --muted-foreground: oklch(0.50 0.02 261);
+
+  /* Accent — Emerald 500 */
+  --accent: oklch(0.70 0.17 162);
+  --accent-foreground: oklch(0.985 0.002 247);
+
+  /* Destructive — Red 500 */
   --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --radius: 0.625rem;
+  --destructive-foreground: oklch(0.985 0 0);
+
+  /* Border / Input / Ring */
+  --border: oklch(0.91 0.01 247);
+  --input: oklch(0.91 0.01 247);
+  --ring: oklch(0.45 0.18 264);
+
+  /* Radius */
+  --radius: 0.75rem;
+
+  /* ── Corporate Trust Custom Tokens ── */
+
+  /* Shadows with brand color tint */
+  --shadow-card: 0 4px 20px -2px rgba(79, 70, 229, 0.08);
+  --shadow-card-hover: 0 12px 28px -5px rgba(79, 70, 229, 0.14),
+    0 8px 12px -6px rgba(79, 70, 229, 0.08);
+  --shadow-btn: 0 4px 14px 0 rgba(79, 70, 229, 0.25);
+  --shadow-btn-hover: 0 6px 20px 0 rgba(79, 70, 229, 0.35);
+  --shadow-glow: 0 0 30px rgba(79, 70, 229, 0.15);
+  --shadow-inner-glow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #4f46e5, #7c3aed);
+  --gradient-primary-hover: linear-gradient(135deg, #4338ca, #6d28d9);
+  --gradient-subtle: linear-gradient(135deg, #eef2ff, #f5f3ff);
+  --gradient-cta: linear-gradient(135deg, #312e81, #1e1b4b);
+  --gradient-success: linear-gradient(135deg, #059669, #10b981);
+  --gradient-warning: linear-gradient(135deg, #d97706, #f59e0b);
+
+  /* Status colors */
+  --status-draft: oklch(0.50 0.02 261);
+  --status-quotation: oklch(0.70 0.15 85);
+  --status-confirmed: oklch(0.55 0.15 145);
+  --status-active: oklch(0.45 0.18 264);
+  --status-paid: oklch(0.60 0.17 162);
+  --status-cancelled: oklch(0.577 0.245 27.325);
+  --status-closed: oklch(0.40 0.02 261);
+
+  /* Chart colors for reporting */
+  --chart-1: oklch(0.45 0.18 264);
+  --chart-2: oklch(0.44 0.24 303);
+  --chart-3: oklch(0.60 0.17 162);
+  --chart-4: oklch(0.70 0.15 85);
+  --chart-5: oklch(0.577 0.245 27.325);
+
+  /* Sidebar (admin) */
+  --sidebar: oklch(0.985 0.002 247);
+  --sidebar-foreground: oklch(0.13 0.028 261);
+  --sidebar-muted: oklch(0.96 0.005 247);
+  --sidebar-muted-foreground: oklch(0.50 0.02 261);
+  --sidebar-border: oklch(0.91 0.01 247);
+  --sidebar-ring: oklch(0.45 0.18 264);
+  --sidebar-primary: oklch(0.45 0.18 264);
+  --sidebar-primary-foreground: oklch(0.985 0.002 247);
+  --sidebar-accent: oklch(0.96 0.005 247);
+  --sidebar-accent-foreground: oklch(0.13 0.028 261);
 }
 
+/* ============================================================================
+   DARK MODE — Corporate Trust (Deep Indigo / Violet)
+   ============================================================================ */
+
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 28.717);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.708 0 0);
+  --background: oklch(0.13 0.028 261);
+  --foreground: oklch(0.96 0.005 247);
+
+  --card: oklch(0.17 0.025 261);
+  --card-foreground: oklch(0.96 0.005 247);
+  --popover: oklch(0.17 0.025 261);
+  --popover-foreground: oklch(0.96 0.005 247);
+
+  --primary: oklch(0.65 0.18 264);
+  --primary-foreground: oklch(0.13 0.028 261);
+
+  --secondary: oklch(0.60 0.22 303);
+  --secondary-foreground: oklch(0.13 0.028 261);
+
+  --muted: oklch(0.22 0.025 261);
+  --muted-foreground: oklch(0.65 0.02 247);
+
+  --accent: oklch(0.70 0.17 162);
+  --accent-foreground: oklch(0.13 0.028 261);
+
+  --destructive: oklch(0.55 0.22 27);
+  --destructive-foreground: oklch(0.96 0 0);
+
+  --border: oklch(0.25 0.02 261);
+  --input: oklch(0.25 0.02 261);
+  --ring: oklch(0.65 0.18 264);
+
+  /* Dark shadows */
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 12px 28px -5px rgba(99, 102, 241, 0.2),
+    0 8px 12px -6px rgba(0, 0, 0, 0.3);
+  --shadow-btn: 0 4px 14px 0 rgba(99, 102, 241, 0.3);
+  --shadow-btn-hover: 0 6px 20px 0 rgba(99, 102, 241, 0.4);
+  --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.2);
+
+  /* Dark gradients */
+  --gradient-subtle: linear-gradient(135deg, #1e1b4b, #312e81);
+  --gradient-cta: linear-gradient(135deg, #eef2ff, #e0e7ff);
+
+  /* Dark status colors */
+  --status-draft: oklch(0.60 0.02 247);
+  --status-quotation: oklch(0.75 0.12 85);
+  --status-confirmed: oklch(0.65 0.15 145);
+  --status-active: oklch(0.65 0.18 264);
+  --status-paid: oklch(0.70 0.17 162);
+  --status-cancelled: oklch(0.55 0.22 27);
+  --status-closed: oklch(0.55 0.02 247);
+
+  /* Dark sidebar */
+  --sidebar: oklch(0.15 0.025 261);
+  --sidebar-foreground: oklch(0.96 0.005 247);
+  --sidebar-muted: oklch(0.20 0.025 261);
+  --sidebar-muted-foreground: oklch(0.65 0.02 247);
+  --sidebar-border: oklch(0.25 0.02 261);
+  --sidebar-ring: oklch(0.65 0.18 264);
+  --sidebar-primary: oklch(0.65 0.18 264);
+  --sidebar-primary-foreground: oklch(0.13 0.028 261);
+  --sidebar-accent: oklch(0.22 0.025 261);
+  --sidebar-accent-foreground: oklch(0.96 0.005 247);
 }
+
+/* ============================================================================
+   BASE STYLES
+   ============================================================================ */
 
 * {
   border-color: var(--border);
@@ -57,4 +229,85 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  font-feature-settings: "cv11", "ss01";
+  font-variation-settings: "wght" 400;
+}
+
+/* Smooth scrolling for in-page navigation */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ============================================================================
+   UTILITY CLASSES — Corporate Trust
+   ============================================================================ */
+
+/* Gradient text utility */
+.text-gradient {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Card elevation utility */
+.card-elevated {
+  box-shadow: var(--shadow-card);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+}
+
+.card-elevated:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+/* Gradient button utility */
+.btn-gradient {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: var(--shadow-btn);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
+}
+
+.btn-gradient:hover {
+  background: var(--gradient-primary-hover);
+  box-shadow: var(--shadow-btn-hover);
+  transform: translateY(-1px);
+}
+
+.btn-gradient:active {
+  transform: translateY(0);
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Focus ring */
+.focus-ring {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
