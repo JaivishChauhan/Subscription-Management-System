@@ -8,6 +8,7 @@ import { IconRocket, IconShoppingCart, IconUser, IconLogout, IconMenu2, IconX } 
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useCartStore } from "@/store/cart";
 import { toast } from "sonner";
+import { getDefaultPortalPath, getPortalLabel } from "@/lib/roles";
 
 export function Header() {
   const [mounted, setMounted] = useState(false);
@@ -65,7 +66,10 @@ export function Header() {
     );
   }
 
-  const isAdmin = session?.user && (session.user as any).role === "admin";
+  const userRole = session?.user?.role;
+  const portalHref = getDefaultPortalPath(userRole);
+  const portalLabel = getPortalLabel(userRole);
+  const showCart = userRole !== "admin" && userRole !== "internal";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 glass">
@@ -88,10 +92,13 @@ export function Header() {
           <NavLink href="/pricing" label="Pricing" />
           {session?.user && (
             <>
-              <NavLink href="/dashboard" label="Dashboard" />
-              <NavLink href="/subscriptions" label="Subscriptions" />
-              <NavLink href="/invoices" label="Invoices" />
-              {isAdmin && <NavLink href="/admin" label="Admin" />}
+              <NavLink href={portalHref} label={portalLabel} />
+              {userRole === "portal" ? (
+                <>
+                  <NavLink href="/subscriptions" label="Subscriptions" />
+                  <NavLink href="/invoices" label="Invoices" />
+                </>
+              ) : null}
             </>
           )}
         </div>
@@ -101,18 +108,20 @@ export function Header() {
           <ThemeToggle />
           
           {/* Cart Icon with Badge */}
-          <Link
-            href="/cart"
-            className="relative rounded-full p-2 text-foreground/70 transition-colors hover:text-indigo-600 hover:bg-muted"
-            aria-label="Shopping cart"
-          >
-            <IconShoppingCart className="h-5 w-5" stroke={2} />
-            {items.length > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white shadow-sm">
-                {items.length}
-              </span>
-            )}
-          </Link>
+          {showCart ? (
+            <Link
+              href="/cart"
+              className="relative rounded-full p-2 text-foreground/70 transition-colors hover:text-indigo-600 hover:bg-muted"
+              aria-label="Shopping cart"
+            >
+              <IconShoppingCart className="h-5 w-5" stroke={2} />
+              {items.length > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white shadow-sm">
+                  {items.length}
+                </span>
+              )}
+            </Link>
+          ) : null}
 
           {/* Auth Section */}
           {isLoading ? (
@@ -157,18 +166,20 @@ export function Header() {
           <ThemeToggle />
           
           {/* Cart Icon with Badge - Mobile */}
-          <Link
-            href="/cart"
-            className="relative rounded-full p-2 text-foreground/70 transition-colors hover:text-indigo-600"
-            aria-label="Shopping cart"
-          >
-            <IconShoppingCart className="h-5 w-5" stroke={2} />
-            {items.length > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white shadow-sm">
-                {items.length}
-              </span>
-            )}
-          </Link>
+          {showCart ? (
+            <Link
+              href="/cart"
+              className="relative rounded-full p-2 text-foreground/70 transition-colors hover:text-indigo-600"
+              aria-label="Shopping cart"
+            >
+              <IconShoppingCart className="h-5 w-5" stroke={2} />
+              {items.length > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white shadow-sm">
+                  {items.length}
+                </span>
+              )}
+            </Link>
+          ) : null}
 
           <button
             type="button"
@@ -197,11 +208,14 @@ export function Header() {
             {session?.user && (
               <>
                 <div className="my-2 border-t border-border/50" />
-                <MobileNavLink href="/dashboard" label="Dashboard" />
-                <MobileNavLink href="/subscriptions" label="Subscriptions" />
-                <MobileNavLink href="/invoices" label="Invoices" />
+                <MobileNavLink href={portalHref} label={portalLabel} />
+                {userRole === "portal" ? (
+                  <>
+                    <MobileNavLink href="/subscriptions" label="Subscriptions" />
+                    <MobileNavLink href="/invoices" label="Invoices" />
+                  </>
+                ) : null}
                 <MobileNavLink href="/profile" label="Profile" />
-                {isAdmin && <MobileNavLink href="/admin" label="Admin" />}
               </>
             )}
 

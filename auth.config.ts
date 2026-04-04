@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from "next-auth"
+import { getDefaultPortalPath, normalizeUserRole } from "@/lib/roles"
 
 /**
  * Edge-compatible auth configuration for NextAuth v5.
@@ -13,11 +14,14 @@ export const authConfig = {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user?.id // Check for user.id to ensure full session
       const pathname = nextUrl.pathname
+      const userRole = normalizeUserRole((auth?.user as { role?: string } | undefined)?.role)
 
       // Protected routes that require authentication
       const protectedRoutes = [
+        "/auth/redirect",
         "/dashboard",
         "/admin",
+        "/internal",
         "/profile",
         "/subscriptions",
         "/invoices",
@@ -28,16 +32,39 @@ export const authConfig = {
         pathname.startsWith(route)
       )
 
+      const redirectToRoleHome = () =>
+        Response.redirect(new URL(getDefaultPortalPath(userRole), nextUrl))
+
       // Admin routes require admin role
       if (pathname.startsWith("/admin")) {
-        const isAdmin = auth?.user && (auth.user as any)?.role === "admin"
         if (!isLoggedIn) {
           return false // Will redirect to /login
         }
-        if (!isAdmin) {
-          return Response.redirect(new URL("/dashboard", nextUrl))
+        if (userRole !== "admin") {
+          return redirectToRoleHome()
         }
         return true
+      }
+
+      if (pathname.startsWith("/internal")) {
+        if (!isLoggedIn) {
+          return false
+        }
+        if (userRole !== "internal") {
+          return redirectToRoleHome()
+        }
+        return true
+      }
+
+      if (
+        isLoggedIn &&
+        userRole !== "portal" &&
+        (pathname.startsWith("/dashboard") ||
+          pathname.startsWith("/subscriptions") ||
+          pathname.startsWith("/invoices") ||
+          pathname.startsWith("/checkout"))
+      ) {
+        return redirectToRoleHome()
       }
 
       // Redirect to login if accessing protected route without auth
@@ -50,7 +77,7 @@ export const authConfig = {
         isLoggedIn &&
         (pathname.startsWith("/login") || pathname.startsWith("/signup"))
       ) {
-        return Response.redirect(new URL("/dashboard", nextUrl))
+        return redirectToRoleHome()
       }
 
       return true
@@ -62,7 +89,7 @@ export const authConfig = {
         ;(session.user as { role: string }).role =
           (token.role as string) ?? "portal"
       } else {
-        return { ...session, user: undefined } as any
+        return { ...session, user: undefined }
       }
       return session
     },

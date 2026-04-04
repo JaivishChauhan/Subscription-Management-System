@@ -15,7 +15,7 @@ import { authConfig } from "@/auth.config"
  */
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma) as any,
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -110,7 +110,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         console.log("[JWT] User object from authorize:", user)
 
-        token.id = user.id
+        token.id = user.id as string
         token.email = user.email
         token.name = user.name
         token.picture = user.image

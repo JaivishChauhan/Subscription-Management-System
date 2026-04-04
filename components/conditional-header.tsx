@@ -15,7 +15,8 @@ export function ConditionalHeader() {
     pathname.startsWith("/login") ||
     pathname.startsWith("/signup") ||
     pathname.startsWith("/reset-password") ||
-    pathname.startsWith("/admin");
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/internal");
   
   if (hideHeader) {
     return null;

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { getDefaultPortalPath } from "@/lib/roles";
 import {
   IconLayoutDashboard,
   IconUsers,
@@ -20,7 +21,7 @@ import {
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export const metadata: Metadata = {
-  title: "Admin Panel",
+  title: "Admin Portal",
 };
 
 /**
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
  * Mobile: hamburger menu (expandable).
  * Desktop: fixed sidebar + scrollable content.
  *
- * @security Only accessible to admin and internal roles (enforced by proxy).
+ * @security Only accessible to admin role.
  */
 export default async function AdminLayout({
   children,
@@ -42,8 +43,8 @@ export default async function AdminLayout({
   }
 
   const userRole = (session.user as { role?: string }).role;
-  if (userRole !== "admin" && userRole !== "internal") {
-    redirect("/");
+  if (userRole !== "admin") {
+    redirect(getDefaultPortalPath(userRole));
   }
 
   return (
@@ -100,7 +101,7 @@ function AdminSidebar({
           <div>
             <span className="text-base font-bold text-gradient">SubsMS</span>
             <p className="text-[10px] font-medium uppercase tracking-wider text-sidebar-muted-foreground">
-              Admin Panel
+              Admin Portal
             </p>
           </div>
         </div>

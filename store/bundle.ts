@@ -7,6 +7,8 @@ export interface BundleService {
   category: string;
   monthlyPrice: number;
   logoUrl: string | null;
+  iconKey?: string | null;
+  color?: string | null;
 }
 
 interface BundleState {

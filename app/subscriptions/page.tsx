@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -21,7 +21,7 @@ export default async function SubscriptionsPage() {
   const subscriptions = await prisma.subscription.findMany({
     where: { userId: session.user.id },
     include: {
-      plan: true,
+      recurringPlan: true,
     },
     orderBy: { createdAt: "desc" },
   });
@@ -66,12 +66,12 @@ function SubscriptionCard({
   subscription: {
     id: string;
     status: string;
-    startDate: Date;
-    endDate: Date | null;
-    plan: {
+    startDate: Date | null;
+    expirationDate: Date | null;
+    recurringPlan: {
       name: string;
       price: number;
-      billingCycle: string;
+      billingPeriod: string;
     };
   };
 }) {
@@ -85,7 +85,7 @@ function SubscriptionCard({
   return (
     <div className="rounded-lg border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md">
       <div className="mb-4 flex items-start justify-between">
-        <h3 className="text-lg font-bold">{subscription.plan.name}</h3>
+        <h3 className="text-lg font-bold">{subscription.recurringPlan.name}</h3>
         <span
           className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${statusColor}`}
         >
@@ -102,17 +102,17 @@ function SubscriptionCard({
         <div className="flex items-center gap-2 text-muted-foreground">
           <IconCreditCard className="h-4 w-4" />
           <span>
-            ₹{subscription.plan.price} / {subscription.plan.billingCycle}
+            â‚¹{subscription.recurringPlan.price} / {subscription.recurringPlan.billingPeriod}
           </span>
         </div>
         <div className="flex items-center gap-2 text-muted-foreground">
           <IconCalendar className="h-4 w-4" />
-          <span>Started: {new Date(subscription.startDate).toLocaleDateString()}</span>
+          <span>Started: {subscription.startDate ? new Date(subscription.startDate).toLocaleDateString() : "Pending"}</span>
         </div>
-        {subscription.endDate && (
+        {subscription.expirationDate && (
           <div className="flex items-center gap-2 text-muted-foreground">
             <IconCalendar className="h-4 w-4" />
-            <span>Ends: {new Date(subscription.endDate).toLocaleDateString()}</span>
+            <span>Ends: {new Date(subscription.expirationDate).toLocaleDateString()}</span>
           </div>
         )}
       </div>

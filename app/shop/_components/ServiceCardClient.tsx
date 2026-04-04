@@ -7,6 +7,7 @@ import {
   IconShoppingCart,
   IconCheck,
 } from "@tabler/icons-react"
+import * as TablerIcons from "@tabler/icons-react"
 import { Service } from "@prisma/client"
 import { useBundleStore } from "@/store/bundle"
 import { useCartStore } from "@/store/cart"
@@ -17,6 +18,12 @@ export function ServiceCardClient({ service }: { service: Service }) {
   const { services, addService, removeService } = useBundleStore()
   const { addItem } = useCartStore()
   const [mounted, setMounted] = useState(false)
+
+  // Dynamically resolve Tabler Icon
+  const IconComponent =
+    service.iconKey && (TablerIcons as any)[service.iconKey]
+      ? (TablerIcons as any)[service.iconKey]
+      : IconApps
 
   useEffect(() => {
     setMounted(true)
@@ -35,6 +42,8 @@ export function ServiceCardClient({ service }: { service: Service }) {
         category: service.category,
         monthlyPrice: service.monthlyPrice,
         logoUrl: service.logoUrl,
+        iconKey: service.iconKey,
+        color: service.color,
       })
       toast.success(`${service.name} added to bundle`)
     }
@@ -51,11 +60,16 @@ export function ServiceCardClient({ service }: { service: Service }) {
     })
     toast.success(`${service.name} added to cart`)
   }
-
   return (
     <div className="group border-border bg-card relative flex flex-col rounded-2xl border p-5 shadow-sm transition-all hover:border-indigo-500 hover:shadow-md">
       <div className="flex items-start justify-between">
-        <div className="bg-muted relative flex h-14 w-14 items-center justify-center rounded-xl p-2">
+        <div
+          className="relative flex h-14 w-14 items-center justify-center rounded-xl p-2 shadow-inner"
+          style={{
+            backgroundColor: service.color || "#6366f1",
+            color: "#ffffff",
+          }}
+        >
           {service.logoUrl ? (
             <Image
               src={service.logoUrl}
@@ -65,7 +79,7 @@ export function ServiceCardClient({ service }: { service: Service }) {
               className="object-contain"
             />
           ) : (
-            <IconApps className="text-muted-foreground h-8 w-8" />
+            <IconComponent className="h-8 w-8" />
           )}
         </div>
         <div className="text-right">
@@ -119,3 +133,4 @@ export function ServiceCardClient({ service }: { service: Service }) {
     </div>
   )
 }
+

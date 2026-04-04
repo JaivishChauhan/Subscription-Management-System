@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { getDefaultPortalPath, type UserRole } from "@/lib/roles";
 
-type AllowedRole = "admin" | "internal" | "portal";
+type AllowedRole = UserRole;
 
 export async function requirePageRole(allowedRoles: AllowedRole[]) {
   const session = await auth();
@@ -12,7 +13,7 @@ export async function requirePageRole(allowedRoles: AllowedRole[]) {
   }
 
   if (!allowedRoles.includes(session.user.role as AllowedRole)) {
-    redirect("/");
+    redirect(getDefaultPortalPath(session.user.role));
   }
 
   return session;
@@ -20,6 +21,10 @@ export async function requirePageRole(allowedRoles: AllowedRole[]) {
 
 export async function requireAdminPage() {
   return requirePageRole(["admin"]);
+}
+
+export async function requireInternalPage() {
+  return requirePageRole(["internal"]);
 }
 
 export async function requireApiRole(allowedRoles: AllowedRole[]) {

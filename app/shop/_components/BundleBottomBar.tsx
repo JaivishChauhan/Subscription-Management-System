@@ -1,8 +1,10 @@
 "use client"
 
 import { useBundleStore } from "@/store/bundle"
-import { IconChevronRight, IconShoppingCartPlus } from "@tabler/icons-react"
+import { IconChevronRight, IconShoppingCartPlus, IconApps } from "@tabler/icons-react"
+import * as TablerIcons from "@tabler/icons-react"
 import Link from "next/link"
+import Image from "next/image"
 import { useEffect, useState } from "react"
 
 export function BundleBottomBar() {
@@ -27,18 +29,36 @@ export function BundleBottomBar() {
         {/* Left section: Services info */}
         <div className="flex items-center gap-4">
           <div className="flex -space-x-3">
-            {services.slice(0, maxAvatars).map((svc, i) => (
-              <div
-                key={svc.id}
-                className="border-card bg-muted z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 shadow-sm"
-                style={{ zIndex: 10 - i }}
-                title={svc.name}
-              >
-                <span className="text-foreground text-xs font-bold">
-                  {svc.name.substring(0, 2).toUpperCase()}
-                </span>
-              </div>
-            ))}
+            {services.slice(0, maxAvatars).map((svc, i) => {
+              const IconComponent =
+                svc.iconKey && (TablerIcons as any)[svc.iconKey]
+                  ? (TablerIcons as any)[svc.iconKey]
+                  : IconApps;
+              
+              return (
+                <div
+                  key={svc.id}
+                  className="border-card z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 shadow-sm relative overflow-hidden"
+                  style={{ 
+                    zIndex: 10 - i,
+                    backgroundColor: svc.color || "#6366f1",
+                    color: "#ffffff"
+                  }}
+                  title={svc.name}
+                >
+                  {svc.logoUrl ? (
+                    <Image
+                      src={svc.logoUrl}
+                      alt={svc.name}
+                      fill
+                      className="object-contain p-1.5"
+                    />
+                  ) : (
+                    <IconComponent className="h-5 w-5" />
+                  )}
+                </div>
+              );
+            })}
             {services.length > maxAvatars && (
               <div className="border-card z-0 flex h-10 w-10 items-center justify-center rounded-full border-2 bg-indigo-100 shadow-sm dark:bg-indigo-900/50">
                 <span className="text-xs font-bold text-indigo-700 dark:text-indigo-400">
@@ -89,3 +109,4 @@ export function BundleBottomBar() {
     </div>
   )
 }
+

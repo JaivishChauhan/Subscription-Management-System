@@ -1,0 +1,29 @@
+﻿  const handleToggleBundle = () => {
+    if (isAddedToBundle) {
+      removeService(service.id)
+      toast.success(${service.name} removed from bundle)
+    } else {
+      addService({
+        id: service.id,
+        name: service.name,
+        category: service.category,
+        monthlyPrice: service.monthlyPrice,
+        logoUrl: service.logoUrl,
+        iconKey: service.iconKey,
+        color: service.color,
+      })
+      toast.success(${service.name} added to bundle)
+    }
+  }
+
+  const handleAddToCart = () => {
+    addItem({
+      id: service.id,
+      name: service.name,
+      price: service.monthlyPrice,
+      quantity: 1,
+      plan: "Monthly",
+      type: "plan",
+    })
+    toast.success(${service.name} added to cart)
+  }

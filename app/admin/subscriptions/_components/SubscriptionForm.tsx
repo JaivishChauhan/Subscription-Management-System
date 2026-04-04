@@ -95,6 +95,7 @@ type SubscriptionRecord = {
 type SubscriptionFormProps = {
   mode: "create" | "edit";
   editable: boolean;
+  basePath?: string;
   contacts: ContactOption[];
   plans: PlanOption[];
   paymentTerms: PaymentTermsOption[];
@@ -117,6 +118,7 @@ const emptyLine = {
 export function SubscriptionForm({
   mode,
   editable,
+  basePath = "/admin",
   contacts,
   plans,
   paymentTerms,
@@ -214,7 +216,9 @@ export function SubscriptionForm({
       );
 
       const nextId = mode === "edit" ? initialSubscription?.id : result.subscription?.id;
-      router.push(nextId ? `/admin/subscriptions/${nextId}` : "/admin/subscriptions");
+      router.push(
+        nextId ? `${basePath}/subscriptions/${nextId}` : `${basePath}/subscriptions`,
+      );
       router.refresh();
     } catch {
       toast.error("Something went wrong while saving the subscription.");
@@ -266,7 +270,7 @@ export function SubscriptionForm({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
-          href="/admin/subscriptions"
+          href={`${basePath}/subscriptions`}
           className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2 text-sm font-medium transition-colors"
         >
           <IconArrowLeft className="h-4 w-4" />

@@ -3,13 +3,14 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { signIn } from "next-auth/react"
+import { getSession, signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { IconLoader2, IconMail, IconLock, IconBrandGoogle } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { DEMO_LOGIN_CREDENTIALS } from "@/lib/demo-data"
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth"
+import { getDefaultPortalPath } from "@/lib/roles"
 
 /**
  * Login page — email + password authentication.
@@ -18,10 +19,12 @@ import { loginSchema, type LoginFormData } from "@/lib/validations/auth"
  *
  * @client Required for form interactivity and signIn().
  */
-export default function LoginPage() {
+import { Suspense } from 'react';
+export default function LoginPage() { return <Suspense fallback={<div className="p-8 text-center"><IconLoader2 className="animate-spin inline-block mr-2" /> Loading...</div>}><LoginContent /></Suspense>; }
+function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/"
+  const callbackUrl = searchParams.get("callbackUrl") ?? "/auth/redirect"
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 
@@ -70,9 +73,9 @@ export default function LoginPage() {
       toast.success("Welcome back!")
       
       // Parse the callback URL
-      let redirectUrl = "/dashboard"
+      let redirectUrl = "/auth/redirect"
       
-      if (callbackUrl && callbackUrl !== "/") {
+      if (callbackUrl && callbackUrl !== "/auth/redirect") {
         try {
           // If it's a full URL, extract the pathname
           const url = new URL(callbackUrl)
@@ -81,6 +84,9 @@ export default function LoginPage() {
           // If it's already a pathname, use it directly
           redirectUrl = callbackUrl
         }
+      } else {
+        const session = await getSession()
+        redirectUrl = getDefaultPortalPath(session?.user?.role)
       }
       
       console.log("[Login] Redirecting to:", redirectUrl)
