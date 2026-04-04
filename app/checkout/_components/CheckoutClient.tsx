@@ -1,13 +1,15 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useCartStore } from "@/store/cart";
-import { toast } from "sonner";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { DEMO_CHECKOUT_DETAILS, DEMO_PAYMENT_DETAILS } from "@/lib/demo-data"
+import { useCartStore } from "@/store/cart"
+import { toast } from "sonner"
+import { IconRocket } from "@tabler/icons-react"
 
 const checkoutSchema = z.object({
   fullName: z.string().min(1, "Required"),
@@ -18,89 +20,124 @@ const checkoutSchema = z.object({
   city: z.string().min(1, "Required"),
   state: z.string().min(1, "Required"),
   pincode: z.string().min(1, "Required"),
-});
+})
 
-type CheckoutFormValues = z.infer<typeof checkoutSchema>;
+type CheckoutFormValues = z.infer<typeof checkoutSchema>
 
 export function CheckoutClient() {
-  const [step, setStep] = useState(2);
-  const router = useRouter();
-  const items = useCartStore((s) => s.items);
-  const discount = useCartStore((s) => s.discount);
-  const clearCart = useCartStore((s) => s.clearCart);
+  const [step, setStep] = useState(2)
+  const [paymentDetails, setPaymentDetails] = useState({
+    cardNumber: "",
+    expiry: "",
+    cvv: "",
+  })
+  const router = useRouter()
+  const items = useCartStore((s) => s.items)
+  const discount = useCartStore((s) => s.discount)
+  const clearCart = useCartStore((s) => s.clearCart)
 
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
   const discountAmount = discount
     ? discount.type === "percent"
       ? Math.round(subtotal * (discount.value / 100))
       : discount.value
-    : 0;
-  const tax = Math.round((subtotal - discountAmount) * 0.18);
-  const total = subtotal - discountAmount + tax;
+    : 0
+  const tax = Math.round((subtotal - discountAmount) * 0.18)
+  const total = subtotal - discountAmount + tax
 
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
-  } = useForm<CheckoutFormValues>({ resolver: zodResolver(checkoutSchema) });
+  } = useForm<CheckoutFormValues>({
+    resolver: zodResolver(checkoutSchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      company: "",
+      phone: "",
+      address: "",
+      city: "",
+      state: "",
+      pincode: "",
+    },
+  })
 
-  const onSubmit = (data: CheckoutFormValues) => {
+  const onSubmit = () => {
     if (step === 2) {
-      setStep(3);
-      return;
+      setStep(3)
+      return
     }
     // Simulate payment submission
-    toast.success("Payment confirmed! Subscription active.");
-    clearCart();
-    router.push("/pricing");
-  };
+    toast.success("Payment confirmed! Subscription active.")
+    clearCart()
+    router.push("/pricing")
+  }
+
+  const handleAutofillBilling = () => {
+    reset(DEMO_CHECKOUT_DETAILS)
+    toast.success("Demo billing details added.")
+  }
+
+  const handleAutofillPayment = () => {
+    setPaymentDetails(DEMO_PAYMENT_DETAILS)
+    toast.success("Demo card details added.")
+  }
 
   const steps = [
     { num: 1, label: "ORDER REVIEW" },
     { num: 2, label: "YOUR DETAILS" },
     { num: 3, label: "PAYMENT" },
-  ];
+  ]
 
   return (
-    <div className="grid-bg min-h-screen">
+    <div className="min-h-screen bg-[#F9FAFB]">
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b border-[#1E2D42]/40 bg-[#0D1117]/80 px-6 backdrop-blur-md">
+      <nav className="border-border sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b bg-white/80 px-6 backdrop-blur-md">
         <Link
           href="/pricing"
-          className="f-syne text-[22px] font-bold text-[#E8EDF5]"
+          className="flex items-center gap-2 transition-opacity hover:opacity-80"
         >
-          SubMS
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#7C3AED] to-[#6D28D9] shadow-md">
+            <IconRocket className="h-4 w-4 text-white" stroke={2} />
+          </div>
+          <span className="f-syne text-foreground text-[20px] font-bold">
+            SubsMS
+          </span>
         </Link>
         <div className="flex items-center gap-3">
           <Link
             href="/cart"
-            className="text-[#8A9BB5] transition-colors hover:text-[#00E5FF]"
+            className="text-muted-foreground transition-colors hover:text-indigo-600"
           >
-            <span className="material-symbols-outlined">shopping_cart</span>
+            <span className="material-symbols-outlined text-[22px]">
+              shopping_cart
+            </span>
           </Link>
         </div>
       </nav>
 
-      <div className="anim-up mx-auto max-w-5xl px-6 pb-24 pt-10">
+      <div className="anim-up mx-auto max-w-5xl px-6 pt-10 pb-24">
         {/* Progress Stepper */}
         <div className="mb-12 flex items-center justify-center">
           {steps.map((s, i) => (
             <div key={s.num} className="flex items-center">
               <div className="flex flex-col items-center gap-2">
                 <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-full text-[14px] font-bold ${
+                  className={`flex h-8 w-8 items-center justify-center rounded-full text-[14px] font-bold shadow-sm transition-all ${
                     s.num <= step
-                      ? "bg-[#00E5FF] text-[#080B10]"
-                      : "border-2 border-[#243347] text-[#4A5D78]"
+                      ? "bg-indigo-600 text-white"
+                      : "border-2 border-slate-200 bg-slate-50 text-slate-400"
                   }`}
                 >
                   {s.num < step ? "✓" : s.num}
                 </div>
                 <span
-                  className={`f-mono text-[11px] uppercase tracking-widest ${
+                  className={`f-mono text-[11px] tracking-widest uppercase ${
                     s.num === step
-                      ? "font-bold text-[#E8EDF5]"
-                      : "text-[#4A5D78]"
+                      ? "text-foreground font-bold"
+                      : "text-muted-foreground"
                   }`}
                 >
                   {s.label}
@@ -109,7 +146,7 @@ export function CheckoutClient() {
               {i < steps.length - 1 && (
                 <div
                   className={`mx-4 h-px w-24 ${
-                    s.num < step ? "bg-[#00E5FF]" : "bg-[#243347]"
+                    s.num < step ? "bg-indigo-600" : "bg-slate-200"
                   }`}
                 ></div>
               )}
@@ -121,19 +158,19 @@ export function CheckoutClient() {
           {/* Left: Steps */}
           <div className="space-y-4 lg:col-span-3">
             {/* Step 1 — Order Review */}
-            <div className="rounded-xl border border-[#1E2D42] bg-[#111820] p-6">
+            <div className="border-border rounded-2xl border bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="f-mono text-[12px] text-[#4A5D78]">
+                  <span className="f-mono text-muted-foreground text-[12px] font-medium">
                     Step 01
                   </span>
-                  <h3 className="f-syne text-[16px] font-bold text-[#8A9BB5]">
+                  <h3 className="f-syne text-[16px] font-bold text-slate-700">
                     Order Review
                   </h3>
                 </div>
                 <button
                   onClick={() => router.push("/cart")}
-                  className="f-mono text-[11px] uppercase text-[#00E5FF] hover:underline"
+                  className="f-mono text-[11px] font-bold text-indigo-600 uppercase hover:text-indigo-700 hover:underline"
                 >
                   Edit
                 </button>
@@ -142,18 +179,29 @@ export function CheckoutClient() {
 
             {/* Step 2 — Billing Details */}
             <div
-              className={`rounded-xl border border-[#1E2D42] bg-[#111820] p-6 ${
+              className={`border-border rounded-2xl border bg-white p-6 shadow-sm transition-opacity ${
                 step === 2
-                  ? "border-l-2 border-l-[#00E5FF]"
+                  ? "border-l-4 border-l-indigo-500"
                   : step > 2
-                  ? ""
-                  : "pointer-events-none opacity-40"
+                    ? ""
+                    : "pointer-events-none opacity-50"
               }`}
             >
-              <span className="f-mono text-[12px] text-[#4A5D78]">Step 02</span>
-              <h3 className="f-syne mb-6 text-[22px] font-bold text-[#E8EDF5]">
-                Billing Details
-              </h3>
+              <span className="f-mono text-muted-foreground text-[12px] font-medium">
+                Step 02
+              </span>
+              <div className="mb-6 flex items-center justify-between gap-3">
+                <h3 className="f-syne text-foreground text-[22px] font-bold">
+                  Billing Details
+                </h3>
+                <button
+                  type="button"
+                  onClick={handleAutofillBilling}
+                  className="f-mono rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-[10px] font-bold tracking-wider text-indigo-700 uppercase transition-colors hover:bg-indigo-100"
+                >
+                  Autofill demo data
+                </button>
+              </div>
               {step >= 2 && (
                 <form
                   onSubmit={handleSubmit(onSubmit)}
@@ -162,31 +210,31 @@ export function CheckoutClient() {
                 >
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="f-mono text-[10px] uppercase tracking-widest text-[#4A5D78]">
+                      <label className="f-mono text-[10px] font-bold tracking-widest text-slate-500 uppercase">
                         Full Name
                       </label>
                       <input
                         {...register("fullName")}
-                        className="f-mono w-full rounded-sm border border-[#1E2D42] bg-[#111820] px-3 py-2.5 text-[13px] text-[#E8EDF5] transition-colors placeholder:text-[#4A5D78] focus:border-[#00E5FF]/50 outline-none"
+                        className="f-mono border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2.5 text-[13px] transition-colors outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500"
                         placeholder="Jane Doe"
                       />
                       {errors.fullName && (
-                        <span className="text-[10px] text-[#EF4444]">
+                        <span className="text-destructive text-[10px] font-medium">
                           {errors.fullName.message}
                         </span>
                       )}
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="f-mono text-[10px] uppercase tracking-widest text-[#4A5D78]">
+                      <label className="f-mono text-[10px] font-bold tracking-widest text-slate-500 uppercase">
                         Email Address
                       </label>
                       <input
                         {...register("email")}
-                        className="f-mono w-full rounded-sm border border-[#1E2D42] bg-[#111820] px-3 py-2.5 text-[13px] text-[#E8EDF5] transition-colors placeholder:text-[#4A5D78] focus:border-[#00E5FF]/50 outline-none"
+                        className="f-mono border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2.5 text-[13px] transition-colors outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500"
                         placeholder="jane@company.com"
                       />
                       {errors.email && (
-                        <span className="text-[10px] text-[#EF4444]">
+                        <span className="text-destructive text-[10px] font-medium">
                           {errors.email.message}
                         </span>
                       )}
@@ -194,73 +242,73 @@ export function CheckoutClient() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="f-mono text-[10px] uppercase tracking-widest text-[#4A5D78]">
+                      <label className="f-mono text-[10px] font-bold tracking-widest text-slate-500 uppercase">
                         Company (Optional)
                       </label>
                       <input
                         {...register("company")}
-                        className="f-mono w-full rounded-sm border border-[#1E2D42] bg-[#111820] px-3 py-2.5 text-[13px] text-[#E8EDF5] transition-colors placeholder:text-[#4A5D78] focus:border-[#00E5FF]/50 outline-none"
+                        className="f-mono border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2.5 text-[13px] transition-colors outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500"
                         placeholder="TechCorp"
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="f-mono text-[10px] uppercase tracking-widest text-[#4A5D78]">
+                      <label className="f-mono text-[10px] font-bold tracking-widest text-slate-500 uppercase">
                         Phone Number
                       </label>
                       <input
                         {...register("phone")}
-                        className="f-mono w-full rounded-sm border border-[#1E2D42] bg-[#111820] px-3 py-2.5 text-[13px] text-[#E8EDF5] transition-colors placeholder:text-[#4A5D78] focus:border-[#00E5FF]/50 outline-none"
+                        className="f-mono border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2.5 text-[13px] transition-colors outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500"
                         placeholder="+91 98765 43210"
                       />
                       {errors.phone && (
-                        <span className="text-[10px] text-[#EF4444]">
+                        <span className="text-destructive text-[10px] font-medium">
                           {errors.phone.message}
                         </span>
                       )}
                     </div>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="f-mono text-[10px] uppercase tracking-widest text-[#4A5D78]">
+                    <label className="f-mono text-[10px] font-bold tracking-widest text-slate-500 uppercase">
                       Billing Address
                     </label>
                     <input
                       {...register("address")}
-                      className="f-mono w-full rounded-sm border border-[#1E2D42] bg-[#111820] px-3 py-2.5 text-[13px] text-[#E8EDF5] transition-colors placeholder:text-[#4A5D78] focus:border-[#00E5FF]/50 outline-none"
+                      className="f-mono border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2.5 text-[13px] transition-colors outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500"
                       placeholder="123 Tech Lane"
                     />
                     {errors.address && (
-                      <span className="text-[10px] text-[#EF4444]">
+                      <span className="text-destructive text-[10px] font-medium">
                         {errors.address.message}
                       </span>
                     )}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="f-mono text-[10px] uppercase tracking-widest text-[#4A5D78]">
+                      <label className="f-mono text-[10px] font-bold tracking-widest text-slate-500 uppercase">
                         City
                       </label>
                       <input
                         {...register("city")}
-                        className="f-mono w-full rounded-sm border border-[#1E2D42] bg-[#111820] px-3 py-2.5 text-[13px] text-[#E8EDF5] transition-colors placeholder:text-[#4A5D78] focus:border-[#00E5FF]/50 outline-none"
+                        className="f-mono border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2.5 text-[13px] transition-colors outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500"
                         placeholder="Mumbai"
                       />
                       {errors.city && (
-                        <span className="text-[10px] text-[#EF4444]">
+                        <span className="text-destructive text-[10px] font-medium">
                           {errors.city.message}
                         </span>
                       )}
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="f-mono text-[10px] uppercase tracking-widest text-[#4A5D78]">
+                      <label className="f-mono text-[10px] font-bold tracking-widest text-slate-500 uppercase">
                         State / Province
                       </label>
                       <input
                         {...register("state")}
-                        className="f-mono w-full rounded-sm border border-[#1E2D42] bg-[#111820] px-3 py-2.5 text-[13px] text-[#E8EDF5] transition-colors placeholder:text-[#4A5D78] focus:border-[#00E5FF]/50 outline-none"
+                        className="f-mono border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2.5 text-[13px] transition-colors outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500"
                         placeholder="Maharashtra"
                       />
                       {errors.state && (
-                        <span className="text-[10px] text-[#EF4444]">
+                        <span className="text-destructive text-[10px] font-medium">
                           {errors.state.message}
                         </span>
                       )}
@@ -268,25 +316,25 @@ export function CheckoutClient() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="f-mono text-[10px] uppercase tracking-widest text-[#4A5D78]">
+                      <label className="f-mono text-[10px] font-bold tracking-widest text-slate-500 uppercase">
                         Pincode / ZIP
                       </label>
                       <input
                         {...register("pincode")}
-                        className="f-mono w-full rounded-sm border border-[#1E2D42] bg-[#111820] px-3 py-2.5 text-[13px] text-[#E8EDF5] transition-colors placeholder:text-[#4A5D78] focus:border-[#00E5FF]/50 outline-none"
+                        className="f-mono border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2.5 text-[13px] transition-colors outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500"
                         placeholder="400001"
                       />
                       {errors.pincode && (
-                        <span className="text-[10px] text-[#EF4444]">
+                        <span className="text-destructive text-[10px] font-medium">
                           {errors.pincode.message}
                         </span>
                       )}
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="f-mono text-[10px] uppercase tracking-widest text-[#4A5D78]">
+                      <label className="f-mono text-[10px] font-bold tracking-widest text-slate-500 uppercase">
                         Country
                       </label>
-                      <select className="f-mono w-full rounded-sm border border-[#1E2D42] bg-[#111820] px-3 py-2.5 text-[13px] text-[#E8EDF5] transition-colors focus:border-[#00E5FF]/50 outline-none">
+                      <select className="f-mono border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2.5 text-[13px] transition-colors outline-none focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500">
                         <option>India</option>
                       </select>
                     </div>
@@ -296,14 +344,14 @@ export function CheckoutClient() {
                     <button
                       type="button"
                       onClick={() => router.push("/cart")}
-                      className="f-mono text-[12px] text-[#8A9BB5] hover:text-[#E8EDF5]"
+                      className="f-mono text-muted-foreground hover:text-foreground text-[12px] font-bold"
                     >
                       ← Back
                     </button>
                     {step === 2 && (
                       <button
                         type="submit"
-                        className="f-syne font-semibold text-[#00E5FF] hover:text-[#00E5FF]/80"
+                        className="f-syne rounded-full bg-indigo-50 px-6 py-2.5 font-bold text-indigo-600 transition-colors hover:bg-indigo-100"
                       >
                         Continue to Payment →
                       </button>
@@ -315,43 +363,75 @@ export function CheckoutClient() {
 
             {/* Step 3 — Payment */}
             <div
-              className={`rounded-xl border border-[#1E2D42] bg-[#111820] p-6 ${
+              className={`border-border rounded-2xl border bg-white p-6 shadow-sm transition-opacity ${
                 step === 3
-                  ? "border-l-2 border-l-[#00E5FF]"
-                  : "pointer-events-none opacity-40"
+                  ? "border-l-4 border-l-indigo-500"
+                  : "pointer-events-none opacity-50"
               }`}
             >
-              <span className="f-mono text-[12px] text-[#4A5D78]">Step 03</span>
-              <h3 className="f-syne mb-6 text-[22px] font-bold text-[#E8EDF5]">
-                Payment
-              </h3>
+              <span className="f-mono text-muted-foreground text-[12px] font-medium">
+                Step 03
+              </span>
+              <div className="mb-6 flex items-center justify-between gap-3">
+                <h3 className="f-syne text-foreground text-[22px] font-bold">
+                  Payment
+                </h3>
+                <button
+                  type="button"
+                  onClick={handleAutofillPayment}
+                  className="f-mono rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-[10px] font-bold tracking-wider text-indigo-700 uppercase transition-colors hover:bg-indigo-100"
+                >
+                  Use demo card
+                </button>
+              </div>
               {step === 3 && (
                 <div className="space-y-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="f-mono text-[10px] uppercase tracking-widest text-[#4A5D78]">
+                    <label className="f-mono text-[10px] font-bold tracking-widest text-slate-500 uppercase">
                       Card Number
                     </label>
                     <input
-                      className="f-mono w-full rounded-sm border border-[#1E2D42] bg-[#0D1117] px-3 py-2.5 text-[13px] text-[#E8EDF5] transition-colors placeholder:text-[#4A5D78] focus:border-[#00E5FF]/50 outline-none"
+                      value={paymentDetails.cardNumber}
+                      onChange={(event) =>
+                        setPaymentDetails((current) => ({
+                          ...current,
+                          cardNumber: event.target.value,
+                        }))
+                      }
+                      className="f-mono border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2.5 text-[13px] transition-colors outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500"
                       placeholder="4242 4242 4242 4242"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="f-mono text-[10px] uppercase tracking-widest text-[#4A5D78]">
+                      <label className="f-mono text-[10px] font-bold tracking-widest text-slate-500 uppercase">
                         Expiry
                       </label>
                       <input
-                        className="f-mono w-full rounded-sm border border-[#1E2D42] bg-[#0D1117] px-3 py-2.5 text-[13px] text-[#E8EDF5] transition-colors placeholder:text-[#4A5D78] focus:border-[#00E5FF]/50 outline-none"
+                        value={paymentDetails.expiry}
+                        onChange={(event) =>
+                          setPaymentDetails((current) => ({
+                            ...current,
+                            expiry: event.target.value,
+                          }))
+                        }
+                        className="f-mono border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2.5 text-[13px] transition-colors outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500"
                         placeholder="MM/YY"
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="f-mono text-[10px] uppercase tracking-widest text-[#4A5D78]">
+                      <label className="f-mono text-[10px] font-bold tracking-widest text-slate-500 uppercase">
                         CVV
                       </label>
                       <input
-                        className="f-mono w-full rounded-sm border border-[#1E2D42] bg-[#0D1117] px-3 py-2.5 text-[13px] text-[#E8EDF5] transition-colors placeholder:text-[#4A5D78] focus:border-[#00E5FF]/50 outline-none"
+                        value={paymentDetails.cvv}
+                        onChange={(event) =>
+                          setPaymentDetails((current) => ({
+                            ...current,
+                            cvv: event.target.value,
+                          }))
+                        }
+                        className="f-mono border-border text-foreground w-full rounded-lg border bg-slate-50 px-3 py-2.5 text-[13px] transition-colors outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500"
                         placeholder="•••"
                         type="password"
                       />
@@ -361,13 +441,13 @@ export function CheckoutClient() {
                     <button
                       type="button"
                       onClick={() => setStep(2)}
-                      className="f-mono text-[12px] text-[#8A9BB5] hover:text-[#E8EDF5]"
+                      className="f-mono text-muted-foreground hover:text-foreground text-[12px] font-bold"
                     >
                       ← Back
                     </button>
                     <button
                       onClick={handleSubmit(onSubmit)}
-                      className="f-syne rounded-full bg-[#00E5FF] px-6 py-2.5 font-bold text-[#080B10] transition-all hover:opacity-90 active:scale-[0.98]"
+                      className="f-syne rounded-full bg-indigo-600 px-6 py-2.5 font-bold text-white shadow-md transition-all hover:bg-indigo-700 active:scale-[0.98]"
                     >
                       Confirm Payment →
                     </button>
@@ -379,45 +459,47 @@ export function CheckoutClient() {
 
           {/* Right: Order Summary */}
           <div className="lg:col-span-2">
-            <div className="sticky top-24 rounded-xl border border-[#1E2D42] bg-[#111820] p-6">
-              <h2 className="f-syne mb-6 text-lg font-bold text-[#E8EDF5]">
+            <div className="border-border sticky top-24 rounded-2xl border bg-white p-6 shadow-sm">
+              <h2 className="f-syne text-foreground mb-6 text-lg font-bold">
                 Order Summary
               </h2>
               <div className="f-mono space-y-3 text-[12px]">
                 {items.map((item) => (
                   <div key={item.id} className="flex justify-between">
                     <div>
-                      <span className="text-[#E8EDF5]">{item.name}</span>
-                      <span className="ml-1 text-[10px] text-[#4A5D78]">
+                      <span className="text-foreground font-medium">
+                        {item.name}
+                      </span>
+                      <span className="text-muted-foreground ml-1 text-[10px]">
                         {item.plan}
                       </span>
                     </div>
-                    <span className="text-[#E8EDF5]">
+                    <span className="text-foreground font-bold">
                       ₹{(item.price * item.quantity).toLocaleString()}
                     </span>
                   </div>
                 ))}
                 {discount && (
-                  <div className="flex justify-between text-[#00E5FF]">
+                  <div className="flex justify-between font-bold text-indigo-600">
                     <span>Discount {discount.code}</span>
                     <span>-₹{discountAmount.toLocaleString()}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-[#8A9BB5]">
+                <div className="text-muted-foreground flex justify-between">
                   <span>GST (18%)</span>
                   <span>₹{tax.toLocaleString()}</span>
                 </div>
               </div>
-              <div className="mt-6 border-t border-[#1E2D42] pt-6">
-                <p className="f-mono mb-1 text-[11px] uppercase tracking-widest text-[#4A5D78]">
+              <div className="border-border mt-6 border-t pt-6">
+                <p className="f-mono mb-1 text-[11px] font-bold tracking-widest text-slate-500 uppercase">
                   Monthly Total
                 </p>
-                <p className="f-syne text-[36px] font-extrabold text-[#00E5FF]">
+                <p className="f-syne text-[36px] font-extrabold tracking-tight text-indigo-600">
                   ₹{total.toLocaleString()}
                 </p>
               </div>
-              <div className="mt-4 rounded-lg border border-[#1E2D42] bg-[#0D1117] p-3">
-                <p className="f-mono text-[10px] text-[#4A5D78]">
+              <div className="mt-4 rounded-lg border border-indigo-100 bg-indigo-50 p-3">
+                <p className="f-mono text-[10px] font-medium text-indigo-700">
                   Auto-renewal enabled. Cancel anytime before the next billing
                   cycle.
                 </p>
@@ -427,5 +509,5 @@ export function CheckoutClient() {
         </div>
       </div>
     </div>
-  );
+  )
 }

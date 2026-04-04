@@ -1,0 +1,185 @@
+Subscription Management System
+The Subscription Management System is a centralized web application that helps
+organizations manage subscription-based products, recurring billing plans,
+customers, quotations, invoices, taxes, discounts, payments, and reports.
+It streamlines the complete subscription lifecycle from product configuration to
+payment collection and reporting, and is suitable for SaaS and other recurring
+revenue businesses.
+● Provide a single platform to manage subscriptions and billing
+● Support recurring pricing and flexible plans
+● Automate invoicing and payment tracking
+● Manage taxes and discounts
+● Improve operational efficiency and accuracy
+● Admin: Full system control and configuration
+● Internal User: Limited operational access
+● Portal/User: Customer/subscriber access
+Rule: Only Admin can create Internal Users.
+1. Overview
+2. Objectives
+3. User Roles
+● Authentication (Login, Signup, Reset Password)
+● Dashboard & Navigation
+● Products Management
+● Recurring Plans
+● Subscriptions
+● Quotation Templates
+● Invoices
+● Payments
+● Discount Management
+● Tax Management
+● Users/Contacts
+● Reports
+5.1 Login
+● Email + password based authentication
+5.2 Signup
+● New user registration
+● Validations for:
+○ Unique email
+○ Strong password
+5.3 Reset Password
+● Email verification
+● Reset link sent to registered email
+4. System Modules
+5. Authentication Module
+5.4 Validation Rules
+● Email must be unique
+● Password must be:
+○ Length > 8
+○ Contains uppercase
+○ Contains lowercase
+○ Contains special character
+Admins can create, update, delete, and view products.
+Product Fields
+● Product Name
+● Product Type
+● Sales Price
+● Cost Price
+Notes
+● Each product supports recurring pricing
+● Products can have variants
+Recurring plans define billing rules for subscription products.
+Plan Fields
+● Plan Name
+6. Product Management
+7. Recurring Plan Management
+● Price
+● Billing Period: Daily / Weekly / Monthly / Yearly
+● Minimum Quantity
+● Start Date
+● End Date
+Plan Options
+● Auto-close
+● Closable
+● Pausable
+● Renewable
+Variants support attribute-based pricing customization.
+Variant Fields
+● Attribute
+● Value
+● Extra Price
+Example
+● Brand
+● Odoo
+● 560
+Create and manage subscriptions.
+8. Product Variants
+9. Subscription Management
+Subscription Fields
+● Subscription Number
+● Customer
+● Plan
+● Start Date
+● Expiration Date
+● Payment Terms
+Order Lines (Per Subscription)
+● Product
+● Quantity
+● Unit Price
+● Taxes
+● Amount
+Status Flow
+Draft → Quotation → Confirmed → Active → Closed
+Predefined templates used during subscription creation to speed up setups.
+Template Fields
+● Template Name
+● Validity Days
+● Recurring Plan
+● Product Lines
+10. Quotation Templates
+Invoices are generated automatically from subscriptions.
+Includes
+● Customer details
+● Product lines
+● Taxes
+● Totals
+Actions
+● Confirm
+● Cancel
+● Send
+● Print
+Invoice Status Flow
+Draft → Confirmed → Paid
+Payments record invoice settlement.
+Payment Fields
+● Payment Method
+● Amount
+● Payment Date
+Notes
+12. Payment Management
+11. Invoice Management
+● Tracks paid and outstanding invoices
+Create discount rules for products/subscriptions.
+Rule: Discounts can be created only by Admin.
+Discount Fields
+● Discount Name
+● Type: Fixed / Percentage
+● Minimum Purchase
+● Minimum Quantity
+● Start Date
+● End Date
+● Limit Usage
+Applies To
+● Products
+● Subscriptions
+Tax rules applied on invoice lines.
+Features
+● Configurable tax percentages and types
+● Auto-calculated during invoice generation
+13. Discount Management
+14. Tax Management
+Provides analytics such as:
+● Active subscriptions
+● Revenue
+● Payments
+● Overdue invoices
+Supports filtering and summary views.
+● User authentication and role-based access
+● Product and pricing configuration
+● Recurring billing automation
+● Subscription lifecycle management
+● Invoice generation
+● Tax and discount application
+● Payment tracking
+● Reporting and dashboards
+● Performance: Response time < 2 seconds
+● Scalability: Supports thousands of subscriptions
+● Security: Role-based permissions and secure authentication
+● Usability: Simple and intuitive UI
+● Reliability: High availability
+15. Reporting Module
+16. Functional Requirements
+17. Non-Functional Requirements
+The Subscription Management System provides a complete solution for
+subscription-based businesses. It automates billing, improves operational
+efficiency, and ensures accurate financial tracking.
+Why This Hackathon Problem is Important
+Real-world ERP workflow: Demonstrates how a complete subscription business
+works end-to-end — from product configuration to subscription creation, billing,
+payments, renewals, and reporting.
+Business logic focus (not just UI): Emphasizes solving operational problems like
+lifecycle handling, recurring billing automation, upgrades, cancellations, taxes, and
+discounts.
+Industry-ready system thinking: Encourages building production-like, modular
+systems with real-time coordination between multiple modules.
+Mockup: https://app.excalidraw.com/l/65VNwvy7c4X/8hI7WFOAKhj
+18. Conclusion

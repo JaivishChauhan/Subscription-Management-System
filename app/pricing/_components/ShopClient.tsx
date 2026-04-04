@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useCartStore } from "@/store/cart";
 import { toast } from "sonner";
+import { IconRocket } from "@tabler/icons-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface Product {
   id: string;
@@ -38,47 +40,53 @@ export function ShopClient({ products, categories }: ShopClientProps) {
   };
 
   return (
-    <div className="grid-bg min-h-screen">
+    <div className="min-h-screen bg-background">
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b border-[#1E2D42]/40 bg-[#0D1117]/80 px-6 backdrop-blur-md">
+      <nav className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b border-border bg-background/80 px-6 backdrop-blur-md">
         <div className="flex items-center gap-8">
-          <span className="f-syne text-[22px] font-bold text-[#E8EDF5]">
-            SubMS
-          </span>
+          <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#7C3AED] to-[#6D28D9] shadow-md">
+              <IconRocket className="h-4 w-4 text-white" stroke={2} />
+            </div>
+            <span className="f-syne text-[20px] font-bold text-foreground">
+              SubsMS
+            </span>
+          </Link>
           <div className="hidden gap-6 md:flex">
-            <span className="f-mono cursor-pointer text-sm font-bold text-[#00E5FF]">
+            <span className="f-mono cursor-pointer text-sm font-bold text-indigo-600">
               Store
             </span>
-            <span className="f-mono cursor-pointer text-sm text-[#8A9BB5] transition-opacity hover:text-[#00E5FF]">
+            <span className="f-mono cursor-pointer text-sm text-muted-foreground transition-opacity hover:text-indigo-600">
               Plans
             </span>
-            <span className="f-mono cursor-pointer text-sm text-[#8A9BB5] transition-opacity hover:text-[#00E5FF]">
+            <span className="f-mono cursor-pointer text-sm text-muted-foreground transition-opacity hover:text-indigo-600">
               Help
             </span>
           </div>
         </div>
         <div className="flex items-center gap-4">
           <div className="relative hidden lg:block">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#8A9BB5]">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
               search
             </span>
             <input
-              className="f-mono w-64 rounded-full border-none bg-[#111820] py-1.5 pl-10 pr-4 text-xs text-[#E8EDF5] outline-none focus:ring-1 focus:ring-[#00E5FF]"
+              className="f-mono w-64 rounded-full border border-border bg-muted py-1.5 pl-10 pr-4 text-xs text-foreground outline-none focus:ring-1 focus:ring-indigo-500 transition-shadow focus:bg-card"
               placeholder="Search products..."
               type="text"
             />
           </div>
           <div className="flex items-center gap-3">
-            <button className="text-[#8A9BB5] transition-colors hover:text-[#00E5FF]">
+            <ThemeToggle />
+            <button type="button" className="text-muted-foreground transition-colors hover:text-indigo-600">
               <span className="material-symbols-outlined">notifications</span>
             </button>
             <Link
               href="/cart"
-              className="text-[#8A9BB5] transition-colors hover:text-[#00E5FF]"
+              className="text-muted-foreground transition-colors hover:text-indigo-600"
             >
               <span className="material-symbols-outlined">shopping_cart</span>
             </Link>
-            <button className="f-syne rounded-full bg-[#00E5FF] px-5 py-1.5 text-xs font-bold uppercase tracking-wider text-[#080B10]">
+            <button type="button" className="f-syne rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition-transform hover:scale-105 active:scale-95">
               Upgrade
             </button>
           </div>
@@ -86,24 +94,24 @@ export function ShopClient({ products, categories }: ShopClientProps) {
       </nav>
 
       {/* Hero */}
-      <section className="anim-up relative overflow-hidden px-6 pb-20 pt-24">
-        <div className="absolute left-0 top-0 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#00E5FF] opacity-10 blur-[140px]"></div>
-        <div className="absolute bottom-0 right-0 h-[600px] w-[600px] translate-x-1/4 translate-y-1/4 rounded-full bg-[#7C3AED] opacity-10 blur-[160px]"></div>
-        <div className="relative z-10 mx-auto max-w-7xl text-center">
-          <h1 className="f-syne mb-6 text-[52px] font-extrabold leading-[1.1] tracking-tight text-[#E8EDF5]">
+      <section className="anim-up relative overflow-hidden px-6 pb-20 pt-24 text-center">
+        <div className="absolute left-0 top-0 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-200 opacity-30 blur-[140px]"></div>
+        <div className="absolute bottom-0 right-0 h-[600px] w-[600px] translate-x-1/4 translate-y-1/4 rounded-full bg-violet-200 opacity-30 blur-[160px]"></div>
+        <div className="relative z-10 mx-auto max-w-7xl">
+          <h1 className="f-syne mb-6 text-[52px] font-extrabold leading-[1.1] tracking-tight text-foreground">
             Choose your perfect
             <br />
             subscription plan
           </h1>
-          <p className="f-mono mx-auto mb-10 max-w-lg text-[13px] text-[#8A9BB5]">
+          <p className="f-mono mx-auto mb-10 max-w-lg text-[13px] text-muted-foreground">
             Scale your infrastructure with surgical precision using our
             architectural tiers designed for high-velocity engineering teams.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <button className="f-syne rounded-full bg-[#00E5FF] px-8 py-3 font-bold text-[#080B10] transition-transform active:scale-95">
+            <button className="f-syne rounded-full bg-indigo-600 px-8 py-3 font-bold text-white shadow-md transition-transform hover:-translate-y-0.5 active:scale-95">
               Explore Plans →
             </button>
-            <button className="f-syne rounded-full border border-[#A78BFA] px-8 py-3 font-bold text-[#A78BFA] transition-colors hover:bg-[#A78BFA]/10">
+            <button className="f-syne rounded-full border border-indigo-200 bg-white px-8 py-3 font-bold text-indigo-600 shadow-sm transition-colors hover:bg-slate-50">
               Talk to AI Assistant
             </button>
           </div>
@@ -111,16 +119,17 @@ export function ShopClient({ products, categories }: ShopClientProps) {
       </section>
 
       {/* Filters */}
-      <section className="mx-auto mb-12 max-w-7xl px-6">
-        <div className="flex items-center gap-3 overflow-x-auto pb-4">
+      <section className="mx-auto mb-12 max-w-7xl px-6 relative z-10">
+        <div className="flex items-center justify-center gap-3 overflow-x-auto pb-4">
           {categories.map((c) => (
             <button
+              type="button"
               key={c}
               onClick={() => setFilter(c)}
               className={`f-mono whitespace-nowrap rounded-full px-5 py-2 text-xs font-bold transition-colors ${
                 filter === c
-                  ? "bg-[#00E5FF] text-[#080B10]"
-                  : "border border-[#1E2D42]/40 bg-[#111820] text-[#8A9BB5] hover:border-[#00E5FF]/50"
+                  ? "bg-foreground text-background shadow-sm"
+                  : "border border-border bg-card text-muted-foreground hover:border-border/80 hover:text-foreground shadow-sm"
               }`}
             >
               {c}
@@ -130,49 +139,51 @@ export function ShopClient({ products, categories }: ShopClientProps) {
       </section>
 
       {/* Products */}
-      <section className="mx-auto max-w-7xl px-6 pb-24">
+      <section className="mx-auto max-w-7xl px-6 pb-24 relative z-10">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {products.map((p) => (
             <div
               key={p.id}
-              className={`group relative overflow-hidden rounded-lg bg-[#111820] transition-transform duration-300 hover:translate-y-[-4px] ${
+              className={`group relative overflow-hidden rounded-2xl bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
                 p.featured
-                  ? "border-2 border-[#00E5FF]"
-                  : "border border-[#1E2D42]/40 hover:border-[#00E5FF]/50"
+                  ? "border-2 border-indigo-500 shadow-indigo-500/10"
+                  : "border border-border hover:border-indigo-300"
               }`}
             >
               {p.featured && (
                 <div className="absolute right-4 top-4 z-20">
-                  <span className="f-syne rounded-full bg-[#00E5FF] px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-[#080B10]">
+                  <span className="f-syne rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-white shadow-sm">
                     Most Popular
                   </span>
                 </div>
               )}
-              <div className="relative h-48 overflow-hidden bg-gradient-to-b from-[#1A2535] to-[#111820]">
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111820] via-transparent to-transparent"></div>
+              <div className={`relative h-32 overflow-hidden ${p.featured ? 'bg-indigo-500/10' : 'bg-muted/40'}`}>
+                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-card"></div>
               </div>
-              <div className="p-8">
-                <h3 className="f-syne mb-2 text-[18px] font-bold text-[#E8EDF5]">
+              <div className="p-8 pt-4">
+                <h3 className="f-syne mb-2 text-[18px] font-bold text-foreground">
                   {p.name}
                 </h3>
                 {p.featured && (
-                  <div className="mb-6 flex w-fit items-center gap-3 rounded-full border border-[#1E2D42]/40 bg-[#080B10] p-1">
+                  <div className="mb-6 flex w-fit items-center gap-3 rounded-full border border-border bg-muted p-1">
                     <button
+                      type="button"
                       onClick={() => setBilling({ ...billing, [p.id]: false })}
-                      className={`f-mono rounded-full px-3 py-1 text-[10px] font-bold ${
+                      className={`f-mono rounded-full px-3 py-1 text-[10px] font-bold transition-colors ${
                         !billing[p.id]
-                          ? "bg-[#1A2535] text-[#00E5FF]"
-                          : "text-[#8A9BB5]"
+                          ? "bg-card text-indigo-600 shadow-sm border border-border"
+                          : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       Monthly
                     </button>
                     <button
+                      type="button"
                       onClick={() => setBilling({ ...billing, [p.id]: true })}
-                      className={`f-mono rounded-full px-3 py-1 text-[10px] font-bold ${
+                      className={`f-mono rounded-full px-3 py-1 text-[10px] font-bold transition-colors ${
                         billing[p.id]
-                          ? "bg-[#1A2535] text-[#00E5FF]"
-                          : "text-[#8A9BB5]"
+                          ? "bg-card text-indigo-600 shadow-sm border border-border"
+                          : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       Yearly
@@ -181,30 +192,30 @@ export function ShopClient({ products, categories }: ShopClientProps) {
                 )}
                 <div className="mb-6">
                   <span
-                    className="f-syne text-[28px] font-extrabold"
-                    style={{ color: p.featured ? "#00E5FF" : "#E8EDF5" }}
+                    className="f-syne text-[36px] font-extrabold tracking-tight"
+                    style={{ color: p.featured ? "#4F46E5" : "#111827" }}
                   >
                     ₹
                     {(billing[p.id] ? p.yearlyPrice : p.price).toLocaleString()}
                   </span>
-                  <span className="f-mono text-xs text-[#8A9BB5]">
+                  <span className="f-mono text-xs text-muted-foreground">
                     {" "}
                     / month
                   </span>
                 </div>
                 <ul className="mb-8 space-y-4">
                   {p.features.map((f, i) => (
-                    <li key={i} className="flex items-center gap-3">
+                    <li key={i} className="flex items-start gap-3">
                       <span
-                        className={`material-symbols-outlined text-lg ${
-                          p.featured ? "text-[#00E5FF]" : "text-[#8A9BB5]"
+                        className={`material-symbols-outlined text-lg translate-y-[2px] ${
+                          p.featured ? "text-indigo-500" : "text-slate-400"
                         }`}
                       >
                         check_circle
                       </span>
                       <span
-                        className={`f-mono text-xs ${
-                          p.featured ? "text-[#E8EDF5]" : "text-[#8A9BB5]"
+                        className={`f-mono text-[13px] ${
+                          p.featured ? "text-slate-700 font-medium" : "text-muted-foreground"
                         }`}
                       >
                         {f}
@@ -213,11 +224,12 @@ export function ShopClient({ products, categories }: ShopClientProps) {
                   ))}
                 </ul>
                 <button
+                  type="button"
                   onClick={() => handleAdd(p)}
-                  className={`f-syne w-full rounded-full py-3 font-bold transition-opacity ${
+                  className={`f-syne w-full rounded-full py-3 font-bold transition-all ${
                     p.featured
-                      ? "bg-[#00E5FF] text-[#080B10] hover:opacity-90"
-                      : "border border-[#00E5FF] text-[#00E5FF] hover:bg-[#00E5FF]/10"
+                      ? "bg-indigo-600 text-white shadow-md hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-500/20"
+                      : "border-2 border-border text-foreground hover:border-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/5"
                   }`}
                 >
                   Add to Cart
@@ -232,15 +244,11 @@ export function ShopClient({ products, categories }: ShopClientProps) {
       <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-4">
         {chatOpen && (
           <div
-            className="flex h-96 w-80 flex-col overflow-hidden rounded-xl border border-[#1E2D42]/60 shadow-2xl"
-            style={{
-              background: "rgba(26,37,53,0.6)",
-              backdropFilter: "blur(12px)",
-            }}
+            className="flex h-96 w-80 flex-col overflow-hidden rounded-xl border border-border shadow-2xl bg-card/95 backdrop-blur-xl"
           >
-            <div className="flex items-center justify-between bg-[#7C3AED] p-4">
+            <div className="flex items-center justify-between bg-gradient-to-r from-indigo-600 to-violet-600 p-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 shadow-inner">
                   <span
                     className="material-symbols-outlined text-sm text-white"
                     style={{ fontVariationSettings: "'FILL' 1" }}
@@ -252,42 +260,43 @@ export function ShopClient({ products, categories }: ShopClientProps) {
                   <p className="f-syne text-xs font-bold leading-none text-white">
                     AI Assistant
                   </p>
-                  <p className="f-mono text-[10px] text-white/70">
-                    Online & ready
+                  <p className="f-mono mt-1 text-[10px] text-indigo-100">
+                    Online &amp; ready
                   </p>
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => setChatOpen(false)}
-                className="text-white/60 hover:text-white"
+                className="text-indigo-100 hover:text-white"
               >
                 <span className="material-symbols-outlined text-sm">close</span>
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/30">
               <div className="flex flex-col gap-1">
-                <div className="rounded-lg rounded-tl-none border border-[#1E2D42]/40 bg-[#1A2535] p-3">
-                  <p className="f-mono text-[11px] text-[#E8EDF5]">
-                    Hello! I've analyzed your usage. I recommend the{" "}
-                    <span className="font-bold text-[#00E5FF]">
+                <div className="rounded-xl rounded-tl-none border border-indigo-500/20 bg-indigo-500/10 p-3 shadow-sm">
+                  <p className="f-mono text-[11px] text-foreground">
+                    Hello! I&apos;ve analyzed your usage. I recommend the{" "}
+                    <span className="font-bold text-indigo-600 dark:text-indigo-400">
                       Cloud Storage Pro
                     </span>{" "}
                     plan for 99.9% uptime during peak loads.
                   </p>
                 </div>
-                <span className="f-mono ml-1 text-[9px] text-[#8A9BB5]">
+                <span className="f-mono ml-1 text-[9px] text-muted-foreground">
                   10:42 AM
                 </span>
               </div>
             </div>
-            <div className="border-t border-[#1E2D42]/40 bg-[#0D1117]/50 p-4">
+            <div className="border-t border-border bg-card p-4">
               <div className="relative">
                 <input
-                  className="f-mono w-full rounded-lg border-none bg-[#111820] py-2.5 pl-3 pr-10 text-xs text-[#E8EDF5] outline-none focus:ring-1 focus:ring-[#7C3AED]"
+                  className="f-mono w-full rounded-lg border border-border bg-muted py-2.5 pl-3 pr-10 text-xs text-foreground outline-none focus:ring-1 focus:ring-indigo-600 focus:bg-card transition-colors"
                   placeholder="Type your question..."
                   type="text"
                 />
-                <button className="absolute right-2 top-1/2 -translate-y-1/2 text-[#7C3AED]">
+                <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-indigo-600 hover:text-indigo-700">
                   <span className="material-symbols-outlined">send</span>
                 </button>
               </div>
@@ -296,7 +305,7 @@ export function ShopClient({ products, categories }: ShopClientProps) {
         )}
         <button
           onClick={() => setChatOpen(!chatOpen)}
-          className="group flex h-14 w-14 items-center justify-center rounded-full bg-[#7C3AED] shadow-[0_0_20px_rgba(124,58,237,0.4)] transition-transform hover:scale-110 active:scale-95"
+          className="group flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 shadow-lg shadow-indigo-200 transition-transform hover:scale-110 active:scale-95"
         >
           <span
             className="material-symbols-outlined text-3xl text-white transition-transform group-hover:rotate-12"
@@ -308,19 +317,19 @@ export function ShopClient({ products, categories }: ShopClientProps) {
       </div>
 
       {/* Footer */}
-      <footer className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 border-t border-[#1E2D42]/40 px-6 py-12 opacity-60 md:flex-row">
+      <footer className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 border-t border-border px-6 py-12 md:flex-row relative z-10">
         <div className="flex items-center gap-4">
-          <span className="f-mono text-[10px] text-[#8A9BB5]">
+          <span className="f-mono text-[10px] text-muted-foreground font-medium">
             SYSTEM STATUS
           </span>
-          <div className="flex items-center gap-2">
-            <span className="dot-live h-2 w-2 rounded-full bg-[#10B981]"></span>
-            <span className="f-mono text-[10px] text-[#10B981]">
+          <div className="flex items-center gap-2 rounded-full bg-emerald-500/10 px-2 py-1 border border-emerald-500/20">
+            <span className="dot-live h-2 w-2 rounded-full bg-emerald-500"></span>
+            <span className="f-mono text-[10px] font-bold text-emerald-500">
               OPERATIONAL
             </span>
           </div>
         </div>
-        <p className="f-mono text-[10px] text-[#8A9BB5]">
+        <p className="f-mono text-[10px] text-muted-foreground font-medium">
           © {new Date().getFullYear()} SUBSCRIPTION MANAGEMENT SYSTEM. BUILT FOR SCALE.
         </p>
       </footer>

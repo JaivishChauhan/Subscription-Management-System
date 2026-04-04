@@ -1,197 +1,732 @@
-import "dotenv/config";
-import bcrypt from "bcryptjs";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/db";
+import * as dotenv from "dotenv";
 
-/**
- * Database seed script.
- * Creates the default admin user and sample data for development.
- *
- * Run with: npx tsx prisma/seed.ts
- */
+dotenv.config();
 
-const prisma = new PrismaClient();
+// ============================================================================
+// 50 MAJOR REAL-WORLD SERVICES — 10 categories
+// ============================================================================
 
-async function seedAdminUser() {
-  const existingAdmin = await prisma.user.findUnique({
-    where: { email: "admin@subsms.local" },
-  });
+const SERVICES = [
+  // ── STREAMING (8) ──────────────────────────────────────────────────────────
+  {
+    name: "Netflix",
+    slug: "netflix",
+    category: "streaming",
+    color: "#E50914",
+    monthlyPrice: 649,
+    yearlyPrice: 6490,
+    logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg",
+    iconKey: null,
+    description: "Movies, TV shows & award-winning originals",
+  },
+  {
+    name: "Disney+",
+    slug: "disney-plus",
+    category: "streaming",
+    color: "#113CCF",
+    monthlyPrice: 299,
+    yearlyPrice: 2990,
+    logoUrl: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg",
+    iconKey: null,
+    description: "Disney, Marvel, Star Wars, Pixar & National Geographic",
+  },
+  {
+    name: "Amazon Prime Video",
+    slug: "prime-video",
+    category: "streaming",
+    color: "#00A8E0",
+    monthlyPrice: 299,
+    yearlyPrice: 1499,
+    logoUrl: null,
+    iconKey: "IconBrandAmazon",
+    description: "Movies, series & Amazon Originals",
+  },
+  {
+    name: "Apple TV+",
+    slug: "apple-tv",
+    category: "streaming",
+    color: "#555555",
+    monthlyPrice: 99,
+    yearlyPrice: 999,
+    logoUrl: null,
+    iconKey: "IconBrandApple",
+    description: "Apple originals & award-winning shows",
+  },
+  {
+    name: "Hotstar",
+    slug: "hotstar",
+    category: "streaming",
+    color: "#1F80E0",
+    monthlyPrice: 299,
+    yearlyPrice: 899,
+    logoUrl: null,
+    iconKey: "IconPlayerPlay",
+    description: "Sports, movies & Disney content",
+  },
+  {
+    name: "SonyLIV",
+    slug: "sony-liv",
+    category: "streaming",
+    color: "#003087",
+    monthlyPrice: 299,
+    yearlyPrice: 999,
+    logoUrl: null,
+    iconKey: "IconDeviceTv",
+    description: "Sports, entertainment & premium shows",
+  },
+  {
+    name: "ZEE5",
+    slug: "zee5",
+    category: "streaming",
+    color: "#6B2D90",
+    monthlyPrice: 99,
+    yearlyPrice: 999,
+    logoUrl: null,
+    iconKey: "IconDeviceTv",
+    description: "Indian content, movies & originals",
+  },
+  {
+    name: "YouTube Premium",
+    slug: "youtube-premium",
+    category: "streaming",
+    color: "#FF0000",
+    monthlyPrice: 139,
+    yearlyPrice: 1390,
+    logoUrl: "https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg",
+    iconKey: null,
+    description: "Ad-free YouTube + YouTube Music",
+  },
 
-  if (existingAdmin) {
-    console.log("✓ Admin user already exists — skipping.");
-    return;
-  }
+  // ── MUSIC (5) ──────────────────────────────────────────────────────────────
+  {
+    name: "Spotify",
+    slug: "spotify",
+    category: "music",
+    color: "#1DB954",
+    monthlyPrice: 119,
+    yearlyPrice: 1189,
+    logoUrl: "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg",
+    iconKey: null,
+    description: "Music, podcasts & audiobooks",
+  },
+  {
+    name: "Apple Music",
+    slug: "apple-music",
+    category: "music",
+    color: "#FC3C44",
+    monthlyPrice: 99,
+    yearlyPrice: 999,
+    logoUrl: null,
+    iconKey: "IconBrandApple",
+    description: "100M+ songs, radio & curated playlists",
+  },
+  {
+    name: "Amazon Music",
+    slug: "amazon-music",
+    category: "music",
+    color: "#00A8E0",
+    monthlyPrice: 99,
+    yearlyPrice: 899,
+    logoUrl: null,
+    iconKey: "IconMusic",
+    description: "Unlimited music streaming with HD audio",
+  },
+  {
+    name: "Gaana",
+    slug: "gaana",
+    category: "music",
+    color: "#E72429",
+    monthlyPrice: 39,
+    yearlyPrice: 399,
+    logoUrl: null,
+    iconKey: "IconMusic",
+    description: "India's largest music streaming platform",
+  },
+  {
+    name: "JioSaavn",
+    slug: "jio-saavn",
+    category: "music",
+    color: "#00A7E1",
+    monthlyPrice: 99,
+    yearlyPrice: 699,
+    logoUrl: null,
+    iconKey: "IconMusic",
+    description: "Indian & international music streaming",
+  },
 
-  const hashedPassword = await bcrypt.hash("Admin@1234!", 12);
+  // ── AI (7) ─────────────────────────────────────────────────────────────────
+  {
+    name: "ChatGPT Plus",
+    slug: "chatgpt-plus",
+    category: "ai",
+    color: "#10A37F",
+    monthlyPrice: 1650,
+    yearlyPrice: 16500,
+    logoUrl: null,
+    iconKey: "IconRobot",
+    description: "GPT-4o, DALL·E 3 & Advanced Voice Mode",
+  },
+  {
+    name: "Claude Pro",
+    slug: "claude-pro",
+    category: "ai",
+    color: "#D97757",
+    monthlyPrice: 1650,
+    yearlyPrice: 16500,
+    logoUrl: null,
+    iconKey: "IconRobot",
+    description: "Anthropic's most capable AI assistant",
+  },
+  {
+    name: "Gemini Advanced",
+    slug: "gemini-advanced",
+    category: "ai",
+    color: "#4285F4",
+    monthlyPrice: 1950,
+    yearlyPrice: 19500,
+    logoUrl: null,
+    iconKey: "IconStars",
+    description: "Google's most capable AI with 1M context",
+  },
+  {
+    name: "GitHub Copilot",
+    slug: "github-copilot",
+    category: "ai",
+    color: "#24292E",
+    monthlyPrice: 830,
+    yearlyPrice: 8300,
+    logoUrl: null,
+    iconKey: "IconBrandGithub",
+    description: "AI pair programmer for developers",
+  },
+  {
+    name: "Midjourney",
+    slug: "midjourney",
+    category: "ai",
+    color: "#000000",
+    monthlyPrice: 830,
+    yearlyPrice: 8300,
+    logoUrl: null,
+    iconKey: "IconPhoto",
+    description: "State-of-the-art AI image generation",
+  },
+  {
+    name: "Perplexity Pro",
+    slug: "perplexity-pro",
+    category: "ai",
+    color: "#20808D",
+    monthlyPrice: 1650,
+    yearlyPrice: 16500,
+    logoUrl: null,
+    iconKey: "IconSearch",
+    description: "AI-powered search & deep research",
+  },
+  {
+    name: "Notion AI",
+    slug: "notion-ai",
+    category: "ai",
+    color: "#000000",
+    monthlyPrice: 830,
+    yearlyPrice: 8300,
+    logoUrl: null,
+    iconKey: "IconBrandNotion",
+    description: "AI writing & productivity inside Notion",
+  },
 
-  const admin = await prisma.user.create({
-    data: {
-      name: "System Admin",
-      email: "admin@subsms.local",
-      password: hashedPassword,
-      role: "admin",
-    },
-  });
+  // ── PRODUCTIVITY (7) ───────────────────────────────────────────────────────
+  {
+    name: "Microsoft 365",
+    slug: "microsoft-365",
+    category: "productivity",
+    color: "#D83B01",
+    monthlyPrice: 499,
+    yearlyPrice: 4999,
+    logoUrl: null,
+    iconKey: "IconBrandWindows",
+    description: "Word, Excel, PowerPoint, Teams & 1TB OneDrive",
+  },
+  {
+    name: "Google Workspace",
+    slug: "google-workspace",
+    category: "productivity",
+    color: "#4285F4",
+    monthlyPrice: 730,
+    yearlyPrice: 7300,
+    logoUrl: null,
+    iconKey: "IconBrandGoogle",
+    description: "Gmail, Drive, Docs, Sheets, Slides & Meet",
+  },
+  {
+    name: "Notion",
+    slug: "notion",
+    category: "productivity",
+    color: "#000000",
+    monthlyPrice: 660,
+    yearlyPrice: 6600,
+    logoUrl: null,
+    iconKey: "IconBrandNotion",
+    description: "All-in-one workspace, notes & database",
+  },
+  {
+    name: "Slack Pro",
+    slug: "slack-pro",
+    category: "productivity",
+    color: "#4A154B",
+    monthlyPrice: 540,
+    yearlyPrice: 5400,
+    logoUrl: null,
+    iconKey: "IconBrandSlack",
+    description: "Team messaging & collaboration platform",
+  },
+  {
+    name: "Trello",
+    slug: "trello",
+    category: "productivity",
+    color: "#0052CC",
+    monthlyPrice: 415,
+    yearlyPrice: 4150,
+    logoUrl: null,
+    iconKey: "IconLayoutKanban",
+    description: "Visual boards for project management",
+  },
+  {
+    name: "Figma Professional",
+    slug: "figma-pro",
+    category: "productivity",
+    color: "#F24E1E",
+    monthlyPrice: 1245,
+    yearlyPrice: 12450,
+    logoUrl: null,
+    iconKey: "IconBrandFigma",
+    description: "Collaborative UI design & prototyping",
+  },
+  {
+    name: "Linear",
+    slug: "linear",
+    category: "productivity",
+    color: "#5E6AD2",
+    monthlyPrice: 830,
+    yearlyPrice: 8300,
+    logoUrl: null,
+    iconKey: "IconTimeline",
+    description: "Modern issue tracking & project management",
+  },
 
-  await prisma.contact.create({
-    data: {
-      userId: admin.id,
-      firstName: "System",
-      lastName: "Admin",
-    },
-  });
+  // ── CLOUD (5) ──────────────────────────────────────────────────────────────
+  {
+    name: "Dropbox Plus",
+    slug: "dropbox-plus",
+    category: "cloud",
+    color: "#0061FF",
+    monthlyPrice: 1245,
+    yearlyPrice: 12450,
+    logoUrl: null,
+    iconKey: "IconBrandDropbox",
+    description: "2TB cloud storage with Smart Sync",
+  },
+  {
+    name: "Google One 2TB",
+    slug: "google-one-2tb",
+    category: "cloud",
+    color: "#4285F4",
+    monthlyPrice: 650,
+    yearlyPrice: 6500,
+    logoUrl: null,
+    iconKey: "IconBrandGoogle",
+    description: "2TB Google storage + AI features & perks",
+  },
+  {
+    name: "iCloud+ 2TB",
+    slug: "icloud-2tb",
+    category: "cloud",
+    color: "#3693F3",
+    monthlyPrice: 219,
+    yearlyPrice: 2190,
+    logoUrl: null,
+    iconKey: "IconBrandApple",
+    description: "2TB iCloud storage + Private Relay & Hide My Email",
+  },
+  {
+    name: "OneDrive 1TB",
+    slug: "onedrive-1tb",
+    category: "cloud",
+    color: "#0078D4",
+    monthlyPrice: 140,
+    yearlyPrice: 1400,
+    logoUrl: null,
+    iconKey: "IconCloud",
+    description: "Microsoft cloud storage with Office integration",
+  },
+  {
+    name: "pCloud Premium",
+    slug: "pcloud-premium",
+    category: "cloud",
+    color: "#17A1FA",
+    monthlyPrice: 415,
+    yearlyPrice: 4150,
+    logoUrl: null,
+    iconKey: "IconCloud",
+    description: "Secure European cloud storage with TLS encryption",
+  },
 
-  console.log("✓ Admin user created: admin@subsms.local / Admin@1234!");
-}
+  // ── GAMING (5) ─────────────────────────────────────────────────────────────
+  {
+    name: "Xbox Game Pass",
+    slug: "xbox-game-pass",
+    category: "gaming",
+    color: "#107C10",
+    monthlyPrice: 699,
+    yearlyPrice: 6990,
+    logoUrl: null,
+    iconKey: "IconDeviceGamepad",
+    description: "100+ games on console, PC & cloud streaming",
+  },
+  {
+    name: "PlayStation Plus",
+    slug: "playstation-plus",
+    category: "gaming",
+    color: "#003087",
+    monthlyPrice: 499,
+    yearlyPrice: 2999,
+    logoUrl: null,
+    iconKey: "IconDeviceGamepad2",
+    description: "Online play, monthly free games & exclusive discounts",
+  },
+  {
+    name: "Nintendo Switch Online",
+    slug: "nintendo-online",
+    category: "gaming",
+    color: "#E60012",
+    monthlyPrice: 150,
+    yearlyPrice: 1499,
+    logoUrl: null,
+    iconKey: "IconDeviceGamepad",
+    description: "Online play + NES, SNES & N64 game library",
+  },
+  {
+    name: "EA Play Pro",
+    slug: "ea-play-pro",
+    category: "gaming",
+    color: "#FF4747",
+    monthlyPrice: 499,
+    yearlyPrice: 2499,
+    logoUrl: null,
+    iconKey: "IconTrophy",
+    description: "EA's full game catalog with early access",
+  },
+  {
+    name: "Ubisoft+",
+    slug: "ubisoft-plus",
+    category: "gaming",
+    color: "#0070D1",
+    monthlyPrice: 1245,
+    yearlyPrice: 12450,
+    logoUrl: null,
+    iconKey: "IconTrophy",
+    description: "100+ Ubisoft games including new releases",
+  },
 
-async function seedSampleTaxes() {
-  const existingTaxes = await prisma.tax.count();
-  if (existingTaxes > 0) {
-    console.log("✓ Taxes already seeded — skipping.");
-    return;
-  }
+  // ── CREATIVE (4) ───────────────────────────────────────────────────────────
+  {
+    name: "Adobe Creative Cloud",
+    slug: "adobe-cc",
+    category: "creative",
+    color: "#FF0000",
+    monthlyPrice: 4557,
+    yearlyPrice: null,
+    logoUrl: null,
+    iconKey: "IconBrush",
+    description: "Photoshop, Illustrator, Premiere & 20+ apps",
+  },
+  {
+    name: "Canva Pro",
+    slug: "canva-pro",
+    category: "creative",
+    color: "#00C4CC",
+    monthlyPrice: 499,
+    yearlyPrice: 3999,
+    logoUrl: null,
+    iconKey: "IconPalette",
+    description: "Premium design templates, brand kit & AI tools",
+  },
+  {
+    name: "Envato Elements",
+    slug: "envato-elements",
+    category: "creative",
+    color: "#81B441",
+    monthlyPrice: 1245,
+    yearlyPrice: 14940,
+    logoUrl: null,
+    iconKey: "IconPhoto",
+    description: "Unlimited creative assets, templates & fonts",
+  },
+  {
+    name: "Skillshare",
+    slug: "skillshare",
+    category: "creative",
+    color: "#00FF84",
+    monthlyPrice: 830,
+    yearlyPrice: 9960,
+    logoUrl: null,
+    iconKey: "IconSchool",
+    description: "Creative, design & business classes",
+  },
 
-  await prisma.tax.createMany({
-    data: [
-      { name: "GST 18%", type: "percentage", rate: 18 },
-      { name: "GST 12%", type: "percentage", rate: 12 },
-      { name: "GST 5%", type: "percentage", rate: 5 },
-      { name: "No Tax", type: "percentage", rate: 0 },
-    ],
-  });
+  // ── COMMUNICATION (3) ──────────────────────────────────────────────────────
+  {
+    name: "Zoom Pro",
+    slug: "zoom-pro",
+    category: "communication",
+    color: "#2D8CFF",
+    monthlyPrice: 1325,
+    yearlyPrice: 13250,
+    logoUrl: null,
+    iconKey: "IconVideo",
+    description: "Video meetings for up to 100 participants",
+  },
+  {
+    name: "Loom Business",
+    slug: "loom-business",
+    category: "communication",
+    color: "#625DF5",
+    monthlyPrice: 1245,
+    yearlyPrice: 12450,
+    logoUrl: null,
+    iconKey: "IconVideoPlus",
+    description: "Async video messaging for remote teams",
+  },
+  {
+    name: "Grammarly Premium",
+    slug: "grammarly-premium",
+    category: "communication",
+    color: "#15C39A",
+    monthlyPrice: 996,
+    yearlyPrice: 7776,
+    logoUrl: null,
+    iconKey: "IconPencilCheck",
+    description: "AI writing assistant & advanced grammar check",
+  },
 
-  console.log("✓ Sample taxes seeded.");
-}
+  // ── SECURITY (4) ───────────────────────────────────────────────────────────
+  {
+    name: "1Password",
+    slug: "1password",
+    category: "security",
+    color: "#1A8CFE",
+    monthlyPrice: 248,
+    yearlyPrice: 2480,
+    logoUrl: null,
+    iconKey: "IconLock",
+    description: "Password manager & secure digital vault",
+  },
+  {
+    name: "NordVPN",
+    slug: "nordvpn",
+    category: "security",
+    color: "#4687FF",
+    monthlyPrice: 830,
+    yearlyPrice: 2988,
+    logoUrl: null,
+    iconKey: "IconShield",
+    description: "Fast & secure VPN with 5400+ servers",
+  },
+  {
+    name: "Bitdefender Total Security",
+    slug: "bitdefender",
+    category: "security",
+    color: "#ED1C24",
+    monthlyPrice: 166,
+    yearlyPrice: 1995,
+    logoUrl: null,
+    iconKey: "IconShieldCheck",
+    description: "Advanced antivirus & cyber protection",
+  },
+  {
+    name: "Malwarebytes Premium",
+    slug: "malwarebytes",
+    category: "security",
+    color: "#2A6DBB",
+    monthlyPrice: 332,
+    yearlyPrice: 2490,
+    logoUrl: null,
+    iconKey: "IconBug",
+    description: "Real-time malware & ransomware protection",
+  },
 
-async function seedSamplePaymentTerms() {
-  const existingTerms = await prisma.paymentTerms.count();
-  if (existingTerms > 0) {
-    console.log("✓ Payment terms already seeded — skipping.");
-    return;
-  }
+  // ── FITNESS (2) ────────────────────────────────────────────────────────────
+  {
+    name: "Headspace",
+    slug: "headspace",
+    category: "fitness",
+    color: "#F47D31",
+    monthlyPrice: 499,
+    yearlyPrice: 2999,
+    logoUrl: null,
+    iconKey: "IconBrain",
+    description: "Guided meditation & mindfulness exercises",
+  },
+  {
+    name: "Cult.fit Pro",
+    slug: "cult-fit-pro",
+    category: "fitness",
+    color: "#FF6B00",
+    monthlyPrice: 999,
+    yearlyPrice: 8999,
+    logoUrl: null,
+    iconKey: "IconRun",
+    description: "Live fitness classes & gym access across India",
+  },
+] as const;
 
-  await prisma.paymentTerms.createMany({
-    data: [
-      { name: "Due on Receipt", dueDays: 0, description: "Payment is due immediately upon receipt." },
-      { name: "Net 15", dueDays: 15, description: "Payment is due within 15 days." },
-      { name: "Net 30", dueDays: 30, description: "Payment is due within 30 days." },
-      { name: "Net 60", dueDays: 60, description: "Payment is due within 60 days." },
-    ],
-  });
+// ============================================================================
+// 7 BUNDLES (4 predefined + 3 suggested)
+// ============================================================================
 
-  console.log("✓ Sample payment terms seeded.");
-}
+const BUNDLES = [
+  {
+    name: "Entertainment Mega Pack",
+    slug: "entertainment-mega-pack",
+    description: "All your streaming & music in one killer bundle",
+    type: "predefined",
+    discountType: "percentage",
+    discountValue: 25,
+    isFeatured: true,
+    serviceSlugs: ["netflix", "spotify", "disney-plus", "youtube-premium"],
+  },
+  {
+    name: "Creator Studio Bundle",
+    slug: "creator-studio-bundle",
+    description: "Everything a content creator and designer needs",
+    type: "predefined",
+    discountType: "percentage",
+    discountValue: 20,
+    isFeatured: true,
+    serviceSlugs: ["canva-pro", "figma-pro", "grammarly-premium", "notion"],
+  },
+  {
+    name: "Developer Power Stack",
+    slug: "developer-power-stack",
+    description: "AI tools + productivity for serious developers",
+    type: "predefined",
+    discountType: "percentage",
+    discountValue: 30,
+    isFeatured: true,
+    serviceSlugs: ["github-copilot", "chatgpt-plus", "notion", "linear", "slack-pro"],
+  },
+  {
+    name: "Privacy & Security Pro",
+    slug: "privacy-security-pro",
+    description: "Complete digital protection suite",
+    type: "predefined",
+    discountType: "percentage",
+    discountValue: 35,
+    isFeatured: false,
+    serviceSlugs: ["nordvpn", "1password", "bitdefender"],
+  },
+  {
+    name: "AI Power User",
+    slug: "ai-power-user",
+    description: "Best AI tools for power users and researchers",
+    type: "suggested",
+    discountType: "percentage",
+    discountValue: 20,
+    isFeatured: true,
+    serviceSlugs: ["chatgpt-plus", "claude-pro", "midjourney", "perplexity-pro"],
+  },
+  {
+    name: "Gaming Essentials",
+    slug: "gaming-essentials",
+    description: "Multi-platform gaming subscription pack",
+    type: "suggested",
+    discountType: "fixed",
+    discountValue: 500,
+    isFeatured: false,
+    serviceSlugs: ["xbox-game-pass", "ea-play-pro", "playstation-plus"],
+  },
+  {
+    name: "Remote Work Pro",
+    slug: "remote-work-pro",
+    description: "Everything you need to work from anywhere, seamlessly",
+    type: "suggested",
+    discountType: "percentage",
+    discountValue: 15,
+    isFeatured: true,
+    serviceSlugs: ["google-workspace", "zoom-pro", "slack-pro", "dropbox-plus", "grammarly-premium"],
+  },
+] as const;
 
-async function seedSampleProducts() {
-  const existingProducts = await prisma.product.count();
-  if (existingProducts > 0) {
-    console.log("✓ Products already seeded — skipping.");
-    return;
-  }
-
-  const products = await Promise.all([
-    prisma.product.create({
-      data: {
-        name: "SubsMS Starter",
-        type: "service",
-        salesPrice: 1200,
-        costPrice: 0,
-        description: "Perfect for small teams getting started with subscription management.",
-        isActive: true,
-      },
-    }),
-    prisma.product.create({
-      data: {
-        name: "SubsMS Professional",
-        type: "service",
-        salesPrice: 3500,
-        costPrice: 0,
-        description: "Advanced features for growing businesses with complex billing needs.",
-        isActive: true,
-      },
-    }),
-    prisma.product.create({
-      data: {
-        name: "SubsMS Enterprise",
-        type: "service",
-        salesPrice: 8000,
-        costPrice: 0,
-        description: "Full-scale solution for large organizations with custom integrations.",
-        isActive: true,
-      },
-    }),
-  ]);
-
-  await prisma.productVariant.createMany({
-    data: [
-      { productId: products[2].id, attribute: "Support", value: "Standard", extraPrice: 0 },
-      { productId: products[2].id, attribute: "Support", value: "Priority", extraPrice: 2000 },
-      { productId: products[2].id, attribute: "Support", value: "Dedicated", extraPrice: 5000 },
-    ],
-  });
-
-  console.log("✓ Sample products seeded (3 products + 3 variants).");
-}
-
-async function seedSamplePlans() {
-  const existingPlans = await prisma.recurringPlan.count();
-  if (existingPlans > 0) {
-    console.log("✓ Recurring plans already seeded — skipping.");
-    return;
-  }
-
-  await prisma.recurringPlan.createMany({
-    data: [
-      {
-        name: "Monthly Plan",
-        billingPeriod: "monthly",
-        price: 1200,
-        minQuantity: 1,
-        closable: true,
-        pausable: true,
-        renewable: true,
-      },
-      {
-        name: "Yearly Plan",
-        billingPeriod: "yearly",
-        price: 12000,
-        minQuantity: 1,
-        closable: true,
-        pausable: false,
-        renewable: true,
-      },
-      {
-        name: "Lifetime Plan",
-        billingPeriod: "yearly",
-        price: 60000,
-        minQuantity: 1,
-        closable: false,
-        pausable: false,
-        renewable: false,
-        autoClose: false,
-      },
-    ],
-  });
-
-  console.log("✓ Sample recurring plans seeded (Monthly, Yearly, Lifetime).");
-}
+const FEATURED_SLUGS = new Set([
+  "netflix", "spotify", "chatgpt-plus", "canva-pro", "github-copilot", "disney-plus",
+]);
 
 async function main() {
-  console.log("\n🌱 Seeding database...\n");
+  console.log("🌱 Seeding 50 services...");
 
-  await seedAdminUser();
-  await seedSampleTaxes();
-  await seedSamplePaymentTerms();
-  await seedSampleProducts();
-  await seedSamplePlans();
+  for (const s of SERVICES) {
+    await prisma.service.upsert({
+      where: { slug: s.slug },
+      update: {},
+      create: {
+        name: s.name,
+        slug: s.slug,
+        category: s.category,
+        color: s.color,
+        monthlyPrice: s.monthlyPrice,
+        yearlyPrice: s.yearlyPrice ?? null,
+        logoUrl: s.logoUrl ?? null,
+        iconKey: s.iconKey ?? null,
+        description: s.description,
+        isActive: true,
+        isFeatured: FEATURED_SLUGS.has(s.slug),
+      },
+    });
+    process.stdout.write(".");
+  }
 
-  console.log("\n✅ Database seeded successfully!\n");
+  console.log(`\n✅ ${SERVICES.length} services seeded`);
+  console.log("🌱 Seeding 7 bundles...");
+
+  for (const b of BUNDLES) {
+    // Resolve service IDs from slugs — skip any not found (guard against typos)
+    const serviceRecords = await prisma.service.findMany({
+      where: { slug: { in: [...b.serviceSlugs] } },
+      select: { id: true, slug: true },
+    });
+
+    const validServices = b.serviceSlugs
+      .map((slug) => serviceRecords.find((s) => s.slug === slug))
+      .filter((s): s is { id: string; slug: string } => s !== undefined);
+
+    await prisma.bundle.upsert({
+      where: { slug: b.slug },
+      update: {},
+      create: {
+        name: b.name,
+        slug: b.slug,
+        description: b.description,
+        type: b.type,
+        discountType: b.discountType,
+        discountValue: b.discountValue,
+        isFeatured: b.isFeatured,
+        isActive: true,
+        services: {
+          create: validServices.map(({ id: serviceId }, order) => ({
+            serviceId,
+            order,
+          })),
+        },
+      },
+    });
+    process.stdout.write(".");
+  }
+
+  console.log(`\n✅ ${BUNDLES.length} bundles seeded`);
 }
 
 main()
-  .catch((error) => {
-    console.error("❌ Seed failed:", error);
+  .catch((e) => {
+    console.error(e);
     process.exit(1);
   })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .finally(() => prisma.$disconnect());

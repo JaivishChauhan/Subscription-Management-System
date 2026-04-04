@@ -14,7 +14,10 @@ import {
   IconRocket,
   IconReceipt2,
   IconRepeat,
+  IconApps,
+  IconPuzzle,
 } from "@tabler/icons-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const metadata: Metadata = {
   title: "Admin Panel",
@@ -67,6 +70,8 @@ export default async function AdminLayout({
 
 const NAV_ITEMS = [
   { href: "/admin", icon: IconLayoutDashboard, label: "Dashboard" },
+  { href: "/admin/services", icon: IconApps, label: "Services" },
+  { href: "/admin/bundles", icon: IconPuzzle, label: "Bundles" },
   { href: "/admin/contacts", icon: IconUsers, label: "Contacts" },
   { href: "/admin/products", icon: IconPackage, label: "Products" },
   { href: "/admin/subscriptions", icon: IconRepeat, label: "Subscriptions" },
@@ -128,6 +133,7 @@ function AdminSidebar({
                 {userRole}
               </p>
             </div>
+            <ThemeToggle className="shrink-0" />
             <form action="/api/auth/signout" method="POST">
               <button
                 type="submit"

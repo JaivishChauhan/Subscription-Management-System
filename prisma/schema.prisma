@@ -435,3 +435,97 @@ model PaymentTerms {
 
   subscriptions Subscription[]
 }
+
+// ============================================================================
+// 14. SERVICES — App/Service Catalog (Admin-managed)
+// ============================================================================
+
+/// An app or service users can subscribe to (e.g., Netflix, Spotify).
+/// @security Admin-only create/update. Public read for marketplace.
+model Service {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  description  String?
+  category     String   // streaming | productivity | ai | music | gaming | creative | cloud | communication | security | fitness
+  logoUrl      String?  // external CDN URL or /icons/<slug>.svg
+  iconKey      String?  // Tabler icon name fallback e.g. "IconBrandNetflix"
+  color        String   @default("#6366f1") // brand hex color
+  monthlyPrice Float
+  yearlyPrice  Float?
+  isActive     Boolean  @default(true)
+  isFeatured   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  bundleServices BundleService[]
+  cartItems      CartItem[]
+
+  @@index([category])
+  @@index([isActive, isFeatured])
+}
+
+// ============================================================================
+// 15. BUNDLES — Predefined/Suggested Service Collections with Discounts
+// ============================================================================
+
+/// Admin-defined bundles — a named collection of services with a discount.
+/// type: predefined (admin curated) | suggested (system-recommended) | custom (user-created)
+model Bundle {
+  id            String   @id @default(cuid())
+  name          String
+  slug          String   @unique
+  description   String?
+  type          String   @default("predefined") // predefined | suggested | custom
+  discountType  String   @default("percentage") // percentage | fixed
+  discountValue Float    @default(0)
+  isActive      Boolean  @default(true)
+  isFeatured    Boolean  @default(false)
+  createdById   String?  // null = admin/system created
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  services  BundleService[]
+  cartItems CartItem[]
+
+  @@index([type, isActive])
+  @@index([isFeatured])
+}
+
+// ============================================================================
+// 16. BUNDLE SERVICES — Join table Bundle ↔ Service
+// ============================================================================
+
+/// Maps services to bundles. Ordered for consistent display.
+model BundleService {
+  id        String @id @default(cuid())
+  bundleId  String
+  serviceId String
+  order     Int    @default(0)
+
+  bundle  Bundle  @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([bundleId, serviceId])
+  @@index([bundleId])
+}
+
+// ============================================================================
+// 17. CART ITEMS — Temporary pre-checkout user selections
+// ============================================================================
+
+/// Holds services or bundles in a user's cart before checkout.
+/// Only one of serviceId or bundleId is set per row.
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  serviceId String?
+  bundleId  String?
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+
+  service Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  bundle  Bundle?  @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}

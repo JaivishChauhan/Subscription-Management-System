@@ -4,6 +4,7 @@ import { Syne, DM_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
+import { Providers } from "@/components/providers";
 
 /**
  * Primary brand typeface — Syne.
@@ -74,7 +75,9 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          {children}
+          <Providers>
+            {children}
+          </Providers>
           <Toaster
             position="top-right"
             richColors

@@ -313,9 +313,7 @@ html {
   display: none;
 }
 
-/* ============================================================================
-   SMS DESIGN TOKENS & CYBERPUNK THEME MERGE
-   ============================================================================ */
+/* ── SMS DESIGN TOKENS & CYBERPUNK THEME MERGE ── */
 
 /* ── FONT ALIASES ── */
 .f-syne { font-family: var(--font-sans), 'Syne', sans-serif; }
@@ -324,8 +322,8 @@ html {
 /* ── GRID TEXTURE (every page) ── */
 .grid-bg {
   background-image:
-    linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+    linear-gradient(rgba(79, 70, 229, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 70, 229, 0.04) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 
@@ -333,13 +331,13 @@ html {
 .tabular { font-variant-numeric: tabular-nums; }
 
 /* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #080B10; }
-::-webkit-scrollbar-thumb { background: #1E2D42; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #243347; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #F9FAFB; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
 
 /* ── SELECTION ── */
-::selection { background: rgba(0,229,255,0.2); color: #E8EDF5; }
+::selection { background: rgba(79, 70, 229, 0.2); color: #1E1B4B; }
 
 /* ── MATERIAL SYMBOLS ── */
 .material-symbols-outlined {
