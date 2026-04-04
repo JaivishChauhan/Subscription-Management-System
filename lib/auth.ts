@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db";
 /**
  * NextAuth v5 (Auth.js) configuration.
  * Uses credentials provider for email/password authentication.
- * RBAC role is embedded in the JWT session for middleware checks.
+ * RBAC role is embedded in the JWT session for proxy checks.
  * @security Passwords are compared via bcrypt — never stored in plaintext.
  */
 export const { handlers, signIn, signOut, auth } = NextAuth({

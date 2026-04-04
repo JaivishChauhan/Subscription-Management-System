@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Syne, DM_Mono } from "next/font/google";
 
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 
 /**
- * Primary brand typeface — Plus Jakarta Sans.
+ * Primary brand typeface — Syne.
  * Applied globally via CSS variable (--font-sans).
  */
-const fontSans = Plus_Jakarta_Sans({
+const fontSans = Syne({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
@@ -20,11 +20,11 @@ const fontSans = Plus_Jakarta_Sans({
  * Monospace typeface for code blocks and data displays.
  * Applied via CSS variable (--font-mono).
  */
-const fontMono = JetBrains_Mono({
+const fontMono = DM_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
   display: "swap",
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
