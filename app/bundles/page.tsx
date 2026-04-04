@@ -2,14 +2,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { IconShoppingCart, IconPuzzle, IconApps } from "@tabler/icons-react";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { db } from "@/lib/db";
-import { BundleType } from "@prisma/client";
+import { prisma as db } from "@/lib/db";
+
 
 export const revalidate = 3600;
 
 export default async function BundlesPage() {
   const bundles = await db.bundle.findMany({
-    where: { isActive: true, type: BundleType.PREDEFINED },
+    where: { isActive: true, type: "predefined" },
     include: {
       services: {
         include: { service: true }

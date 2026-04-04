@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireApiRole } from "@/lib/admin";
+import { generateInvoiceFromSubscription } from "@/lib/invoices";
 import { canTransitionSubscriptionStatus } from "@/lib/subscriptions";
 import { subscriptionStatusUpdateSchema } from "@/lib/validations/subscription";
 
@@ -74,9 +75,27 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     revalidatePath("/admin/subscriptions");
     revalidatePath(`/admin/subscriptions/${id}`);
 
+    let invoice = null;
+
+    if (parsed.data.status === "active") {
+      try {
+        const generated = await generateInvoiceFromSubscription(id);
+        invoice = generated.invoice;
+      } catch (invoiceError) {
+        console.error("[INVOICE_GENERATION_ERROR]", invoiceError);
+        return NextResponse.json(
+          {
+            error:
+              "Subscription activated, but invoice generation failed. Please review the subscription lines and try again.",
+          },
+          { status: 500 },
+        );
+      }
+    }
+
     return NextResponse.json({
       subscription: updatedSubscription,
-      invoiceGenerationPending: parsed.data.status === "active",
+      invoice,
     });
   } catch (error) {
     console.error("[SUBSCRIPTION_STATUS_ERROR]", error);

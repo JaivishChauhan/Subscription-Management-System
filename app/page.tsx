@@ -5,13 +5,15 @@ import {
   IconShoppingBag,
   IconTags,
   IconPuzzle,
-  IconArrowRight,
   IconCheck,
   IconStar,
   IconApps,
+  IconDiscount,
+  IconSearch,
 } from "@tabler/icons-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { prisma as db } from "@/lib/db";
+import type { Service, Bundle, BundleService } from "@prisma/client";
 
 export const revalidate = 3600; // Cache for 1 hour
 
@@ -176,7 +178,7 @@ function HeroSection() {
    TOP SERVICES SECTION
    ============================================================================ */
 
-function TopServicesSection({ services }: { services: any[] }) {
+function TopServicesSection({ services }: { services: Service[] }) {
   return (
     <section className="relative px-4 pb-20 sm:px-6 sm:pb-28 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -234,7 +236,7 @@ const FEATURES = [
       "Mix and match any services you want. Create your dream bundle and have it managed under a single invoice.",
   },
   {
-    icon: IconDiscount2,
+    icon: IconDiscount,
     title: "Automated Discounts",
     description:
       "The more you bundle, the more you save. Our dynamic discount engine automatically applies up to 40% off.",
@@ -300,7 +302,11 @@ function FeaturesSection() {
    BUNDLES SECTION
    ============================================================================ */
 
-function BundlesSection({ bundles }: { bundles: any[] }) {
+type BundleWithServices = Bundle & {
+  services: (BundleService & { service: Service })[];
+};
+
+function BundlesSection({ bundles }: { bundles: BundleWithServices[] }) {
   return (
     <section id="bundles" className="relative border-t border-border/50 px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-indigo-50/30 to-transparent dark:via-indigo-950/10" />
@@ -319,7 +325,11 @@ function BundlesSection({ bundles }: { bundles: any[] }) {
         </div>
 
         <div className="mt-16 grid gap-6 sm:gap-8 lg:grid-cols-3">
-          {bundles.map((bundle, idx) => (
+          {bundles.map((bundle, idx) => {
+            const basePrice = bundle.services.reduce((acc: number, bs: BundleService & { service: Service }) => acc + bs.service.monthlyPrice, 0);
+            const discountedPrice = bundle.discountType === "fixed" ? Math.max(0, basePrice - bundle.discountValue) : basePrice * (1 - bundle.discountValue / 100);
+            
+            return (
             <div
               key={bundle.id}
               className={`relative rounded-2xl border p-6 sm:p-8 transition-all duration-300 ${
@@ -340,9 +350,9 @@ function BundlesSection({ bundles }: { bundles: any[] }) {
               </p>
 
               <div className="mt-6 flex items-baseline gap-2">
-                <span className="text-4xl font-extrabold">₹{bundle.price}</span>
+                <span className="text-4xl font-extrabold">₹{discountedPrice.toFixed(0)}</span>
                 <span className="text-sm text-muted-foreground line-through">
-                  ₹{bundle.services.reduce((acc: number, bs: any) => acc + bs.service.monthlyPrice, 0)}
+                  ₹{basePrice.toFixed(0)}
                 </span>
                 <span className="text-sm text-emerald-500 font-semibold">/mo</span>
               </div>
@@ -361,7 +371,7 @@ function BundlesSection({ bundles }: { bundles: any[] }) {
               <div className="mt-8 border-t border-border pt-6">
                 <p className="mb-4 text-sm font-semibold text-foreground">Includes:</p>
                 <ul className="space-y-3">
-                  {bundle.services.slice(0, 5).map((bs: any) => (
+                  {bundle.services.slice(0, 5).map((bs: BundleService & { service: Service }) => (
                     <li
                       key={bs.serviceId}
                       className="flex items-center gap-3 text-sm"
@@ -384,7 +394,7 @@ function BundlesSection({ bundles }: { bundles: any[] }) {
                 </ul>
               </div>
             </div>
-          ))}
+          )})}
         </div>
       </div>
     </section>
