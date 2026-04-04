@@ -4,8 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart";
-import { IconRocket } from "@tabler/icons-react";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 export function CartClient() {
   const router = useRouter();
@@ -35,38 +33,6 @@ export function CartClient() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b border-border bg-background/80 px-6 backdrop-blur-md">
-        <Link
-          href="/pricing"
-          className="flex items-center gap-2 transition-opacity hover:opacity-80"
-        >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#7C3AED] to-[#6D28D9] shadow-md">
-            <IconRocket className="h-4 w-4 text-white" stroke={2} />
-          </div>
-          <span className="f-syne text-[20px] font-bold text-foreground">
-            SubsMS
-          </span>
-        </Link>
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <Link
-            href="/cart"
-            className="relative text-indigo-600 transition-colors"
-          >
-            <span className="material-symbols-outlined text-[22px]">shopping_cart</span>
-            {items.length > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-[9px] font-bold text-white shadow-sm">
-                {items.length}
-              </span>
-            )}
-          </Link>
-          <button type="button" className="text-muted-foreground transition-colors hover:text-indigo-600">
-            <span className="material-symbols-outlined text-[22px]">account_circle</span>
-          </button>
-        </div>
-      </nav>
-
       <div className="anim-up mx-auto max-w-6xl px-6 pb-24 pt-12">
         <h1 className="f-syne mb-2 text-[36px] font-extrabold text-foreground">
           Your Cart
@@ -97,18 +63,33 @@ export function CartClient() {
             {items.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm"
+                className="flex items-start gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm"
               >
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/20">
                   <span className="material-symbols-outlined text-[28px] text-indigo-500">
-                    cloud
+                    {item.type === "bundle" ? "package_2" : "cloud"}
                   </span>
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="f-syne text-[15px] font-bold text-foreground">
                     {item.name}
                   </h3>
-                  {item.plan && (
+                  {item.type === "bundle" && item.services && (
+                    <div className="mt-2 space-y-1">
+                      {item.services.map((service, idx) => (
+                        <div key={idx} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <span className="h-1 w-1 rounded-full bg-indigo-500"></span>
+                          {service}
+                        </div>
+                      ))}
+                      {item.discount && item.discount > 0 && (
+                        <span className="f-mono mt-2 inline-block rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                          {item.discount}% Bundle Discount
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {item.plan && !item.type && (
                     <span className="f-mono mt-1 inline-block rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-0.5 text-[11px] font-bold text-indigo-600 dark:text-indigo-400">
                       {item.plan}
                     </span>

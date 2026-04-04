@@ -6,6 +6,9 @@ export interface CartItem {
   price: number;
   quantity: number;
   plan: "Monthly" | "Yearly" | "Lifetime" | "One-time";
+  type?: "plan" | "bundle";
+  services?: string[]; // For bundles
+  discount?: number; // Bundle discount percentage
 }
 
 export interface Discount {

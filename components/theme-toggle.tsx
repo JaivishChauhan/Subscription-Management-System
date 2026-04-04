@@ -15,7 +15,9 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
 
   // Avoid SSR mismatch — only render after hydration
   useEffect(() => {
-    setMounted(true);
+    // Using a timeout to defer the state update to avoid cascading renders
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
   }, []);
 
   if (!mounted) {

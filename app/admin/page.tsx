@@ -1,17 +1,12 @@
 import { DashboardClient } from "./_components/DashboardClient";
-import { auth } from "@/lib/auth";
+import { requireAdminPage } from "@/lib/admin";
 import { prisma } from "@/lib/db";
-import { redirect } from "next/navigation";
 
 // Force dynamic since we're displaying real-time data
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-  const session = await auth();
-
-  if (!session?.user || session.user.role !== "admin") {
-    redirect("/login");
-  }
+  await requireAdminPage();
 
   // Fetch real data from Prisma for aggregates
   const activeSubsCount = await prisma.subscription.count({

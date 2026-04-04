@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { IconLoader2 } from "@tabler/icons-react";
 import { toast } from "sonner";
-import { getNextAllowedStatus } from "@/lib/subscriptions";
+import { getNextAllowedStatus } from "@/lib/validations/subscription-helpers";
 import type { SubscriptionStatus } from "@/lib/validations/subscription";
 
 const STATUS_ACTION_LABELS: Record<SubscriptionStatus, string> = {

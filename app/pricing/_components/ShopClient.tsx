@@ -29,8 +29,9 @@ export function ShopClient({ products, categories }: ShopClientProps) {
 
   const handleAdd = (p: Product) => {
     const isYearly = billing[p.id];
+    const uniqueId = `${p.id}-${crypto.randomUUID()}`;
     addItem({
-      id: `${p.id}-${Date.now()}`,
+      id: uniqueId,
       name: p.name,
       price: isYearly ? p.yearlyPrice : p.price,
       quantity: 1,

@@ -42,23 +42,55 @@ export default function LoginPage() {
     setIsSubmitting(true)
 
     try {
+      console.log("[Login] Attempting sign in with:", { email: data.email })
+      
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
-        redirect: false,
+        redirect: false, // Handle redirect manually for better control
       })
 
+      console.log("[Login] Sign in result:", result)
+
       if (result?.error) {
+        console.error("[Login] Sign in error:", result.error)
         toast.error("Invalid email or password. Please try again.")
+        setIsSubmitting(false)
         return
       }
 
+      if (!result?.ok) {
+        console.error("[Login] Sign in not ok")
+        toast.error("Authentication failed. Please try again.")
+        setIsSubmitting(false)
+        return
+      }
+
+      console.log("[Login] Sign in successful, preparing redirect")
       toast.success("Welcome back!")
-      router.push(callbackUrl)
-      router.refresh()
-    } catch {
+      
+      // Parse the callback URL
+      let redirectUrl = "/dashboard"
+      
+      if (callbackUrl && callbackUrl !== "/") {
+        try {
+          // If it's a full URL, extract the pathname
+          const url = new URL(callbackUrl)
+          redirectUrl = url.pathname + url.search + url.hash
+        } catch {
+          // If it's already a pathname, use it directly
+          redirectUrl = callbackUrl
+        }
+      }
+      
+      console.log("[Login] Redirecting to:", redirectUrl)
+      
+      // Use router.push for client-side navigation
+      router.push(redirectUrl)
+      router.refresh() // Force a refresh to load the new session
+    } catch (error) {
+      console.error("[Login] Exception during sign in:", error)
       toast.error("Something went wrong. Please try again.")
-    } finally {
       setIsSubmitting(false)
     }
   }

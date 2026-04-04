@@ -19,7 +19,7 @@ import {
   calculateLineSubtotal,
   calculateTaxAmount,
   roundCurrency,
-} from "@/lib/subscriptions";
+} from "@/lib/validations/subscription-helpers";
 import {
   subscriptionCreateSchema,
   type SubscriptionCreateInput,

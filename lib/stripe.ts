@@ -71,10 +71,7 @@ export async function createCheckoutSession(
  * Verifies a Stripe webhook event signature.
  * Returns the parsed event or null if verification fails.
  */
-export async function verifyWebhookSignature(
-  rawBody: string,
-  signature: string,
-): Promise<{ type: string; data: Record<string, unknown> } | null> {
+export async function verifyWebhookSignature(): Promise<{ type: string; data: Record<string, unknown> } | null> {
   if (!STRIPE_CONFIGURED) {
     console.warn("[STRIPE_STUB] Webhook verification skipped — Stripe not configured.");
     return null;

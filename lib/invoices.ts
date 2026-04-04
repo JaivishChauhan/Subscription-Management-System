@@ -1,11 +1,13 @@
-import { prisma } from "@/lib/db";
-import { roundCurrency } from "@/lib/subscriptions";
+import { prisma } from "@/lib/db"
+import { roundCurrency } from "@/lib/subscriptions"
+
+export * from "./validations/invoice"
 
 export async function generateInvoiceNumber(date = new Date()) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const prefix = `INV-${year}${month}${day}`;
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  const prefix = `INV-${year}${month}${day}`
 
   const existingCount = await prisma.invoice.count({
     where: {
@@ -13,19 +15,19 @@ export async function generateInvoiceNumber(date = new Date()) {
         startsWith: prefix,
       },
     },
-  });
+  })
 
-  return `${prefix}-${String(existingCount + 1).padStart(4, "0")}`;
+  return `${prefix}-${String(existingCount + 1).padStart(4, "0")}`
 }
 
 export async function generateInvoiceFromSubscription(subscriptionId: string) {
   const existingInvoice = await prisma.invoice.findFirst({
     where: { subscriptionId },
     select: { id: true, invoiceNumber: true },
-  });
+  })
 
   if (existingInvoice) {
-    return { invoice: existingInvoice, created: false as const };
+    return { invoice: existingInvoice, created: false as const }
   }
 
   const subscription = await prisma.subscription.findUnique({
@@ -52,26 +54,31 @@ export async function generateInvoiceFromSubscription(subscriptionId: string) {
         },
       },
     },
-  });
+  })
 
   if (!subscription) {
-    throw new Error("SUBSCRIPTION_NOT_FOUND");
+    throw new Error("SUBSCRIPTION_NOT_FOUND")
   }
 
   if (subscription.lines.length === 0) {
-    throw new Error("SUBSCRIPTION_HAS_NO_LINES");
+    throw new Error("SUBSCRIPTION_HAS_NO_LINES")
   }
 
   const subtotal = roundCurrency(
-    subscription.lines.reduce((sum, line) => sum + line.quantity * line.unitPrice, 0),
-  );
+    subscription.lines.reduce(
+      (sum, line) => sum + line.quantity * line.unitPrice,
+      0
+    )
+  )
   const taxTotal = roundCurrency(
-    subscription.lines.reduce((sum, line) => sum + line.taxAmount, 0),
-  );
-  const total = roundCurrency(subtotal + taxTotal);
+    subscription.lines.reduce((sum, line) => sum + line.taxAmount, 0)
+  )
+  const total = roundCurrency(subtotal + taxTotal)
   const dueDate = subscription.paymentTerms
-    ? new Date(Date.now() + subscription.paymentTerms.dueDays * 24 * 60 * 60 * 1000)
-    : null;
+    ? new Date(
+        Date.now() + subscription.paymentTerms.dueDays * 24 * 60 * 60 * 1000
+      )
+    : null
 
   const invoice = await prisma.invoice.create({
     data: {
@@ -109,63 +116,7 @@ export async function generateInvoiceFromSubscription(subscriptionId: string) {
       total: true,
       amountDue: true,
     },
-  });
+  })
 
-  return { invoice, created: true as const };
-}
-
-export function getNextInvoiceStatus(currentStatus: string) {
-  switch (currentStatus) {
-    case "draft":
-      return "confirmed";
-    case "confirmed":
-      return "paid";
-    default:
-      return null;
-  }
-}
-
-export function canTransitionInvoiceStatus({
-  currentStatus,
-  nextStatus,
-}: {
-  currentStatus: string;
-  nextStatus: string;
-}) {
-  if (currentStatus === "cancelled" || currentStatus === "paid") {
-    return {
-      ok: false,
-      error: `Invoices in ${currentStatus} status cannot be updated.`,
-    };
-  }
-
-  if (nextStatus === "cancelled") {
-    return {
-      ok: currentStatus === "draft" || currentStatus === "confirmed",
-      error: "Only draft or confirmed invoices can be cancelled.",
-    };
-  }
-
-  const allowedNextStatus = getNextInvoiceStatus(currentStatus);
-  if (!allowedNextStatus || allowedNextStatus !== nextStatus) {
-    return {
-      ok: false,
-      error: `Invalid invoice status transition from ${currentStatus} to ${nextStatus}.`,
-    };
-  }
-
-  return { ok: true as const };
-}
-
-export function formatInvoiceStatus(status: string) {
-  switch (status) {
-    case "confirmed":
-      return "confirmed";
-    case "paid":
-      return "paid";
-    case "cancelled":
-      return "cancelled";
-    default:
-      return "draft";
-  }
+  return { invoice, created: true as const }
 }

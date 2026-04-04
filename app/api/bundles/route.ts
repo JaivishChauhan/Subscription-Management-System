@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { requireAdminApi } from "@/lib/admin";
 import { computeBundleFinalPrice } from "@/types/bundle";
 import type { ServiceDTO } from "@/types/service";
+import type { Bundle, BundleService, Service } from "@prisma/client";
 
 /**
  * GET /api/bundles
@@ -30,7 +31,9 @@ export async function GET(req: NextRequest) {
       orderBy: [{ isFeatured: "desc" }, { name: "asc" }],
     });
 
-    const bundleDTOs = bundles.map((b) => {
+    type BundleWithServices = Bundle & { services: (BundleService & { service: Service })[] };
+
+    const bundleDTOs = bundles.map((b: BundleWithServices) => {
       const services: ServiceDTO[] = b.services.map((bs) => ({
         id: bs.service.id,
         name: bs.service.name,
@@ -81,9 +84,9 @@ export async function GET(req: NextRequest) {
  * @security Admin-only. Creates bundle and its BundleService join records.
  */
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session || session.user.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const { error, session } = await requireAdminApi();
+  if (error) {
+    return error;
   }
 
   try {

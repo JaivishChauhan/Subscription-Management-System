@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { requireAdminApi } from "@/lib/admin";
 
 /**
  * PATCH /api/services/[id]
@@ -10,9 +10,9 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session || session.user.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const { error } = await requireAdminApi();
+  if (error) {
+    return error;
   }
 
   const { id } = await params;
@@ -52,9 +52,9 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session || session.user.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const { error } = await requireAdminApi();
+  if (error) {
+    return error;
   }
 
   const { id } = await params;

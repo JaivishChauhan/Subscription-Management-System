@@ -1,62 +1,22 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import NextAuth from "next-auth";
+import { authConfig } from "@/auth.config";
 
 /**
- * NextAuth proxy for route protection.
- * Uses NextAuth's built-in session handling via callback URL.
+ * NextAuth v5 middleware using edge-compatible configuration.
+ * Handles route protection and authentication without Node.js crypto module.
  */
-export default function proxy(request: NextRequest) {
-  const { nextUrl } = request;
-  const pathname = nextUrl.pathname;
-
-  // Skip middleware for API routes and static files
-  if (
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/static") ||
-    pathname.includes(".")
-  ) {
-    return NextResponse.next();
-  }
-
-  // Check for authenticated session via cookie
-  const hasSession = request.cookies.has("next-auth.session-token") 
-    || request.cookies.has("__Secure-next-auth.session-token");
-
-  // Admin routes require admin role (checked via callback URL param)
-  if (pathname.startsWith("/admin")) {
-    if (!hasSession) {
-      return NextResponse.redirect(new URL("/login", nextUrl));
-    }
-    // Role check happens server-side in API routes
-  }
-
-  // Protected user routes require authentication.
-  const protectedPaths = ["/profile", "/cart", "/checkout"];
-  const isProtectedRoute = protectedPaths.some((path) =>
-    pathname.startsWith(path),
-  );
-
-  if (isProtectedRoute && !hasSession) {
-    const callbackUrl = encodeURIComponent(pathname);
-    return NextResponse.redirect(
-      new URL(`/login?callbackUrl=${callbackUrl}`, nextUrl),
-    );
-  }
-
-  // Auth routes redirect authenticated users to home.
-  const authPaths = ["/login", "/signup", "/reset-password"];
-  const isAuthRoute = authPaths.includes(pathname);
-
-  if (isAuthRoute && hasSession) {
-    return NextResponse.redirect(new URL("/", nextUrl));
-  }
-
-  return NextResponse.next();
-}
+export default NextAuth(authConfig).auth;
 
 export const config = {
   matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     * - API routes (handled separately)
+     */
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

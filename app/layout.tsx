@@ -5,6 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 import { Providers } from "@/components/providers";
+import { ConditionalHeader } from "@/components/conditional-header";
 
 /**
  * Primary brand typeface — Syne.
@@ -76,6 +77,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <Providers>
+            <ConditionalHeader />
             {children}
           </Providers>
           <Toaster

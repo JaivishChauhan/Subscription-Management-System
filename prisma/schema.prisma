@@ -34,10 +34,10 @@ model User {
   sessions Session[]
 
   // Business relations
-  contact            Contact?
-  subscriptions      Subscription[]
-  invoices           Invoice[]
-  createdPayments    Payment[]       @relation("PaymentCreator")
+  contact             Contact?
+  subscriptions       Subscription[]
+  invoices            Invoice[]
+  createdPayments     Payment[]      @relation("PaymentCreator")
   assignedSalesOrders Subscription[] @relation("Salesperson")
 
   @@index([email])
@@ -161,20 +161,20 @@ model ProductVariant {
 
 /// Plans define how subscriptions are billed: period, options, and lifecycle.
 model RecurringPlan {
-  id              String   @id @default(cuid())
-  name            String
-  billingPeriod   String   // daily | weekly | monthly | yearly
-  price           Float
-  minQuantity     Int      @default(1)
-  startDate       DateTime?
-  endDate         DateTime?
-  autoClose       Boolean  @default(false)
-  closable        Boolean  @default(true)
-  pausable        Boolean  @default(false)
-  renewable       Boolean  @default(true)
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            String    @id @default(cuid())
+  name          String
+  billingPeriod String // daily | weekly | monthly | yearly
+  price         Float
+  minQuantity   Int       @default(1)
+  startDate     DateTime?
+  endDate       DateTime?
+  autoClose     Boolean   @default(false)
+  closable      Boolean   @default(true)
+  pausable      Boolean   @default(false)
+  renewable     Boolean   @default(true)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   recurringPrices    RecurringPrice[]
   subscriptions      Subscription[]
@@ -230,16 +230,16 @@ model QuotationTemplate {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  recurringPlan RecurringPlan?         @relation(fields: [recurringPlanId], references: [id])
+  recurringPlan RecurringPlan?          @relation(fields: [recurringPlanId], references: [id])
   lines         QuotationTemplateLine[]
 }
 
 model QuotationTemplateLine {
-  id                  String @id @default(cuid())
+  id                  String  @id @default(cuid())
   quotationTemplateId String
   productName         String
   description         String?
-  quantity            Int    @default(1)
+  quantity            Int     @default(1)
   unitPrice           Float
 
   quotationTemplate QuotationTemplate @relation(fields: [quotationTemplateId], references: [id], onDelete: Cascade)
@@ -253,9 +253,9 @@ model QuotationTemplateLine {
 /// Draft → Quotation → Confirmed → Active → Closed
 /// Status transitions are enforced — no skipping stages.
 model Subscription {
-  id                 String   @id @default(cuid())
-  subscriptionNumber String   @unique
-  status             String   @default("draft") // draft | quotation | confirmed | active | closed
+  id                 String    @id @default(cuid())
+  subscriptionNumber String    @unique
+  status             String    @default("draft") // draft | quotation | confirmed | active | closed
   contactId          String
   userId             String
   salespersonId      String?
@@ -264,14 +264,14 @@ model Subscription {
   startDate          DateTime?
   expirationDate     DateTime?
   notes              String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
-  contact       Contact        @relation(fields: [contactId], references: [id])
-  user          User           @relation(fields: [userId], references: [id])
-  salesperson   User?          @relation("Salesperson", fields: [salespersonId], references: [id])
-  recurringPlan RecurringPlan  @relation(fields: [recurringPlanId], references: [id])
-  paymentTerms  PaymentTerms?  @relation(fields: [paymentTermsId], references: [id])
+  contact       Contact       @relation(fields: [contactId], references: [id])
+  user          User          @relation(fields: [userId], references: [id])
+  salesperson   User?         @relation("Salesperson", fields: [salespersonId], references: [id])
+  recurringPlan RecurringPlan @relation(fields: [recurringPlanId], references: [id])
+  paymentTerms  PaymentTerms? @relation(fields: [paymentTermsId], references: [id])
 
   lines    SubscriptionLine[]
   invoices Invoice[]
@@ -302,26 +302,26 @@ model SubscriptionLine {
 
 /// Invoice lifecycle: Draft → Confirmed → Paid | Cancelled
 model Invoice {
-  id              String   @id @default(cuid())
-  invoiceNumber   String   @unique
-  status          String   @default("draft") // draft | confirmed | paid | cancelled
-  subscriptionId  String
-  contactId       String
-  userId          String
-  subtotal        Float    @default(0)
-  taxTotal        Float    @default(0)
-  discountTotal   Float    @default(0)
-  total           Float    @default(0)
-  amountDue       Float    @default(0)
-  dueDate         DateTime?
-  paidAt          DateTime?
-  notes           String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String    @id @default(cuid())
+  invoiceNumber  String    @unique
+  status         String    @default("draft") // draft | confirmed | paid | cancelled
+  subscriptionId String
+  contactId      String
+  userId         String
+  subtotal       Float     @default(0)
+  taxTotal       Float     @default(0)
+  discountTotal  Float     @default(0)
+  total          Float     @default(0)
+  amountDue      Float     @default(0)
+  dueDate        DateTime?
+  paidAt         DateTime?
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  subscription Subscription @relation(fields: [subscriptionId], references: [id])
-  contact      Contact      @relation(fields: [contactId], references: [id])
-  user         User         @relation(fields: [userId], references: [id])
+  subscription Subscription  @relation(fields: [subscriptionId], references: [id])
+  contact      Contact       @relation(fields: [contactId], references: [id])
+  user         User          @relation(fields: [userId], references: [id])
   lines        InvoiceLine[]
   payments     Payment[]
 
@@ -352,15 +352,18 @@ model InvoiceLine {
 
 /// Only Admins can create payment records.
 model Payment {
-  id            String   @id @default(cuid())
-  invoiceId     String
-  createdById   String
-  paymentMethod String   // credit_card | paypal | bank_transfer | cash | stripe
-  amount        Float
-  paymentDate   DateTime @default(now())
+  id                    String   @id @default(cuid())
+  invoiceId             String
+  createdById           String
+  paymentMethod         String // credit_card | paypal | bank_transfer | cash | stripe | razorpay
+  amount                Float
+  paymentDate           DateTime @default(now())
   stripePaymentIntentId String?
-  notes         String?
-  createdAt     DateTime @default(now())
+  gatewayOrderId        String?
+  gatewayPaymentId      String?  @unique
+  gatewaySignature      String?
+  notes                 String?
+  createdAt             DateTime @default(now())
 
   invoice   Invoice @relation(fields: [invoiceId], references: [id])
   createdBy User    @relation("PaymentCreator", fields: [createdById], references: [id])
@@ -377,8 +380,8 @@ model Discount {
   id          String   @id @default(cuid())
   name        String
   code        String   @unique
-  type        String   // fixed | percentage
-  value       Float    // discount amount or percentage
+  type        String // fixed | percentage
+  value       Float // discount amount or percentage
   minPurchase Float?
   minQuantity Int?
   startDate   DateTime
@@ -412,12 +415,12 @@ model DiscountProduct {
 
 /// Configurable tax rules applied during invoice generation.
 model Tax {
-  id          String  @id @default(cuid())
-  name        String  // e.g., "GST 18%", "VAT 20%"
-  type        String  @default("percentage") // percentage | fixed
-  rate        Float   // 18.0 for 18%, or fixed amount
+  id          String   @id @default(cuid())
+  name        String // e.g., "GST 18%", "VAT 20%"
+  type        String   @default("percentage") // percentage | fixed
+  rate        Float // 18.0 for 18%, or fixed amount
   description String?
-  isActive    Boolean @default(true)
+  isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
 }
 
@@ -428,7 +431,7 @@ model Tax {
 /// Configurable terms for invoice payment schedules.
 model PaymentTerms {
   id          String   @id @default(cuid())
-  name        String   // e.g., "Net 30", "Due on Receipt"
+  name        String // e.g., "Net 30", "Due on Receipt"
   dueDays     Int      @default(30)
   description String?
   createdAt   DateTime @default(now())
@@ -447,9 +450,9 @@ model Service {
   name         String
   slug         String   @unique
   description  String?
-  category     String   // streaming | productivity | ai | music | gaming | creative | cloud | communication | security | fitness
-  logoUrl      String?  // external CDN URL or /icons/<slug>.svg
-  iconKey      String?  // Tabler icon name fallback e.g. "IconBrandNetflix"
+  category     String // streaming | productivity | ai | music | gaming | creative | cloud | communication | security | fitness
+  logoUrl      String? // external CDN URL or /icons/<slug>.svg
+  iconKey      String? // Tabler icon name fallback e.g. "IconBrandNetflix"
   color        String   @default("#6366f1") // brand hex color
   monthlyPrice Float
   yearlyPrice  Float?
@@ -481,7 +484,7 @@ model Bundle {
   discountValue Float    @default(0)
   isActive      Boolean  @default(true)
   isFeatured    Boolean  @default(false)
-  createdById   String?  // null = admin/system created
+  createdById   String? // null = admin/system created
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
