@@ -19,12 +19,20 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic"
 
-const INR = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 })
+const INR = new Intl.NumberFormat("en-IN", {
+  style: "currency",
+  currency: "INR",
+  maximumFractionDigits: 2,
+})
 
-const STATUS_CONFIG: Record<string, { label: string; colorClass: string; icon: React.ElementType }> = {
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; colorClass: string; icon: React.ElementType }
+> = {
   active: {
     label: "Active",
-    colorClass: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+    colorClass:
+      "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
     icon: IconCheck,
   },
   confirmed: {
@@ -34,12 +42,14 @@ const STATUS_CONFIG: Record<string, { label: string; colorClass: string; icon: R
   },
   quotation: {
     label: "Quotation",
-    colorClass: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+    colorClass:
+      "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
     icon: IconClock,
   },
   draft: {
     label: "Draft",
-    colorClass: "bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400",
+    colorClass:
+      "bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400",
     icon: IconClock,
   },
   closed: {
@@ -59,6 +69,10 @@ type Subscription = {
     price: number
     billingPeriod: string
   }
+  lines: {
+    subtotal: number
+    taxAmount: number
+  }[]
 }
 
 export default async function SubscriptionsPage() {
@@ -78,16 +92,22 @@ export default async function SubscriptionsPage() {
           billingPeriod: true,
         },
       },
+      lines: {
+        select: {
+          subtotal: true,
+          taxAmount: true,
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
   })
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">My Subscriptions</h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="text-muted-foreground mt-2">
             Manage and track all your active and past subscriptions
           </p>
         </div>
@@ -99,8 +119,8 @@ export default async function SubscriptionsPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-2xl border border-border bg-card p-12 text-center">
-            <p className="text-lg text-muted-foreground">
+          <div className="border-border bg-card rounded-2xl border p-12 text-center">
+            <p className="text-muted-foreground text-lg">
               You don&apos;t have any subscriptions yet.
             </p>
             <Link
@@ -121,9 +141,11 @@ function SubscriptionCard({ subscription }: { subscription: Subscription }) {
   const StatusIcon = config.icon
 
   return (
-    <div className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md">
+    <div className="border-border bg-card flex flex-col rounded-2xl border p-6 shadow-sm transition-all hover:shadow-md">
       <div className="mb-4 flex items-start justify-between gap-2">
-        <h3 className="text-lg font-bold leading-snug">{subscription.recurringPlan.name}</h3>
+        <h3 className="text-lg leading-snug font-bold">
+          {subscription.recurringPlan.name}
+        </h3>
         <span
           className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${config.colorClass}`}
         >
@@ -132,12 +154,19 @@ function SubscriptionCard({ subscription }: { subscription: Subscription }) {
         </span>
       </div>
 
-      <div className="space-y-2.5 text-sm text-muted-foreground">
+      <div className="text-muted-foreground space-y-2.5 text-sm">
         <div className="flex items-center gap-2">
           <IconCreditCard className="h-4 w-4 shrink-0" />
           <span>
-            {INR.format(subscription.recurringPlan.price)} /{" "}
-            {subscription.recurringPlan.billingPeriod}
+            {INR.format(
+              subscription.lines && subscription.lines.length > 0
+                ? subscription.lines.reduce(
+                    (sum, line) => sum + line.subtotal + line.taxAmount,
+                    0
+                  )
+                : subscription.recurringPlan.price
+            )}{" "}
+            / {subscription.recurringPlan.billingPeriod}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -158,21 +187,24 @@ function SubscriptionCard({ subscription }: { subscription: Subscription }) {
             <IconCalendar className="h-4 w-4 shrink-0" />
             <span>
               Ends:{" "}
-              {new Date(subscription.expirationDate).toLocaleDateString("en-IN", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-              })}
+              {new Date(subscription.expirationDate).toLocaleDateString(
+                "en-IN",
+                {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                }
+              )}
             </span>
           </div>
         )}
       </div>
 
       {/* View Details only — cancellation must be requested via contact/admin per RBAC spec */}
-      <div className="mt-6 flex-1 flex items-end">
+      <div className="mt-6 flex flex-1 items-end">
         <Link
           href={`/subscriptions/${subscription.id}`}
-          className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold transition-colors hover:bg-muted"
+          className="group border-border bg-card hover:bg-muted inline-flex w-full items-center justify-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-colors"
         >
           View Details
           <IconArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

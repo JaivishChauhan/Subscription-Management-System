@@ -1,4 +1,4 @@
-﻿import type { SubscriptionStatus } from "./subscription";
+﻿import type { SubscriptionStatus } from "./subscription"
 
 export const STATUS_ORDER: SubscriptionStatus[] = [
   "draft",
@@ -6,11 +6,11 @@ export const STATUS_ORDER: SubscriptionStatus[] = [
   "confirmed",
   "active",
   "closed",
-];
+]
 
 export function getNextAllowedStatus(currentStatus: SubscriptionStatus) {
-  const currentIndex = STATUS_ORDER.indexOf(currentStatus);
-  return STATUS_ORDER[currentIndex + 1] ?? null;
+  const currentIndex = STATUS_ORDER.indexOf(currentStatus)
+  return STATUS_ORDER[currentIndex + 1] ?? null
 }
 
 export function canTransitionSubscriptionStatus({
@@ -18,31 +18,31 @@ export function canTransitionSubscriptionStatus({
   nextStatus,
   closable,
 }: {
-  currentStatus: SubscriptionStatus;
-  nextStatus: SubscriptionStatus;
-  closable: boolean;
+  currentStatus: SubscriptionStatus
+  nextStatus: SubscriptionStatus
+  closable: boolean
 }) {
-  const allowedNextStatus = getNextAllowedStatus(currentStatus);
+  const allowedNextStatus = getNextAllowedStatus(currentStatus)
 
   if (!allowedNextStatus || allowedNextStatus !== nextStatus) {
     return {
       ok: false,
       error: `Invalid status transition from ${currentStatus} to ${nextStatus}.`,
-    };
+    }
   }
 
   if (currentStatus === "active" && nextStatus === "closed" && !closable) {
     return {
       ok: false,
       error: "This plan does not allow manual closure of active subscriptions.",
-    };
+    }
   }
 
-  return { ok: true as const };
+  return { ok: true as const }
 }
 
 export function roundCurrency(value: number) {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
+  return Math.round((value + Number.EPSILON) * 100) / 100
 }
 
 export function calculateLineSubtotal({
@@ -50,11 +50,11 @@ export function calculateLineSubtotal({
   unitPrice,
   taxAmount,
 }: {
-  quantity: number;
-  unitPrice: number;
-  taxAmount: number;
+  quantity: number
+  unitPrice: number
+  taxAmount: number
 }) {
-  return roundCurrency(quantity * unitPrice + taxAmount);
+  return roundCurrency(quantity * unitPrice + taxAmount)
 }
 
 export function calculateTaxAmount({
@@ -63,14 +63,14 @@ export function calculateTaxAmount({
   taxType,
   taxRate,
 }: {
-  quantity: number;
-  unitPrice: number;
-  taxType: string;
-  taxRate: number;
+  quantity: number
+  unitPrice: number
+  taxType: string
+  taxRate: number
 }) {
   if (taxType === "fixed") {
-    return roundCurrency(taxRate * quantity);
+    return roundCurrency(taxRate * quantity)
   }
 
-  return roundCurrency(quantity * unitPrice * (taxRate / 100));
+  return roundCurrency(quantity * unitPrice * (taxRate / 100))
 }

@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 @import "tailwindcss";
 
 /* ============================================================================
@@ -19,13 +18,23 @@
   --animate-scale-in: scale-in 0.3s ease-out forwards;
 
   @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
   }
 
   @keyframes pulse-slow {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 0.8; }
+    0%,
+    100% {
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 0.8;
+    }
   }
 
   @keyframes fade-in-up {
@@ -60,6 +69,78 @@
       transform: scale(1);
     }
   }
+
+  /* Payment specific animations */
+  --animate-fade-up-1: fadeUp 0.5s 0.1s ease-out both;
+  --animate-fade-up-2: fadeUp 0.5s 0.25s ease-out both;
+  --animate-fade-up-3: fadeUp 0.5s 0.4s ease-out both;
+  --animate-fade-up-4: fadeUp 0.5s 0.55s ease-out both;
+  --animate-payment-scale-in: paymentScaleIn 0.55s ease-out forwards;
+  --animate-pulse-ring: pulseRing 1.4s ease-out infinite;
+  --animate-shake: shakeX 0.5s ease-in-out;
+  --animate-confetti-fall: confettiFall 1.2s ease-in forwards;
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes paymentScaleIn {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    60% {
+      transform: scale(1.15);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes pulseRing {
+    0% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    100% {
+      transform: scale(1.7);
+      opacity: 0;
+    }
+  }
+
+  @keyframes shakeX {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    20%,
+    60% {
+      transform: translateX(-10px);
+    }
+    40%,
+    80% {
+      transform: translateX(10px);
+    }
+  }
+
+  @keyframes confettiFall {
+    0% {
+      transform: translateY(-20px) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(120px) rotate(720deg);
+      opacity: 0;
+    }
+  }
 }
 
 /* ============================================================================
@@ -87,10 +168,10 @@
 
   /* Muted — Slate 100 */
   --muted: oklch(0.96 0.005 247);
-  --muted-foreground: oklch(0.50 0.02 261);
+  --muted-foreground: oklch(0.5 0.02 261);
 
   /* Accent — Emerald 500 */
-  --accent: oklch(0.70 0.17 162);
+  --accent: oklch(0.7 0.17 162);
   --accent-foreground: oklch(0.985 0.002 247);
 
   /* Destructive — Red 500 */
@@ -109,7 +190,8 @@
 
   /* Shadows with brand color tint */
   --shadow-card: 0 4px 20px -2px rgba(79, 70, 229, 0.08);
-  --shadow-card-hover: 0 12px 28px -5px rgba(79, 70, 229, 0.14),
+  --shadow-card-hover:
+    0 12px 28px -5px rgba(79, 70, 229, 0.14),
     0 8px 12px -6px rgba(79, 70, 229, 0.08);
   --shadow-btn: 0 4px 14px 0 rgba(79, 70, 229, 0.25);
   --shadow-btn-hover: 0 6px 20px 0 rgba(79, 70, 229, 0.35);
@@ -125,26 +207,26 @@
   --gradient-warning: linear-gradient(135deg, #d97706, #f59e0b);
 
   /* Status colors */
-  --status-draft: oklch(0.50 0.02 261);
-  --status-quotation: oklch(0.70 0.15 85);
+  --status-draft: oklch(0.5 0.02 261);
+  --status-quotation: oklch(0.7 0.15 85);
   --status-confirmed: oklch(0.55 0.15 145);
   --status-active: oklch(0.45 0.18 264);
-  --status-paid: oklch(0.60 0.17 162);
+  --status-paid: oklch(0.6 0.17 162);
   --status-cancelled: oklch(0.577 0.245 27.325);
-  --status-closed: oklch(0.40 0.02 261);
+  --status-closed: oklch(0.4 0.02 261);
 
   /* Chart colors for reporting */
   --chart-1: oklch(0.45 0.18 264);
   --chart-2: oklch(0.44 0.24 303);
-  --chart-3: oklch(0.60 0.17 162);
-  --chart-4: oklch(0.70 0.15 85);
+  --chart-3: oklch(0.6 0.17 162);
+  --chart-4: oklch(0.7 0.15 85);
   --chart-5: oklch(0.577 0.245 27.325);
 
   /* Sidebar (admin) */
   --sidebar: oklch(0.985 0.002 247);
   --sidebar-foreground: oklch(0.13 0.028 261);
   --sidebar-muted: oklch(0.96 0.005 247);
-  --sidebar-muted-foreground: oklch(0.50 0.02 261);
+  --sidebar-muted-foreground: oklch(0.5 0.02 261);
   --sidebar-border: oklch(0.91 0.01 247);
   --sidebar-ring: oklch(0.45 0.18 264);
   --sidebar-primary: oklch(0.45 0.18 264);
@@ -169,13 +251,13 @@
   --primary: oklch(0.65 0.18 264);
   --primary-foreground: oklch(0.13 0.028 261);
 
-  --secondary: oklch(0.60 0.22 303);
+  --secondary: oklch(0.6 0.22 303);
   --secondary-foreground: oklch(0.13 0.028 261);
 
   --muted: oklch(0.22 0.025 261);
   --muted-foreground: oklch(0.65 0.02 247);
 
-  --accent: oklch(0.70 0.17 162);
+  --accent: oklch(0.7 0.17 162);
   --accent-foreground: oklch(0.13 0.028 261);
 
   --destructive: oklch(0.55 0.22 27);
@@ -187,8 +269,8 @@
 
   /* Dark shadows */
   --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
-  --shadow-card-hover: 0 12px 28px -5px rgba(99, 102, 241, 0.2),
-    0 8px 12px -6px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover:
+    0 12px 28px -5px rgba(99, 102, 241, 0.2), 0 8px 12px -6px rgba(0, 0, 0, 0.3);
   --shadow-btn: 0 4px 14px 0 rgba(99, 102, 241, 0.3);
   --shadow-btn-hover: 0 6px 20px 0 rgba(99, 102, 241, 0.4);
   --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.2);
@@ -198,18 +280,18 @@
   --gradient-cta: linear-gradient(135deg, #eef2ff, #e0e7ff);
 
   /* Dark status colors */
-  --status-draft: oklch(0.60 0.02 247);
+  --status-draft: oklch(0.6 0.02 247);
   --status-quotation: oklch(0.75 0.12 85);
   --status-confirmed: oklch(0.65 0.15 145);
   --status-active: oklch(0.65 0.18 264);
-  --status-paid: oklch(0.70 0.17 162);
+  --status-paid: oklch(0.7 0.17 162);
   --status-cancelled: oklch(0.55 0.22 27);
   --status-closed: oklch(0.55 0.02 247);
 
   /* Dark sidebar */
   --sidebar: oklch(0.15 0.025 261);
   --sidebar-foreground: oklch(0.96 0.005 247);
-  --sidebar-muted: oklch(0.20 0.025 261);
+  --sidebar-muted: oklch(0.2 0.025 261);
   --sidebar-muted-foreground: oklch(0.65 0.02 247);
   --sidebar-border: oklch(0.25 0.02 261);
   --sidebar-ring: oklch(0.65 0.18 264);
@@ -316,8 +398,12 @@ html {
 /* ── SMS DESIGN TOKENS & CYBERPUNK THEME MERGE ── */
 
 /* ── FONT ALIASES ── */
-.f-syne { font-family: var(--font-sans), 'Syne', sans-serif; }
-.f-mono { font-family: var(--font-mono), 'DM Mono', monospace; }
+.f-syne {
+  font-family: var(--font-sans), "Syne", sans-serif;
+}
+.f-mono {
+  font-family: var(--font-mono), "DM Mono", monospace;
+}
 
 /* ── GRID TEXTURE (every page) ── */
 .grid-bg {
@@ -328,112 +414,322 @@ html {
 }
 
 /* ── TABULAR NUMBERS ── */
-.tabular { font-variant-numeric: tabular-nums; }
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
 
 /* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #F9FAFB; }
-::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f9fafb;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
 
 /* ── SELECTION ── */
-::selection { background: rgba(79, 70, 229, 0.2); color: #1E1B4B; }
-
-/* ── MATERIAL SYMBOLS ── */
-.material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+::selection {
+  background: rgba(79, 70, 229, 0.2);
+  color: #1e1b4b;
 }
 
 /* ── SMS ANIMATION KEYFRAMES ── */
-@keyframes fadeUp   { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-@keyframes fadeIn   { from{opacity:0} to{opacity:1} }
-@keyframes slideR   { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
-@keyframes slideL   { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
-@keyframes panelIn  { from{opacity:0;transform:translateX(24px)} to{opacity:1;transform:translateX(0)} }
-@keyframes aiPulse  { 0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,0)} 50%{box-shadow:0 0 0 4px rgba(124,58,237,0.2)} }
-@keyframes riskPulse{ 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0)} 50%{box-shadow:0 0 0 4px rgba(239,68,68,0.12)} }
-@keyframes dotBlink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-@keyframes fillBar  { from{width:0%} }
-@keyframes stamp    { 0%{transform:rotate(-15deg) scale(2);opacity:0} 60%{transform:rotate(-15deg) scale(0.95);opacity:1} 100%{transform:rotate(-15deg) scale(1);opacity:1} }
-@keyframes orbFloat { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-18px) scale(1.04)} }
-@keyframes fabFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
-@keyframes numReveal{ from{opacity:0;transform:translateY(6px) scale(0.96)} to{opacity:1;transform:translateY(0) scale(1)} }
-@keyframes spin     { to{transform:rotate(360deg)} }
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes slideR {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes slideL {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes aiPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(124, 58, 237, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.2);
+  }
+}
+@keyframes riskPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+  }
+}
+@keyframes dotBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+@keyframes fillBar {
+  from {
+    width: 0%;
+  }
+}
+@keyframes stamp {
+  0% {
+    transform: rotate(-15deg) scale(2);
+    opacity: 0;
+  }
+  60% {
+    transform: rotate(-15deg) scale(0.95);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(-15deg) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes orbFloat {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-18px) scale(1.04);
+  }
+}
+@keyframes fabFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+@keyframes numReveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* ── ANIMATION CLASSES ── */
-.anim-up    { animation: fadeUp  0.4s cubic-bezier(0.16,1,0.3,1) both; }
-.anim-in    { animation: fadeIn  0.3s ease both; }
-.anim-r     { animation: slideR  0.35s cubic-bezier(0.16,1,0.3,1) both; }
-.anim-l     { animation: slideL  0.35s cubic-bezier(0.16,1,0.3,1) both; }
-.anim-panel { animation: panelIn 0.35s cubic-bezier(0.16,1,0.3,1) both; }
-.anim-num   { animation: numReveal 0.5s cubic-bezier(0.16,1,0.3,1) both; }
-.anim-fill  { animation: fillBar 0.9s cubic-bezier(0.16,1,0.3,1) 0.3s both; }
-.anim-stamp { animation: stamp  0.5s cubic-bezier(0.16,1,0.3,1) 0.8s both; }
-.ai-pulse   { animation: aiPulse   2.5s ease-in-out infinite; }
-.badge-risk { animation: riskPulse 2s ease-in-out infinite; }
-.dot-live   { animation: dotBlink 1.8s ease-in-out infinite; }
-.orb-float  { animation: orbFloat  8s ease-in-out infinite; }
-.fab-float  { animation: fabFloat  3s ease-in-out infinite; }
-.icon-spin  { animation: spin 0.6s linear infinite; }
+.anim-up {
+  animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.anim-in {
+  animation: fadeIn 0.3s ease both;
+}
+.anim-r {
+  animation: slideR 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.anim-l {
+  animation: slideL 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.anim-panel {
+  animation: panelIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.anim-num {
+  animation: numReveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.anim-fill {
+  animation: fillBar 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+.anim-stamp {
+  animation: stamp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.8s both;
+}
+.ai-pulse {
+  animation: aiPulse 2.5s ease-in-out infinite;
+}
+.badge-risk {
+  animation: riskPulse 2s ease-in-out infinite;
+}
+.dot-live {
+  animation: dotBlink 1.8s ease-in-out infinite;
+}
+.orb-float {
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.fab-float {
+  animation: fabFloat 3s ease-in-out infinite;
+}
+.icon-spin {
+  animation: spin 0.6s linear infinite;
+}
 
 /* ── STAGGER DELAYS ── */
-.d1{animation-delay:60ms}  .d2{animation-delay:120ms}
-.d3{animation-delay:180ms} .d4{animation-delay:240ms}
-.d5{animation-delay:300ms} .d6{animation-delay:360ms}
-.d7{animation-delay:420ms}
+.d1 {
+  animation-delay: 60ms;
+}
+.d2 {
+  animation-delay: 120ms;
+}
+.d3 {
+  animation-delay: 180ms;
+}
+.d4 {
+  animation-delay: 240ms;
+}
+.d5 {
+  animation-delay: 300ms;
+}
+.d6 {
+  animation-delay: 360ms;
+}
+.d7 {
+  animation-delay: 420ms;
+}
 
 /* ── CARD HOVER LIFT ── */
 .card-lift {
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 .card-lift:hover {
   transform: translateY(-3px);
-  border-color: rgba(0,229,255,0.15) !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,229,255,0.06);
+  border-color: rgba(0, 229, 255, 0.15) !important;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(0, 229, 255, 0.06);
 }
 
 /* ── TABLE ROW HOVER ── */
-.tr-hover { transition: background 0.12s ease; position: relative; }
-.tr-hover:hover { background: rgba(26,37,53,0.5) !important; }
-.tr-hover::before {
-  content:''; position:absolute; left:0; top:0; bottom:0; width:2px;
-  background:#00E5FF; transform:scaleY(0);
-  transition: transform 0.15s ease; transform-origin: center;
+.tr-hover {
+  transition: background 0.12s ease;
+  position: relative;
 }
-.tr-hover:hover::before { transform: scaleY(1); }
+.tr-hover:hover {
+  background: rgba(26, 37, 53, 0.5) !important;
+}
+.tr-hover::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #00e5ff;
+  transform: scaleY(0);
+  transition: transform 0.15s ease;
+  transform-origin: center;
+}
+.tr-hover:hover::before {
+  transform: scaleY(1);
+}
 
 /* ── INPUT (Admin) ── */
 .input-sms {
   background: #111820;
-  border: 1px solid #1E2D42;
+  border: 1px solid #1e2d42;
   border-radius: 2px;
-  color: #E8EDF5;
+  color: #e8edf5;
   font-family: var(--font-mono), monospace;
   font-size: 13px;
   transition: border-color 0.15s ease;
   outline: none;
 }
 .input-sms:focus {
-  border-color: rgba(0,229,255,0.5);
+  border-color: rgba(0, 229, 255, 0.5);
 }
-.input-sms::placeholder { color: #4A5D78; }
+.input-sms::placeholder {
+  color: #4a5d78;
+}
 
 /* ── BTN PRIMARY (Admin — rounded-sm) ── */
 .btn-primary-sms {
-  background: #00E5FF; color: #080B10; font-family: var(--font-sans), sans-serif;
-  font-weight: 700; border-radius: 2px; font-size: 12px;
-  transition: opacity 0.15s, transform 0.1s;
-  cursor: pointer; border: none;
+  background: #00e5ff;
+  color: #080b10;
+  font-family: var(--font-sans), sans-serif;
+  font-weight: 700;
+  border-radius: 2px;
+  font-size: 12px;
+  transition:
+    opacity 0.15s,
+    transform 0.1s;
+  cursor: pointer;
+  border: none;
 }
-.btn-primary-sms:hover { opacity: 0.9; }
-.btn-primary-sms:active { transform: scale(0.97); }
+.btn-primary-sms:hover {
+  opacity: 0.9;
+}
+.btn-primary-sms:active {
+  transform: scale(0.97);
+}
 
 /* ── BTN PORTAL (Portal — rounded-full / pill) ── */
 .btn-portal-sms {
-  background: #00E5FF; color: #080B10; font-family: var(--font-sans), sans-serif;
-  font-weight: 700; border-radius: 9999px; font-size: 14px;
-  transition: opacity 0.15s, transform 0.1s;
-  cursor: pointer; border: none;
+  background: #00e5ff;
+  color: #080b10;
+  font-family: var(--font-sans), sans-serif;
+  font-weight: 700;
+  border-radius: 9999px;
+  font-size: 14px;
+  transition:
+    opacity 0.15s,
+    transform 0.1s;
+  cursor: pointer;
+  border: none;
 }
-.btn-portal-sms:hover { opacity: 0.9; }
-.btn-portal-sms:active { transform: scale(0.98); }
+.btn-portal-sms:hover {
+  opacity: 0.9;
+}
+.btn-portal-sms:active {
+  transform: scale(0.98);
+}

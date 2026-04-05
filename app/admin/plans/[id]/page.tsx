@@ -1,22 +1,22 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { PlanForm } from "../_components/PlanForm";
-import { prisma } from "@/lib/db";
-import { requireAdminPage } from "@/lib/admin";
-import type { BillingPeriod } from "@/lib/validations/plan";
+import type { Metadata } from "next"
+import { notFound } from "next/navigation"
+import { PlanForm } from "../_components/PlanForm"
+import { prisma } from "@/lib/db"
+import { requireAdminPage } from "@/lib/admin"
+import type { BillingPeriod } from "@/lib/validations/plan"
 
 type PlanDetailPageProps = {
-  params: Promise<{ id: string }>;
-};
+  params: Promise<{ id: string }>
+}
 
 export const metadata: Metadata = {
   title: "Edit Plan",
-};
+}
 
 export default async function PlanDetailPage({ params }: PlanDetailPageProps) {
-  await requireAdminPage();
+  await requireAdminPage()
 
-  const { id } = await params;
+  const { id } = await params
   const [plan, activeSubscriptionsCount] = await prisma.$transaction([
     prisma.recurringPlan.findUnique({
       where: { id },
@@ -41,10 +41,10 @@ export default async function PlanDetailPage({ params }: PlanDetailPageProps) {
         status: "active",
       },
     }),
-  ]);
+  ])
 
   if (!plan) {
-    notFound();
+    notFound()
   }
 
   return (
@@ -56,7 +56,7 @@ export default async function PlanDetailPage({ params }: PlanDetailPageProps) {
         billingPeriod: normalizeBillingPeriod(plan.billingPeriod),
       }}
     />
-  );
+  )
 }
 
 function normalizeBillingPeriod(value: string): BillingPeriod {
@@ -64,8 +64,8 @@ function normalizeBillingPeriod(value: string): BillingPeriod {
     case "daily":
     case "weekly":
     case "yearly":
-      return value;
+      return value
     default:
-      return "monthly";
+      return "monthly"
   }
 }

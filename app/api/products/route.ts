@@ -1,34 +1,34 @@
-import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/db";
-import { requireApiRole, requireAdminApi } from "@/lib/admin";
+import { NextRequest, NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
+import { prisma } from "@/lib/db"
+import { requireApiRole, requireAdminApi } from "@/lib/admin"
 import {
   productCreateSchema,
   productFiltersSchema,
-} from "@/lib/validations/product";
+} from "@/lib/validations/product"
 
 export async function GET(request: NextRequest) {
-  const { error } = await requireApiRole(["admin", "internal"]);
+  const { error } = await requireApiRole(["admin", "internal"])
   if (error) {
-    return error;
+    return error
   }
 
-  const searchParams = request.nextUrl.searchParams;
+  const searchParams = request.nextUrl.searchParams
   const parsed = productFiltersSchema.safeParse({
     q: searchParams.get("q") ?? undefined,
     status: searchParams.get("status") ?? undefined,
     page: searchParams.get("page") ?? undefined,
     pageSize: searchParams.get("pageSize") ?? undefined,
-  });
+  })
 
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? "Invalid filters." },
-      { status: 400 },
-    );
+      { status: 400 }
+    )
   }
 
-  const { q, status, page, pageSize } = parsed.data;
+  const { q, status, page, pageSize } = parsed.data
   const where = {
     ...(q
       ? {
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
         }
       : {}),
     ...(status === "all" ? {} : { isActive: status === "active" }),
-  };
+  }
 
   const [total, products] = await prisma.$transaction([
     prisma.product.count({ where }),
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
         updatedAt: true,
       },
     }),
-  ]);
+  ])
 
   return NextResponse.json({
     products,
@@ -72,24 +72,24 @@ export async function GET(request: NextRequest) {
       total,
       totalPages: Math.max(1, Math.ceil(total / pageSize)),
     },
-  });
+  })
 }
 
 export async function POST(request: NextRequest) {
-  const { error } = await requireAdminApi();
+  const { error } = await requireAdminApi()
   if (error) {
-    return error;
+    return error
   }
 
   try {
-    const body = await request.json();
-    const parsed = productCreateSchema.safeParse(body);
+    const body = await request.json()
+    const parsed = productCreateSchema.safeParse(body)
 
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0]?.message ?? "Invalid product data." },
-        { status: 400 },
-      );
+        { status: 400 }
+      )
     }
 
     const product = await prisma.product.create({
@@ -105,17 +105,17 @@ export async function POST(request: NextRequest) {
         image: true,
         isActive: true,
       },
-    });
+    })
 
-    revalidatePath("/admin/products");
-    revalidatePath(`/admin/products/${product.id}`);
+    revalidatePath("/admin/products")
+    revalidatePath(`/admin/products/${product.id}`)
 
-    return NextResponse.json({ product }, { status: 201 });
+    return NextResponse.json({ product }, { status: 201 })
   } catch (error) {
-    console.error("[PRODUCT_CREATE_ERROR]", error);
+    console.error("[PRODUCT_CREATE_ERROR]", error)
     return NextResponse.json(
       { error: "Unable to create product right now." },
-      { status: 500 },
-    );
+      { status: 500 }
+    )
   }
 }

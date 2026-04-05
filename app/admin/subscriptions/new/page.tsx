@@ -1,46 +1,48 @@
-import type { Metadata } from "next";
-import { SubscriptionForm } from "../_components/SubscriptionForm";
-import { prisma } from "@/lib/db";
-import { requirePageRole } from "@/lib/admin";
+import type { Metadata } from "next"
+import { SubscriptionForm } from "../_components/SubscriptionForm"
+import { prisma } from "@/lib/db"
+import { requirePageRole } from "@/lib/admin"
 
 export const metadata: Metadata = {
   title: "New Subscription",
-};
+}
 
 export default async function NewSubscriptionPage() {
-  await requirePageRole(["admin", "internal"]);
+  await requirePageRole(["admin", "internal"])
 
-  const [contacts, plans, paymentTerms, products, taxes] = await Promise.all([
-    prisma.contact.findMany({
-      orderBy: [{ company: "asc" }, { firstName: "asc" }],
-      include: {
-        user: {
-          select: {
-            email: true,
-          },
+  const contacts = await prisma.contact.findMany({
+    orderBy: [{ company: "asc" }, { firstName: "asc" }],
+    include: {
+      user: {
+        select: {
+          email: true,
         },
       },
-    }),
-    prisma.recurringPlan.findMany({
-      orderBy: { name: "asc" },
-    }),
-    prisma.paymentTerms.findMany({
-      orderBy: { dueDays: "asc" },
-    }),
-    prisma.product.findMany({
-      orderBy: { name: "asc" },
-      include: {
-        variants: {
-          orderBy: [{ attribute: "asc" }, { value: "asc" }],
-        },
-        recurringPrices: true,
+    },
+  })
+
+  const plans = await prisma.recurringPlan.findMany({
+    orderBy: { name: "asc" },
+  })
+
+  const paymentTerms = await prisma.paymentTerms.findMany({
+    orderBy: { dueDays: "asc" },
+  })
+
+  const products = await prisma.product.findMany({
+    orderBy: { name: "asc" },
+    include: {
+      variants: {
+        orderBy: [{ attribute: "asc" }, { value: "asc" }],
       },
-    }),
-    prisma.tax.findMany({
-      where: { isActive: true },
-      orderBy: { name: "asc" },
-    }),
-  ]);
+      recurringPrices: true,
+    },
+  })
+
+  const taxes = await prisma.tax.findMany({
+    where: { isActive: true },
+    orderBy: { name: "asc" },
+  })
 
   return (
     <SubscriptionForm
@@ -49,7 +51,10 @@ export default async function NewSubscriptionPage() {
       contacts={contacts.map((contact) => ({
         id: contact.id,
         name:
-          [contact.firstName, contact.lastName].filter(Boolean).join(" ").trim() ||
+          [contact.firstName, contact.lastName]
+            .filter(Boolean)
+            .join(" ")
+            .trim() ||
           contact.company ||
           "Customer",
         email: contact.user.email,
@@ -91,5 +96,5 @@ export default async function NewSubscriptionPage() {
         isActive: tax.isActive,
       }))}
     />
-  );
+  )
 }

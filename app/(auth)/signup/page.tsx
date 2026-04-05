@@ -5,7 +5,13 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { IconLoader2, IconMail, IconLock, IconUser, IconBrandGoogle } from "@tabler/icons-react"
+import {
+  IconLoader2,
+  IconMail,
+  IconLock,
+  IconUser,
+  IconBrandGoogle,
+} from "@tabler/icons-react"
 import { toast } from "sonner"
 import { getDemoSignupData } from "@/lib/demo-data"
 import { signupSchema, type SignupFormData } from "@/lib/validations/auth"
@@ -250,10 +256,12 @@ export default function SignupPage() {
       {/* Divider */}
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border"></div>
+          <div className="border-border w-full border-t"></div>
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background text-muted-foreground px-2">Or continue with</span>
+          <span className="bg-background text-muted-foreground px-2">
+            Or continue with
+          </span>
         </div>
       </div>
 
@@ -262,7 +270,7 @@ export default function SignupPage() {
         type="button"
         onClick={handleGoogleSignIn}
         disabled={isSubmitting || isGoogleLoading}
-        className="flex w-full items-center justify-center gap-3 rounded-full border border-input bg-background py-3 text-sm font-semibold transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+        className="border-input bg-background hover:bg-accent flex w-full items-center justify-center gap-3 rounded-full border py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isGoogleLoading ? (
           <>

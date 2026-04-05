@@ -14,13 +14,19 @@ type PaymentsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
-const INR = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 })
+const INR = new Intl.NumberFormat("en-IN", {
+  style: "currency",
+  currency: "INR",
+  maximumFractionDigits: 2,
+})
 
 /**
  * Internal Payments page — view all recorded payments with invoice linkage.
  * @security Requires internal role.
  */
-export default async function InternalPaymentsPage({ searchParams }: PaymentsPageProps) {
+export default async function InternalPaymentsPage({
+  searchParams,
+}: PaymentsPageProps) {
   await requireInternalPage()
 
   const rawParams = await searchParams
@@ -31,7 +37,11 @@ export default async function InternalPaymentsPage({ searchParams }: PaymentsPag
   const where = q
     ? {
         OR: [
-          { invoice: { invoiceNumber: { contains: q, mode: "insensitive" as const } } },
+          {
+            invoice: {
+              invoiceNumber: { contains: q, mode: "insensitive" as const },
+            },
+          },
           { paymentMethod: { contains: q, mode: "insensitive" as const } },
         ],
       }
@@ -63,19 +73,22 @@ export default async function InternalPaymentsPage({ searchParams }: PaymentsPag
 
   return (
     <div className="space-y-8">
-      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-card via-card to-sky-500/5 p-6 shadow-sm">
-        <p className="text-xs font-semibold tracking-[0.28em] text-sky-600 uppercase">Finance</p>
+      <section className="border-border from-card via-card rounded-[2rem] border bg-gradient-to-br to-sky-500/5 p-6 shadow-sm">
+        <p className="text-xs font-semibold tracking-[0.28em] text-sky-600 uppercase">
+          Finance
+        </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight">Payments</h1>
-        <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-          Track all recorded payments and their association with invoices. Use this to verify outstanding balances.
+        <p className="text-muted-foreground mt-3 max-w-2xl text-sm">
+          Track all recorded payments and their association with invoices. Use
+          this to verify outstanding balances.
         </p>
       </section>
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="border-border bg-card overflow-hidden rounded-2xl border">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-border">
+          <table className="divide-border min-w-full divide-y">
             <thead className="bg-muted/40">
-              <tr className="text-left text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+              <tr className="text-muted-foreground text-left text-xs font-semibold tracking-widest uppercase">
                 <th className="px-5 py-4">Invoice</th>
                 <th className="px-5 py-4">Amount</th>
                 <th className="px-5 py-4">Method</th>
@@ -84,28 +97,38 @@ export default async function InternalPaymentsPage({ searchParams }: PaymentsPag
                 <th className="px-5 py-4 text-right">Invoice</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border bg-card">
+            <tbody className="divide-border bg-card divide-y">
               {payments.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-14 text-center">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
-                      <IconCreditCard className="h-6 w-6 text-muted-foreground" />
+                    <div className="bg-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl">
+                      <IconCreditCard className="text-muted-foreground h-6 w-6" />
                     </div>
-                    <h2 className="mt-4 text-lg font-semibold">No payments recorded yet</h2>
+                    <h2 className="mt-4 text-lg font-semibold">
+                      No payments recorded yet
+                    </h2>
                   </td>
                 </tr>
               ) : (
                 payments.map((p) => (
                   <tr key={p.id} className="hover:bg-muted/20">
-                    <td className="px-5 py-4 font-mono text-sm">{p.invoice.invoiceNumber}</td>
-                    <td className="px-5 py-4 font-semibold text-emerald-600">{INR.format(p.amount)}</td>
-                    <td className="px-5 py-4 text-sm capitalize text-muted-foreground">
+                    <td className="px-5 py-4 font-mono text-sm">
+                      {p.invoice.invoiceNumber}
+                    </td>
+                    <td className="px-5 py-4 font-semibold text-emerald-600">
+                      {INR.format(p.amount)}
+                    </td>
+                    <td className="text-muted-foreground px-5 py-4 text-sm capitalize">
                       {p.paymentMethod.replace(/_/g, " ")}
                     </td>
-                    <td className="px-5 py-4 text-sm text-muted-foreground">
-                      {new Date(p.paymentDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                    <td className="text-muted-foreground px-5 py-4 text-sm">
+                      {new Date(p.paymentDate).toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
                     </td>
-                    <td className="px-5 py-4 text-sm text-muted-foreground">
+                    <td className="text-muted-foreground px-5 py-4 text-sm">
                       {p.createdBy?.name ?? "—"}
                     </td>
                     <td className="px-5 py-4 text-right">
@@ -124,17 +147,27 @@ export default async function InternalPaymentsPage({ searchParams }: PaymentsPag
           </table>
         </div>
 
-        <div className="flex items-center justify-between gap-3 px-5 py-4 border-t border-border">
-          <p className="text-sm text-muted-foreground">{total} payment{total === 1 ? "" : "s"} total</p>
+        <div className="border-border flex items-center justify-between gap-3 border-t px-5 py-4">
+          <p className="text-muted-foreground text-sm">
+            {total} payment{total === 1 ? "" : "s"} total
+          </p>
           <div className="flex items-center gap-2">
             {page > 1 && (
-              <Link href={buildHref(rawParams, page - 1)} className="rounded-full border border-border px-4 py-2 text-sm font-semibold hover:bg-muted">
+              <Link
+                href={buildHref(rawParams, page - 1)}
+                className="border-border hover:bg-muted rounded-full border px-4 py-2 text-sm font-semibold"
+              >
                 Previous
               </Link>
             )}
-            <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+            <span className="text-muted-foreground text-sm">
+              Page {page} of {totalPages}
+            </span>
             {page < totalPages && (
-              <Link href={buildHref(rawParams, page + 1)} className="rounded-full border border-border px-4 py-2 text-sm font-semibold hover:bg-muted">
+              <Link
+                href={buildHref(rawParams, page + 1)}
+                className="border-border hover:bg-muted rounded-full border px-4 py-2 text-sm font-semibold"
+              >
                 Next
               </Link>
             )}
@@ -149,7 +182,10 @@ function firstValue(v: string | string[] | undefined) {
   return Array.isArray(v) ? v[0] : v
 }
 
-function buildHref(params: Record<string, string | string[] | undefined>, nextPage: number) {
+function buildHref(
+  params: Record<string, string | string[] | undefined>,
+  nextPage: number
+) {
   const p = new URLSearchParams()
   const q = firstValue(params.q)
   if (q) p.set("q", q)

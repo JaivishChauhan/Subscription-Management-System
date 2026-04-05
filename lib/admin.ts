@@ -19,7 +19,9 @@ import { getDefaultPortalPath, type UserRole } from "@/lib/roles"
  *
  * @returns The authenticated session (never null — will redirect otherwise).
  */
-export async function requirePageRole(allowedRoles: UserRole[]): Promise<Session> {
+export async function requirePageRole(
+  allowedRoles: UserRole[]
+): Promise<Session> {
   const session = await auth()
 
   if (!session?.user?.id) {
@@ -49,7 +51,9 @@ export async function requireInternalPage(): Promise<Session> {
  * Guards an API route handler by role.
  * Returns a 401/403 NextResponse if the check fails, or the session if it passes.
  */
-export async function requireApiRole(allowedRoles: UserRole[]): Promise<
+export async function requireApiRole(
+  allowedRoles: UserRole[]
+): Promise<
   { error: NextResponse; session: null } | { error: null; session: Session }
 > {
   const session = await auth()

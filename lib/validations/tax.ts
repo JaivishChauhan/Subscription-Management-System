@@ -1,15 +1,15 @@
-import { z } from "zod";
+import { z } from "zod"
 
-const taxTypeValues = ["percentage", "fixed"] as const;
+const taxTypeValues = ["percentage", "fixed"] as const
 
 const emptyStringToUndefined = (value: unknown) => {
   if (typeof value !== "string") {
-    return value;
+    return value
   }
 
-  const trimmedValue = value.trim();
-  return trimmedValue === "" ? undefined : trimmedValue;
-};
+  const trimmedValue = value.trim()
+  return trimmedValue === "" ? undefined : trimmedValue
+}
 
 const taxBaseSchema = z.object({
   name: z
@@ -29,10 +29,10 @@ const taxBaseSchema = z.object({
     z
       .string()
       .max(500, "Description must be 500 characters or fewer.")
-      .optional(),
+      .optional()
   ),
   isActive: z.coerce.boolean().optional(),
-});
+})
 
 export const taxCreateSchema = taxBaseSchema
   .extend({
@@ -44,9 +44,9 @@ export const taxCreateSchema = taxBaseSchema
         code: z.ZodIssueCode.custom,
         path: ["rate"],
         message: "Percentage tax rate cannot exceed 100.",
-      });
+      })
     }
-  });
+  })
 
 export const taxUpdateSchema = taxBaseSchema
   .partial()
@@ -55,27 +55,31 @@ export const taxUpdateSchema = taxBaseSchema
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "At least one tax field is required.",
-      });
+      })
     }
 
-    if (data.type === "percentage" && typeof data.rate === "number" && data.rate > 100) {
+    if (
+      data.type === "percentage" &&
+      typeof data.rate === "number" &&
+      data.rate > 100
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["rate"],
         message: "Percentage tax rate cannot exceed 100.",
-      });
+      })
     }
-  });
+  })
 
 export const taxFiltersSchema = z.object({
   q: z.preprocess(
     emptyStringToUndefined,
-    z.string().max(120, "Search query is too long.").optional(),
+    z.string().max(120, "Search query is too long.").optional()
   ),
   status: z.enum(["all", "active", "inactive"]).optional().default("all"),
   page: z.coerce.number().int().min(1).optional().default(1),
   pageSize: z.coerce.number().int().min(1).max(50).optional().default(10),
-});
+})
 
-export type TaxType = (typeof taxTypeValues)[number];
-export type TaxCreateInput = z.infer<typeof taxCreateSchema>;
+export type TaxType = (typeof taxTypeValues)[number]
+export type TaxCreateInput = z.infer<typeof taxCreateSchema>

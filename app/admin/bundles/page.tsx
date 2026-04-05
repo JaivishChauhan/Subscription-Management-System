@@ -27,13 +27,27 @@ export default async function AdminBundlesPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-card via-card to-indigo-500/5 p-6 shadow-sm">
-        <p className="text-xs font-semibold tracking-[0.28em] text-indigo-600 uppercase">
-          Marketplace Bundles
-        </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">Bundle merchandising</h1>
+      <section className="border-border from-card via-card rounded-[2rem] border bg-gradient-to-br to-indigo-500/5 p-6 shadow-sm">
+        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <p className="text-xs font-semibold tracking-[0.28em] text-indigo-600 uppercase">
+              Marketplace Bundles
+            </p>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight">
+              Bundle merchandising
+            </h1>
+          </div>
+          <Link
+            href="/admin/bundles/new"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+          >
+            <IconPuzzle className="h-4 w-4" />
+            New Bundle
+          </Link>
+        </div>
         <p className="text-muted-foreground mt-3 max-w-2xl text-sm sm:text-base">
-          Monitor predefined and suggested bundles that shape marketplace packaging and discounts.
+          Monitor predefined and suggested bundles that shape marketplace
+          packaging and discounts.
         </p>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <SummaryCard label="Active Bundles" value={activeCount} />
@@ -42,29 +56,32 @@ export default async function AdminBundlesPage() {
         </div>
       </section>
 
-      <section className="rounded-[2rem] border border-border bg-card p-6 shadow-sm">
-        <div className="overflow-hidden rounded-3xl border border-border">
+      <section className="border-border bg-card rounded-[2rem] border p-6 shadow-sm">
+        <div className="border-border overflow-hidden rounded-3xl border">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border">
+            <table className="divide-border min-w-full divide-y">
               <thead className="bg-muted/40">
-                <tr className="text-left text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                <tr className="text-muted-foreground text-left text-xs font-semibold tracking-[0.18em] uppercase">
                   <th className="px-5 py-4">Bundle</th>
                   <th className="px-5 py-4">Type</th>
                   <th className="px-5 py-4">Discount</th>
                   <th className="px-5 py-4">Services</th>
                   <th className="px-5 py-4">Marketplace</th>
+                  <th className="px-5 py-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border bg-card">
+              <tbody className="divide-border bg-card divide-y">
                 {bundles.map((bundle) => (
                   <tr key={bundle.id} className="hover:bg-muted/20">
                     <td className="px-5 py-4">
                       <div>
                         <p className="font-semibold">{bundle.name}</p>
-                        <p className="text-muted-foreground text-sm">{bundle.slug}</p>
+                        <p className="text-muted-foreground text-sm">
+                          {bundle.slug}
+                        </p>
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-sm capitalize text-muted-foreground">
+                    <td className="text-muted-foreground px-5 py-4 text-sm capitalize">
                       {bundle.type}
                     </td>
                     <td className="px-5 py-4 text-sm font-medium">
@@ -72,15 +89,16 @@ export default async function AdminBundlesPage() {
                         ? formatCurrency(bundle.discountValue)
                         : `${bundle.discountValue}%`}
                     </td>
-                    <td className="px-5 py-4 text-sm text-muted-foreground">
+                    <td className="text-muted-foreground px-5 py-4 text-sm">
                       {bundle.services.length}
                     </td>
                     <td className="px-5 py-4">
                       <Link
-                        href="/bundles"
+                        href={`/admin/bundles/${bundle.id}`}
                         className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-500"
                       >
-                        View bundles
+                        {" "}
+                        Edit
                         <IconArrowRight className="h-4 w-4" />
                       </Link>
                     </td>
@@ -90,12 +108,15 @@ export default async function AdminBundlesPage() {
                   <tr>
                     <td colSpan={5} className="px-5 py-14 text-center">
                       <div className="mx-auto max-w-md">
-                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
-                          <IconPuzzle className="h-6 w-6 text-muted-foreground" />
+                        <div className="bg-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl">
+                          <IconPuzzle className="text-muted-foreground h-6 w-6" />
                         </div>
-                        <h2 className="mt-4 text-lg font-semibold">No bundles found</h2>
+                        <h2 className="mt-4 text-lg font-semibold">
+                          No bundles found
+                        </h2>
                         <p className="text-muted-foreground mt-2 text-sm">
-                          Bundle records will appear here once marketplace packaging is configured.
+                          Bundle records will appear here once marketplace
+                          packaging is configured.
                         </p>
                       </div>
                     </td>
@@ -112,8 +133,8 @@ export default async function AdminBundlesPage() {
 
 function SummaryCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-3xl border border-border bg-card/80 p-5">
-      <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+    <div className="border-border bg-card/80 rounded-3xl border p-5">
+      <p className="text-muted-foreground text-xs font-semibold tracking-[0.2em] uppercase">
         {label}
       </p>
       <p className="mt-3 text-3xl font-bold tracking-tight">{value}</p>

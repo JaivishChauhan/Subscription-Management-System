@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { IconArrowRight, IconReceipt2 } from "@tabler/icons-react"
+import { IconReceipt2, IconPlus, IconArrowRight } from "@tabler/icons-react"
 import { requireAdminPage } from "@/lib/admin"
 import { prisma } from "@/lib/db"
 
@@ -32,22 +32,35 @@ export default async function AdminQuotationsPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-card via-card to-indigo-500/5 p-6 shadow-sm">
-        <p className="text-xs font-semibold tracking-[0.28em] text-indigo-600 uppercase">
-          Quotations
-        </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">Pre-confirmation pipeline</h1>
+      <section className="border-border from-card via-card rounded-[2rem] border bg-gradient-to-br to-indigo-500/5 p-6 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold tracking-[0.28em] text-indigo-600 uppercase">
+              Quotations
+            </p>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight">
+              Pre-confirmation pipeline
+            </h1>
+          </div>
+          <Link
+            href="/admin/subscriptions/new"
+            className="inline-flex max-w-fit items-center justify-center gap-2 rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+          >
+            <IconPlus className="h-4 w-4" />
+            New Quotation
+          </Link>
+        </div>
         <p className="text-muted-foreground mt-3 max-w-2xl text-sm sm:text-base">
-          This view isolates subscriptions currently in the quotation lifecycle stage.
+          This view isolates subscriptions currently in the quotation lifecycle
         </p>
       </section>
 
-      <section className="rounded-[2rem] border border-border bg-card p-6 shadow-sm">
-        <div className="overflow-hidden rounded-3xl border border-border">
+      <section className="border-border bg-card rounded-[2rem] border p-6 shadow-sm">
+        <div className="border-border overflow-hidden rounded-3xl border">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border">
+            <table className="divide-border min-w-full divide-y">
               <thead className="bg-muted/40">
-                <tr className="text-left text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                <tr className="text-muted-foreground text-left text-xs font-semibold tracking-[0.18em] uppercase">
                   <th className="px-5 py-4">Quotation</th>
                   <th className="px-5 py-4">Customer</th>
                   <th className="px-5 py-4">Plan</th>
@@ -55,27 +68,34 @@ export default async function AdminQuotationsPage() {
                   <th className="px-5 py-4 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border bg-card">
+              <tbody className="divide-border bg-card divide-y">
                 {quotations.map((quotation) => (
                   <tr key={quotation.id} className="hover:bg-muted/20">
-                    <td className="px-5 py-4 font-semibold">{quotation.subscriptionNumber}</td>
+                    <td className="px-5 py-4 font-semibold">
+                      {quotation.subscriptionNumber}
+                    </td>
                     <td className="px-5 py-4">
                       <div>
                         <p className="font-medium">
-                          {[quotation.contact.firstName, quotation.contact.lastName]
+                          {[
+                            quotation.contact.firstName,
+                            quotation.contact.lastName,
+                          ]
                             .filter(Boolean)
                             .join(" ")
-                            .trim() || quotation.contact.company || "Customer"}
+                            .trim() ||
+                            quotation.contact.company ||
+                            "Customer"}
                         </p>
                         <p className="text-muted-foreground text-sm">
                           {quotation.contact.user.email}
                         </p>
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-sm text-muted-foreground">
+                    <td className="text-muted-foreground px-5 py-4 text-sm">
                       {quotation.recurringPlan.name}
                     </td>
-                    <td className="px-5 py-4 text-sm text-muted-foreground">
+                    <td className="text-muted-foreground px-5 py-4 text-sm">
                       {formatDate(quotation.updatedAt)}
                     </td>
                     <td className="px-5 py-4 text-right">
@@ -93,12 +113,15 @@ export default async function AdminQuotationsPage() {
                   <tr>
                     <td colSpan={5} className="px-5 py-14 text-center">
                       <div className="mx-auto max-w-md">
-                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
-                          <IconReceipt2 className="h-6 w-6 text-muted-foreground" />
+                        <div className="bg-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl">
+                          <IconReceipt2 className="text-muted-foreground h-6 w-6" />
                         </div>
-                        <h2 className="mt-4 text-lg font-semibold">No quotations found</h2>
+                        <h2 className="mt-4 text-lg font-semibold">
+                          No quotations found
+                        </h2>
                         <p className="text-muted-foreground mt-2 text-sm">
-                          Subscription records in quotation state will appear here.
+                          Subscription records in quotation state will appear
+                          here.
                         </p>
                       </div>
                     </td>

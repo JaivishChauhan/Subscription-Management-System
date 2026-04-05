@@ -7,7 +7,13 @@ export const dynamic = "force-dynamic"
 export default async function InternalDashboardPage() {
   await requireInternalPage()
 
-  const [activeSubsCount, confirmedCount, confirmedTotalAgg, invoiceAgg, overdueCount] = await prisma.$transaction([
+  const [
+    activeSubsCount,
+    confirmedCount,
+    confirmedTotalAgg,
+    invoiceAgg,
+    overdueCount,
+  ] = await prisma.$transaction([
     prisma.subscription.count({
       where: { status: "active" },
     }),
@@ -32,14 +38,17 @@ export default async function InternalDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-card via-card to-sky-500/5 p-6 shadow-sm">
+      <section className="border-border from-card via-card rounded-[2rem] border bg-gradient-to-br to-sky-500/5 p-6 shadow-sm">
         <p className="text-xs font-semibold tracking-[0.28em] text-sky-600 uppercase">
           Internal Operations
         </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">Operational workspace</h1>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight">
+          Operational workspace
+        </h1>
         <p className="text-muted-foreground mt-3 max-w-3xl text-sm sm:text-base">
-          Internal users now land in a separate portal focused on day-to-day subscription and
-          invoice operations, without the admin-only catalog and configuration modules.
+          Internal users now land in a separate portal focused on day-to-day
+          subscription and invoice operations, without the admin-only catalog
+          and configuration modules.
         </p>
       </section>
 
@@ -59,10 +68,26 @@ export default async function InternalDashboardPage() {
           { month: "JUN", actual: 74, forecast: 72 },
         ]}
         churnData={[
-          { name: "Pending renewals", sub: "Watch upcoming activations and follow-ups.", initials: "PR" },
-          { name: "Billing queue", sub: "Confirmed invoices need payment follow-through.", initials: "BQ" },
-          { name: "Customer responses", sub: "Review recent operational exceptions.", initials: "CR" },
-          { name: "Provisioning checks", sub: "Verify newly activated subscriptions.", initials: "PC" },
+          {
+            name: "Pending renewals",
+            sub: "Watch upcoming activations and follow-ups.",
+            initials: "PR",
+          },
+          {
+            name: "Billing queue",
+            sub: "Confirmed invoices need payment follow-through.",
+            initials: "BQ",
+          },
+          {
+            name: "Customer responses",
+            sub: "Review recent operational exceptions.",
+            initials: "CR",
+          },
+          {
+            name: "Provisioning checks",
+            sub: "Verify newly activated subscriptions.",
+            initials: "PC",
+          },
         ]}
         timeline={[
           {
@@ -85,8 +110,16 @@ export default async function InternalDashboardPage() {
           },
         ]}
         planDist={[
-          { name: "Active Subscriptions", pct: `${activeSubsCount}`, color: "#0ea5e9" },
-          { name: "Confirmed Invoices", pct: `${confirmedCount}`, color: "#06b6d4" },
+          {
+            name: "Active Subscriptions",
+            pct: `${activeSubsCount}`,
+            color: "#0ea5e9",
+          },
+          {
+            name: "Confirmed Invoices",
+            pct: `${confirmedCount}`,
+            color: "#06b6d4",
+          },
           { name: "Overdue Items", pct: `${overdueCount}`, color: "#f97316" },
         ]}
       />

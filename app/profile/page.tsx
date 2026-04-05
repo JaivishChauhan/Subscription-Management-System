@@ -1,22 +1,22 @@
-import { redirect } from "next/navigation";
-import Link from "next/link";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { redirect } from "next/navigation"
+import Link from "next/link"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/db"
 import {
   IconUser,
   IconMail,
   IconPhone,
   IconMapPin,
   IconBuilding,
-} from "@tabler/icons-react";
+} from "@tabler/icons-react"
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"
 
 export default async function ProfilePage() {
-  const session = await auth();
+  const session = await auth()
 
   if (!session?.user) {
-    redirect("/login");
+    redirect("/login")
   }
 
   const user = await prisma.user.findUnique({
@@ -24,25 +24,25 @@ export default async function ProfilePage() {
     include: {
       contact: true,
     },
-  });
+  })
 
   if (!user) {
-    redirect("/login");
+    redirect("/login")
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Profile Settings</h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="text-muted-foreground mt-2">
             Manage your account information and preferences
           </p>
         </div>
 
         <div className="space-y-6">
           {/* Account Information */}
-          <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
+          <div className="border-border bg-card rounded-lg border p-6 shadow-sm">
             <h2 className="mb-4 text-xl font-bold">Account Information</h2>
             <div className="space-y-4">
               <div className="flex items-center gap-3">
@@ -50,7 +50,7 @@ export default async function ProfilePage() {
                   <IconUser className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Full Name</p>
+                  <p className="text-muted-foreground text-sm">Full Name</p>
                   <p className="font-semibold">{user.name || "Not set"}</p>
                 </div>
               </div>
@@ -59,7 +59,7 @@ export default async function ProfilePage() {
                   <IconMail className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="text-muted-foreground text-sm">Email</p>
                   <p className="font-semibold">{user.email}</p>
                 </div>
               </div>
@@ -68,7 +68,7 @@ export default async function ProfilePage() {
                   <IconPhone className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Phone</p>
+                  <p className="text-muted-foreground text-sm">Phone</p>
                   <p className="font-semibold">{user.phone || "Not set"}</p>
                 </div>
               </div>
@@ -77,7 +77,7 @@ export default async function ProfilePage() {
 
           {/* Contact Details */}
           {user.contact && (
-            <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
+            <div className="border-border bg-card rounded-lg border p-6 shadow-sm">
               <h2 className="mb-4 text-xl font-bold">Contact Details</h2>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -85,7 +85,7 @@ export default async function ProfilePage() {
                     <IconBuilding className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Company</p>
+                    <p className="text-muted-foreground text-sm">Company</p>
                     <p className="font-semibold">
                       {user.contact.company || "Not set"}
                     </p>
@@ -96,7 +96,7 @@ export default async function ProfilePage() {
                     <IconMapPin className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Address</p>
+                    <p className="text-muted-foreground text-sm">Address</p>
                     <p className="font-semibold">
                       {user.contact.address
                         ? `${user.contact.address}, ${user.contact.city || ""}`
@@ -109,27 +109,27 @@ export default async function ProfilePage() {
           )}
 
           {/* Account Stats */}
-          <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
+          <div className="border-border bg-card rounded-lg border p-6 shadow-sm">
             <h2 className="mb-4 text-xl font-bold">Account Details</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <p className="text-sm text-muted-foreground">Account Role</p>
+                <p className="text-muted-foreground text-sm">Account Role</p>
                 <p className="mt-1 font-semibold capitalize">{user.role}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Member Since</p>
+                <p className="text-muted-foreground text-sm">Member Since</p>
                 <p className="mt-1 font-semibold">
                   {new Date(user.createdAt).toLocaleDateString()}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Email Verified</p>
+                <p className="text-muted-foreground text-sm">Email Verified</p>
                 <p className="mt-1 font-semibold">
                   {user.emailVerified ? "Yes" : "No"}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Last Updated</p>
+                <p className="text-muted-foreground text-sm">Last Updated</p>
                 <p className="mt-1 font-semibold">
                   {new Date(user.updatedAt).toLocaleDateString()}
                 </p>
@@ -141,7 +141,7 @@ export default async function ProfilePage() {
           <div className="flex gap-4">
             <button
               type="button"
-              className="rounded-full border border-border bg-card px-6 py-2 text-sm font-semibold transition-colors hover:bg-muted"
+              className="border-border bg-card hover:bg-muted rounded-full border px-6 py-2 text-sm font-semibold transition-colors"
             >
               Edit Profile
             </button>
@@ -155,5 +155,5 @@ export default async function ProfilePage() {
         </div>
       </main>
     </div>
-  );
+  )
 }

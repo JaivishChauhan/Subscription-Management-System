@@ -9,7 +9,8 @@ import { z } from "zod"
 import { DEMO_CHECKOUT_DETAILS, DEMO_PAYMENT_DETAILS } from "@/lib/demo-data"
 import { useCartStore } from "@/store/cart"
 import { toast } from "sonner"
-import { IconRocket } from "@tabler/icons-react"
+import { IconRocket, IconShoppingCart } from "@tabler/icons-react"
+import { processCheckout } from "@/actions/checkout-actions"
 
 const checkoutSchema = z.object({
   fullName: z.string().min(1, "Required"),
@@ -49,6 +50,7 @@ export function CheckoutClient() {
     register,
     handleSubmit,
     reset,
+    getValues,
     formState: { errors },
   } = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
@@ -64,15 +66,39 @@ export function CheckoutClient() {
     },
   })
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     if (step === 2) {
       setStep(3)
       return
     }
-    // Simulate payment submission
+    // Get form values for the success page
+    const values = getValues()
+    const mockPaymentId = `pay_${Math.random().toString(36).substring(2, 11)}`
+    const mockOrderId = `order_${Math.random().toString(36).substring(2, 11)}`
+    const mockInvoiceId = `INV-${Math.floor(Math.random() * 10000)
+      .toString()
+      .padStart(4, "0")}`
+
+    const res = await processCheckout(items)
+    if (res.error) {
+      toast.error(res.error)
+      return
+    }
+
+    const params = new URLSearchParams({
+      amount: total.toString(),
+      currency: "₹",
+      customerName: values.fullName || "Customer",
+      customerEmail: values.email || "",
+      orderId: mockOrderId,
+      paymentId: mockPaymentId,
+      invoiceId: mockInvoiceId,
+    })
+
+    // Simulate payment submission but actually save the subscription
     toast.success("Payment confirmed! Subscription active.")
     clearCart()
-    router.push("/pricing")
+    router.push(`/checkout/success?${params.toString()}`)
   }
 
   const handleAutofillBilling = () => {
@@ -111,9 +137,7 @@ export function CheckoutClient() {
             href="/cart"
             className="text-muted-foreground transition-colors hover:text-indigo-600"
           >
-            <span className="material-symbols-outlined text-[22px]">
-              shopping_cart
-            </span>
+            <IconShoppingCart className="h-5 w-5" />
           </Link>
         </div>
       </nav>
@@ -475,19 +499,36 @@ export function CheckoutClient() {
                       </span>
                     </div>
                     <span className="text-foreground font-bold">
-                      {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(item.price * item.quantity)}
+                      {new Intl.NumberFormat("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                        maximumFractionDigits: 0,
+                      }).format(item.price * item.quantity)}
                     </span>
                   </div>
                 ))}
                 {discount && (
                   <div className="flex justify-between font-bold text-indigo-600">
                     <span>Discount {discount.code}</span>
-                    <span>-{new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(discountAmount)}</span>
+                    <span>
+                      -
+                      {new Intl.NumberFormat("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                        maximumFractionDigits: 0,
+                      }).format(discountAmount)}
+                    </span>
                   </div>
                 )}
                 <div className="text-muted-foreground flex justify-between">
                   <span>GST (18%)</span>
-                  <span>{new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(tax)}</span>
+                  <span>
+                    {new Intl.NumberFormat("en-IN", {
+                      style: "currency",
+                      currency: "INR",
+                      maximumFractionDigits: 0,
+                    }).format(tax)}
+                  </span>
                 </div>
               </div>
               <div className="border-border mt-6 border-t pt-6">
@@ -495,7 +536,11 @@ export function CheckoutClient() {
                   Monthly Total
                 </p>
                 <p className="f-syne text-[36px] font-extrabold tracking-tight text-indigo-600">
-                  {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(total)}
+                  {new Intl.NumberFormat("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                    maximumFractionDigits: 0,
+                  }).format(total)}
                 </p>
               </div>
               <div className="mt-4 rounded-lg border border-indigo-100 bg-indigo-50 p-3">

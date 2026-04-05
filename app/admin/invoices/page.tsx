@@ -1,24 +1,28 @@
-import type { Metadata } from "next";
-import Link from "next/link";
+import type { Metadata } from "next"
+import Link from "next/link"
 import {
   IconArrowRight,
   IconFileInvoice,
   IconSearch,
-} from "@tabler/icons-react";
-import { prisma } from "@/lib/db";
-import { requirePageRole } from "@/lib/admin";
-import { invoiceFiltersSchema, type InvoiceStatus } from "@/lib/validations/invoice";
-import { InvoiceStatusBadge } from "./_components/InvoiceStatusBadge";
+  IconPlus,
+} from "@tabler/icons-react"
+import { prisma } from "@/lib/db"
+import { requirePageRole } from "@/lib/admin"
+import {
+  invoiceFiltersSchema,
+  type InvoiceStatus,
+} from "@/lib/validations/invoice"
+import { InvoiceStatusBadge } from "./_components/InvoiceStatusBadge"
 
 export const metadata: Metadata = {
   title: "Invoices",
-};
+}
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"
 
 type InvoicesPageProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
 
 const STATUS_TABS: Array<{ label: string; value: "all" | InvoiceStatus }> = [
   { label: "All", value: "all" },
@@ -26,69 +30,89 @@ const STATUS_TABS: Array<{ label: string; value: "all" | InvoiceStatus }> = [
   { label: "Confirmed", value: "confirmed" },
   { label: "Paid", value: "paid" },
   { label: "Cancelled", value: "cancelled" },
-];
+]
 
-export default async function InvoicesPage({ searchParams }: InvoicesPageProps) {
-  await requirePageRole(["admin", "internal"]);
+export default async function InvoicesPage({
+  searchParams,
+}: InvoicesPageProps) {
+  await requirePageRole(["admin", "internal"])
 
-  const rawSearchParams = await searchParams;
+  const rawSearchParams = await searchParams
   const parsed = invoiceFiltersSchema.parse({
     q: firstValue(rawSearchParams.q),
     status: firstValue(rawSearchParams.status),
     page: firstValue(rawSearchParams.page),
     pageSize: firstValue(rawSearchParams.pageSize),
-  });
+  })
 
-  const { q, status, page, pageSize } = parsed;
-  const where = buildInvoiceWhereClause({ q, status });
+  const { q, status, page, pageSize } = parsed
+  const where = buildInvoiceWhereClause({ q, status })
 
-  const [invoices, totalInvoices, draftCount, confirmedCount, paidCount, cancelledCount] =
-    await prisma.$transaction([
-      prisma.invoice.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        include: {
-          contact: {
-            include: {
-              user: {
-                select: {
-                  email: true,
-                },
+  const [
+    invoices,
+    totalInvoices,
+    draftCount,
+    confirmedCount,
+    paidCount,
+    cancelledCount,
+  ] = await prisma.$transaction([
+    prisma.invoice.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: {
+        contact: {
+          include: {
+            user: {
+              select: {
+                email: true,
               },
             },
           },
         },
-      }),
-      prisma.invoice.count({ where }),
-      prisma.invoice.count({ where: { status: "draft" } }),
-      prisma.invoice.count({ where: { status: "confirmed" } }),
-      prisma.invoice.count({ where: { status: "paid" } }),
-      prisma.invoice.count({ where: { status: "cancelled" } }),
-    ]);
+      },
+    }),
+    prisma.invoice.count({ where }),
+    prisma.invoice.count({ where: { status: "draft" } }),
+    prisma.invoice.count({ where: { status: "confirmed" } }),
+    prisma.invoice.count({ where: { status: "paid" } }),
+    prisma.invoice.count({ where: { status: "cancelled" } }),
+  ])
 
-  const totalPages = Math.max(1, Math.ceil(totalInvoices / pageSize));
+  const totalPages = Math.max(1, Math.ceil(totalInvoices / pageSize))
   const statusCounts: Record<string, number> = {
     all: draftCount + confirmedCount + paidCount + cancelledCount,
     draft: draftCount,
     confirmed: confirmedCount,
     paid: paidCount,
     cancelled: cancelledCount,
-  };
+  }
 
   return (
     <div className="space-y-8">
-      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-card via-card to-indigo-500/5 p-6 shadow-sm">
-        <div className="max-w-2xl">
-          <p className="text-xs font-semibold tracking-[0.28em] text-indigo-600 uppercase">
-            Invoice Management
-          </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight">Generated billing records</h1>
-          <p className="text-muted-foreground mt-3 text-sm sm:text-base">
-            Invoices are now created automatically when a subscription activates. Use this view to
-            track status, overdue balances, and customer billing records.
-          </p>
+      <section className="border-border from-card via-card rounded-[2rem] border bg-gradient-to-br to-indigo-500/5 p-6 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="max-w-2xl">
+            <p className="text-xs font-semibold tracking-[0.28em] text-indigo-600 uppercase">
+              Invoice Management
+            </p>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight">
+              Generated billing records
+            </h1>
+            <p className="text-muted-foreground mt-3 text-sm sm:text-base">
+              Invoices are now created automatically when a subscription
+              activates. Use this view to track status, overdue balances, and
+              customer billing records.
+            </p>
+          </div>
+          <Link
+            href="/admin/invoices/new"
+            className="inline-flex max-w-fit items-center justify-center gap-2 rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+          >
+            <IconPlus className="h-4 w-4" />
+            Generate Invoice
+          </Link>
         </div>
 
         <div className="mt-6 flex flex-wrap gap-2">
@@ -99,13 +123,15 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                 status === tab.value
                   ? "bg-primary text-primary-foreground"
-                  : "border border-border bg-card hover:bg-muted"
+                  : "border-border bg-card hover:bg-muted border"
               }`}
             >
               {tab.label}
               <span
                 className={`rounded-full px-2 py-0.5 text-xs ${
-                  status === tab.value ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
+                  status === tab.value
+                    ? "bg-white/20 text-white"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 {statusCounts[tab.value]}
@@ -115,7 +141,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
         </div>
       </section>
 
-      <section className="rounded-[2rem] border border-border bg-card p-6 shadow-sm">
+      <section className="border-border bg-card rounded-[2rem] border p-6 shadow-sm">
         <form className="grid gap-4 lg:grid-cols-[1fr_auto]">
           <label className="relative block">
             <span className="sr-only">Search invoices</span>
@@ -125,23 +151,23 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
               name="q"
               defaultValue={q ?? ""}
               placeholder="Search by invoice number, customer, company, or email"
-              className="w-full rounded-2xl border border-input bg-background py-3 pr-4 pl-11 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="border-input bg-background focus:border-primary focus:ring-primary/20 w-full rounded-2xl border py-3 pr-4 pl-11 text-sm transition-colors outline-none focus:ring-2"
             />
           </label>
 
           <button
             type="submit"
-            className="rounded-2xl border border-border px-5 py-3 text-sm font-semibold transition-colors hover:bg-muted"
+            className="border-border hover:bg-muted rounded-2xl border px-5 py-3 text-sm font-semibold transition-colors"
           >
             Apply search
           </button>
         </form>
 
-        <div className="mt-6 overflow-hidden rounded-3xl border border-border">
+        <div className="border-border mt-6 overflow-hidden rounded-3xl border">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border">
+            <table className="divide-border min-w-full divide-y">
               <thead className="bg-muted/40">
-                <tr className="text-left text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                <tr className="text-muted-foreground text-left text-xs font-semibold tracking-[0.18em] uppercase">
                   <th className="px-5 py-4">Invoice</th>
                   <th className="px-5 py-4">Customer</th>
                   <th className="px-5 py-4">Total</th>
@@ -150,17 +176,20 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                   <th className="px-5 py-4 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border bg-card">
+              <tbody className="divide-border bg-card divide-y">
                 {invoices.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-5 py-14 text-center">
                       <div className="mx-auto max-w-md">
-                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
-                          <IconFileInvoice className="h-6 w-6 text-muted-foreground" />
+                        <div className="bg-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl">
+                          <IconFileInvoice className="text-muted-foreground h-6 w-6" />
                         </div>
-                        <h2 className="mt-4 text-lg font-semibold">No invoices found</h2>
+                        <h2 className="mt-4 text-lg font-semibold">
+                          No invoices found
+                        </h2>
                         <p className="text-muted-foreground mt-2 text-sm">
-                          Activate a subscription to generate the first invoice record.
+                          Activate a subscription to generate the first invoice
+                          record.
                         </p>
                       </div>
                     </td>
@@ -173,17 +202,26 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                         .join(" ")
                         .trim() ||
                       invoice.contact.company ||
-                      "Customer";
+                      "Customer"
                     const isOverdue =
                       invoice.status === "confirmed" &&
                       invoice.dueDate &&
-                      new Date(invoice.dueDate) < new Date();
+                      new Date(invoice.dueDate) < new Date()
 
                     return (
-                      <tr key={invoice.id} className={isOverdue ? "bg-red-50/40 dark:bg-red-500/5" : "hover:bg-muted/20"}>
+                      <tr
+                        key={invoice.id}
+                        className={
+                          isOverdue
+                            ? "bg-red-50/40 dark:bg-red-500/5"
+                            : "hover:bg-muted/20"
+                        }
+                      >
                         <td className="px-5 py-4">
                           <div>
-                            <p className="font-semibold">{invoice.invoiceNumber}</p>
+                            <p className="font-semibold">
+                              {invoice.invoiceNumber}
+                            </p>
                             <p className="text-muted-foreground text-sm">
                               Created {formatDate(invoice.createdAt)}
                             </p>
@@ -201,11 +239,21 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                           {formatCurrency(invoice.total)}
                         </td>
                         <td className="px-5 py-4">
-                          <InvoiceStatusBadge status={normalizeInvoiceStatus(invoice.status)} />
+                          <InvoiceStatusBadge
+                            status={normalizeInvoiceStatus(invoice.status)}
+                          />
                         </td>
                         <td className="px-5 py-4 text-sm">
-                          <span className={isOverdue ? "font-semibold text-red-600" : "text-muted-foreground"}>
-                            {invoice.dueDate ? formatDate(invoice.dueDate) : "Not set"}
+                          <span
+                            className={
+                              isOverdue
+                                ? "font-semibold text-red-600"
+                                : "text-muted-foreground"
+                            }
+                          >
+                            {invoice.dueDate
+                              ? formatDate(invoice.dueDate)
+                              : "Not set"}
                           </span>
                         </td>
                         <td className="px-5 py-4 text-right">
@@ -218,7 +266,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                           </Link>
                         </td>
                       </tr>
-                    );
+                    )
                   })
                 )}
               </tbody>
@@ -227,7 +275,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
         </div>
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Showing {(page - 1) * pageSize + (invoices.length ? 1 : 0)}-
             {(page - 1) * pageSize + invoices.length} of {totalInvoices} invoice
             {totalInvoices === 1 ? "" : "s"}.
@@ -240,11 +288,14 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
             >
               Previous
             </PaginationLink>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-muted-foreground text-sm">
               Page {page} of {totalPages}
             </span>
             <PaginationLink
-              href={buildPageHref(rawSearchParams, Math.min(totalPages, page + 1))}
+              href={buildPageHref(
+                rawSearchParams,
+                Math.min(totalPages, page + 1)
+              )}
               disabled={page >= totalPages}
             >
               Next
@@ -253,7 +304,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
         </div>
       </section>
     </div>
-  );
+  )
 }
 
 function PaginationLink({
@@ -261,34 +312,34 @@ function PaginationLink({
   disabled,
   children,
 }: {
-  href: string;
-  disabled: boolean;
-  children: React.ReactNode;
+  href: string
+  disabled: boolean
+  children: React.ReactNode
 }) {
   if (disabled) {
     return (
-      <span className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-muted-foreground/60">
+      <span className="border-border text-muted-foreground/60 rounded-full border px-4 py-2 text-sm font-semibold">
         {children}
       </span>
-    );
+    )
   }
 
   return (
     <Link
       href={href}
-      className="rounded-full border border-border px-4 py-2 text-sm font-semibold transition-colors hover:bg-muted"
+      className="border-border hover:bg-muted rounded-full border px-4 py-2 text-sm font-semibold transition-colors"
     >
       {children}
     </Link>
-  );
+  )
 }
 
 function buildInvoiceWhereClause({
   q,
   status,
 }: {
-  q?: string;
-  status: "all" | InvoiceStatus;
+  q?: string
+  status: "all" | InvoiceStatus
 }) {
   return {
     ...(status === "all" ? {} : { status }),
@@ -296,65 +347,81 @@ function buildInvoiceWhereClause({
       ? {
           OR: [
             { invoiceNumber: { contains: q, mode: "insensitive" as const } },
-            { contact: { firstName: { contains: q, mode: "insensitive" as const } } },
-            { contact: { lastName: { contains: q, mode: "insensitive" as const } } },
-            { contact: { company: { contains: q, mode: "insensitive" as const } } },
-            { contact: { user: { email: { contains: q, mode: "insensitive" as const } } } },
+            {
+              contact: {
+                firstName: { contains: q, mode: "insensitive" as const },
+              },
+            },
+            {
+              contact: {
+                lastName: { contains: q, mode: "insensitive" as const },
+              },
+            },
+            {
+              contact: {
+                company: { contains: q, mode: "insensitive" as const },
+              },
+            },
+            {
+              contact: {
+                user: { email: { contains: q, mode: "insensitive" as const } },
+              },
+            },
           ],
         }
       : {}),
-  };
+  }
 }
 
 function buildStatusHref(
   searchParams: Record<string, string | string[] | undefined>,
-  nextStatus: "all" | InvoiceStatus,
+  nextStatus: "all" | InvoiceStatus
 ) {
-  const params = new URLSearchParams();
-  const q = firstValue(searchParams.q);
-  const pageSize = firstValue(searchParams.pageSize);
+  const params = new URLSearchParams()
+  const q = firstValue(searchParams.q)
+  const pageSize = firstValue(searchParams.pageSize)
 
   if (q) {
-    params.set("q", q);
+    params.set("q", q)
   }
 
   if (pageSize) {
-    params.set("pageSize", pageSize);
+    params.set("pageSize", pageSize)
   }
 
-  params.set("status", nextStatus);
+  params.set("status", nextStatus)
 
-  return `/admin/invoices?${params.toString()}`;
+  return `/admin/invoices?${params.toString()}`
 }
 
 function buildPageHref(
   searchParams: Record<string, string | string[] | undefined>,
-  nextPage: number,
+  nextPage: number
 ) {
-  const params = new URLSearchParams();
-  const q = firstValue(searchParams.q);
-  const status = firstValue(searchParams.status);
-  const pageSize = firstValue(searchParams.pageSize);
+  const params = new URLSearchParams()
+  const q = firstValue(searchParams.q)
+  const status = firstValue(searchParams.status)
+  const pageSize = firstValue(searchParams.pageSize)
 
   if (q) {
-    params.set("q", q);
+    params.set("q", q)
   }
 
   if (status) {
-    params.set("status", status);
+    params.set("status", status)
   }
 
   if (pageSize) {
-    params.set("pageSize", pageSize);
+    params.set("pageSize", pageSize)
   }
 
-  params.set("page", String(nextPage));
+  params.set("page", String(nextPage))
 
-  return `/admin/invoices?${params.toString()}`;
+  return `/admin/invoices?${params.toString()}`
 }
 
 function firstValue(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
+  return Array.isArray(value) ? value[0] : value
 }
 
 function normalizeInvoiceStatus(value: string): InvoiceStatus {
@@ -362,9 +429,9 @@ function normalizeInvoiceStatus(value: string): InvoiceStatus {
     case "confirmed":
     case "paid":
     case "cancelled":
-      return value;
+      return value
     default:
-      return "draft";
+      return "draft"
   }
 }
 
@@ -373,11 +440,11 @@ function formatCurrency(value: number) {
     style: "currency",
     currency: "INR",
     maximumFractionDigits: 2,
-  }).format(value);
+  }).format(value)
 }
 
 function formatDate(value: Date) {
   return new Intl.DateTimeFormat("en-IN", {
     dateStyle: "medium",
-  }).format(value);
+  }).format(value)
 }

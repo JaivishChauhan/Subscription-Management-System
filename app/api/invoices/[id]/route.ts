@@ -1,18 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { requireApiRole } from "@/lib/admin";
+import { NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/db"
+import { requireApiRole } from "@/lib/admin"
 
 type RouteContext = {
-  params: Promise<{ id: string }>;
-};
+  params: Promise<{ id: string }>
+}
 
 export async function GET(_request: NextRequest, context: RouteContext) {
-  const { error, session } = await requireApiRole(["admin", "internal", "portal"]);
+  const { error, session } = await requireApiRole([
+    "admin",
+    "internal",
+    "portal",
+  ])
   if (error || !session?.user?.id) {
-    return error ?? NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return (
+      error ?? NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    )
   }
 
-  const { id } = await context.params;
+  const { id } = await context.params
   const invoice = await prisma.invoice.findUnique({
     where: { id },
     include: {
@@ -53,15 +59,15 @@ export async function GET(_request: NextRequest, context: RouteContext) {
         orderBy: { paymentDate: "desc" },
       },
     },
-  });
+  })
 
   if (!invoice) {
-    return NextResponse.json({ error: "Invoice not found." }, { status: 404 });
+    return NextResponse.json({ error: "Invoice not found." }, { status: 404 })
   }
 
   if (session.user.role === "portal" && invoice.userId !== session.user.id) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  return NextResponse.json({ invoice });
+  return NextResponse.json({ invoice })
 }

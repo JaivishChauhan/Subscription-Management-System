@@ -32,9 +32,15 @@ const paymentCreateSchema = z.object({
  * @security RBAC enforced — portal users see own data only.
  */
 export async function GET(request: NextRequest) {
-  const { error, session } = await requireApiRole(["admin", "internal", "portal"])
+  const { error, session } = await requireApiRole([
+    "admin",
+    "internal",
+    "portal",
+  ])
   if (error || !session?.user?.id) {
-    return error ?? NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return (
+      error ?? NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    )
   }
 
   const searchParams = request.nextUrl.searchParams
@@ -122,7 +128,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const { error, session } = await requireApiRole(["admin", "internal"])
   if (error || !session?.user?.id) {
-    return error ?? NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return (
+      error ?? NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    )
   }
 
   try {

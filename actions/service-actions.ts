@@ -1,15 +1,15 @@
-"use server";
+"use server"
 
-import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/db";
-import { auth } from "@/lib/auth";
-import type { ServiceFormData } from "@/types/service";
+import { revalidatePath } from "next/cache"
+import { prisma } from "@/lib/db"
+import { auth } from "@/lib/auth"
+import type { ServiceFormData } from "@/types/service"
 
 /** @throws If session is missing or user is not admin */
 async function requireAdmin(): Promise<void> {
-  const session = await auth();
+  const session = await auth()
   if (!session || session.user.role !== "admin") {
-    throw new Error("Forbidden: Admin access required");
+    throw new Error("Forbidden: Admin access required")
   }
 }
 
@@ -18,7 +18,7 @@ async function requireAdmin(): Promise<void> {
  * @security Admin-only — checked inside requireAdmin().
  */
 export async function createServiceAction(data: ServiceFormData) {
-  await requireAdmin();
+  await requireAdmin()
 
   const service = await prisma.service.create({
     data: {
@@ -34,20 +34,23 @@ export async function createServiceAction(data: ServiceFormData) {
       isActive: data.isActive,
       isFeatured: data.isFeatured,
     },
-  });
+  })
 
-  revalidatePath("/admin/services");
-  revalidatePath("/shop");
-  revalidatePath("/");
-  return service;
+  revalidatePath("/admin/services")
+  revalidatePath("/shop")
+  revalidatePath("/")
+  return service
 }
 
 /**
  * Updates an existing service by ID.
  * @security Admin-only.
  */
-export async function updateServiceAction(id: string, data: Partial<ServiceFormData>) {
-  await requireAdmin();
+export async function updateServiceAction(
+  id: string,
+  data: Partial<ServiceFormData>
+) {
+  await requireAdmin()
 
   const service = await prisma.service.update({
     where: { id },
@@ -59,17 +62,19 @@ export async function updateServiceAction(id: string, data: Partial<ServiceFormD
       ...(data.logoUrl !== undefined && { logoUrl: data.logoUrl }),
       ...(data.iconKey !== undefined && { iconKey: data.iconKey }),
       ...(data.color !== undefined && { color: data.color }),
-      ...(data.monthlyPrice !== undefined && { monthlyPrice: data.monthlyPrice }),
+      ...(data.monthlyPrice !== undefined && {
+        monthlyPrice: data.monthlyPrice,
+      }),
       ...(data.yearlyPrice !== undefined && { yearlyPrice: data.yearlyPrice }),
       ...(data.isActive !== undefined && { isActive: data.isActive }),
       ...(data.isFeatured !== undefined && { isFeatured: data.isFeatured }),
     },
-  });
+  })
 
-  revalidatePath("/admin/services");
-  revalidatePath("/shop");
-  revalidatePath("/");
-  return service;
+  revalidatePath("/admin/services")
+  revalidatePath("/shop")
+  revalidatePath("/")
+  return service
 }
 
 /**
@@ -77,23 +82,26 @@ export async function updateServiceAction(id: string, data: Partial<ServiceFormD
  * @security Admin-only. Never hard-deletes per JAIVISH Rule 5.1.
  */
 export async function deactivateServiceAction(id: string) {
-  await requireAdmin();
+  await requireAdmin()
 
-  await prisma.service.update({ where: { id }, data: { isActive: false } });
+  await prisma.service.update({ where: { id }, data: { isActive: false } })
 
-  revalidatePath("/admin/services");
-  revalidatePath("/shop");
+  revalidatePath("/admin/services")
+  revalidatePath("/shop")
 }
 
 /**
  * Toggles the featured flag on a service.
  * @security Admin-only.
  */
-export async function toggleServiceFeaturedAction(id: string, isFeatured: boolean) {
-  await requireAdmin();
+export async function toggleServiceFeaturedAction(
+  id: string,
+  isFeatured: boolean
+) {
+  await requireAdmin()
 
-  await prisma.service.update({ where: { id }, data: { isFeatured } });
+  await prisma.service.update({ where: { id }, data: { isFeatured } })
 
-  revalidatePath("/admin/services");
-  revalidatePath("/");
+  revalidatePath("/admin/services")
+  revalidatePath("/")
 }

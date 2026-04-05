@@ -25,14 +25,15 @@ type SubscriptionsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
-const STATUS_TABS: Array<{ label: string; value: "all" | SubscriptionStatus }> = [
-  { label: "All", value: "all" },
-  { label: "Draft", value: "draft" },
-  { label: "Quotation", value: "quotation" },
-  { label: "Confirmed", value: "confirmed" },
-  { label: "Active", value: "active" },
-  { label: "Closed", value: "closed" },
-]
+const STATUS_TABS: Array<{ label: string; value: "all" | SubscriptionStatus }> =
+  [
+    { label: "All", value: "all" },
+    { label: "Draft", value: "draft" },
+    { label: "Quotation", value: "quotation" },
+    { label: "Confirmed", value: "confirmed" },
+    { label: "Active", value: "active" },
+    { label: "Closed", value: "closed" },
+  ]
 
 export default async function InternalSubscriptionsPage({
   searchParams,
@@ -50,53 +51,55 @@ export default async function InternalSubscriptionsPage({
   const { q, status, page, pageSize } = parsed
   const where = buildSubscriptionWhereClause({ q, status })
 
-  const [
-    subscriptions,
-    totalSubscriptions,
-    draftCount,
-    quotationCount,
-    confirmedCount,
-    activeCount,
-    closedCount,
-  ] = await prisma.$transaction([
-    prisma.subscription.findMany({
-      where,
-      orderBy: { updatedAt: "desc" },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      include: {
-        contact: {
-          include: {
-            user: {
-              select: {
-                email: true,
-              },
+  const subscriptions = await prisma.subscription.findMany({
+    where,
+    orderBy: { updatedAt: "desc" },
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+    include: {
+      contact: {
+        include: {
+          user: {
+            select: {
+              email: true,
             },
           },
         },
-        recurringPlan: {
-          select: {
-            name: true,
-          },
-        },
-        lines: {
-          select: {
-            subtotal: true,
-          },
+      },
+      recurringPlan: {
+        select: {
+          name: true,
         },
       },
-    }),
-    prisma.subscription.count({ where }),
-    prisma.subscription.count({ where: { status: "draft" } }),
-    prisma.subscription.count({ where: { status: "quotation" } }),
-    prisma.subscription.count({ where: { status: "confirmed" } }),
-    prisma.subscription.count({ where: { status: "active" } }),
-    prisma.subscription.count({ where: { status: "closed" } }),
-  ])
+      lines: {
+        select: {
+          subtotal: true,
+        },
+      },
+    },
+  })
+
+  const totalSubscriptions = await prisma.subscription.count({ where })
+  const draftCount = await prisma.subscription.count({
+    where: { status: "draft" },
+  })
+  const quotationCount = await prisma.subscription.count({
+    where: { status: "quotation" },
+  })
+  const confirmedCount = await prisma.subscription.count({
+    where: { status: "confirmed" },
+  })
+  const activeCount = await prisma.subscription.count({
+    where: { status: "active" },
+  })
+  const closedCount = await prisma.subscription.count({
+    where: { status: "closed" },
+  })
 
   const totalPages = Math.max(1, Math.ceil(totalSubscriptions / pageSize))
   const statusCounts: Record<string, number> = {
-    all: draftCount + quotationCount + confirmedCount + activeCount + closedCount,
+    all:
+      draftCount + quotationCount + confirmedCount + activeCount + closedCount,
     draft: draftCount,
     quotation: quotationCount,
     confirmed: confirmedCount,
@@ -106,16 +109,18 @@ export default async function InternalSubscriptionsPage({
 
   return (
     <div className="space-y-8">
-      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-card via-card to-sky-500/5 p-6 shadow-sm">
+      <section className="border-border from-card via-card rounded-[2rem] border bg-gradient-to-br to-sky-500/5 p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold tracking-[0.28em] text-sky-600 uppercase">
               Internal Subscriptions
             </p>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight">Operational lifecycle queue</h1>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight">
+              Operational lifecycle queue
+            </h1>
             <p className="text-muted-foreground mt-3 text-sm sm:text-base">
-              Internal users can manage active subscription work without crossing into admin-only
-              configuration modules.
+              Internal users can manage active subscription work without
+              crossing into admin-only configuration modules.
             </p>
           </div>
 
@@ -136,13 +141,15 @@ export default async function InternalSubscriptionsPage({
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                 status === tab.value
                   ? "bg-sky-600 text-white"
-                  : "border border-border bg-card hover:bg-muted"
+                  : "border-border bg-card hover:bg-muted border"
               }`}
             >
               {tab.label}
               <span
                 className={`rounded-full px-2 py-0.5 text-xs ${
-                  status === tab.value ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
+                  status === tab.value
+                    ? "bg-white/20 text-white"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 {statusCounts[tab.value]}
@@ -152,7 +159,7 @@ export default async function InternalSubscriptionsPage({
         </div>
       </section>
 
-      <section className="rounded-[2rem] border border-border bg-card p-6 shadow-sm">
+      <section className="border-border bg-card rounded-[2rem] border p-6 shadow-sm">
         <form className="grid gap-4 lg:grid-cols-[1fr_auto]">
           <label className="relative block">
             <span className="sr-only">Search subscriptions</span>
@@ -162,23 +169,23 @@ export default async function InternalSubscriptionsPage({
               name="q"
               defaultValue={q ?? ""}
               placeholder="Search by customer name, email, company, or subscription number"
-              className="w-full rounded-2xl border border-input bg-background py-3 pr-4 pl-11 text-sm outline-none transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+              className="border-input bg-background w-full rounded-2xl border py-3 pr-4 pl-11 text-sm transition-colors outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
             />
           </label>
 
           <button
             type="submit"
-            className="rounded-2xl border border-border px-5 py-3 text-sm font-semibold transition-colors hover:bg-muted"
+            className="border-border hover:bg-muted rounded-2xl border px-5 py-3 text-sm font-semibold transition-colors"
           >
             Apply search
           </button>
         </form>
 
-        <div className="mt-6 overflow-hidden rounded-3xl border border-border">
+        <div className="border-border mt-6 overflow-hidden rounded-3xl border">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border">
+            <table className="divide-border min-w-full divide-y">
               <thead className="bg-muted/40">
-                <tr className="text-left text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                <tr className="text-muted-foreground text-left text-xs font-semibold tracking-[0.18em] uppercase">
                   <th className="px-5 py-4">Subscription</th>
                   <th className="px-5 py-4">Customer</th>
                   <th className="px-5 py-4">Plan</th>
@@ -188,17 +195,20 @@ export default async function InternalSubscriptionsPage({
                   <th className="px-5 py-4 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border bg-card">
+              <tbody className="divide-border bg-card divide-y">
                 {subscriptions.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-5 py-14 text-center">
                       <div className="mx-auto max-w-md">
-                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
-                          <IconRepeat className="h-6 w-6 text-muted-foreground" />
+                        <div className="bg-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl">
+                          <IconRepeat className="text-muted-foreground h-6 w-6" />
                         </div>
-                        <h2 className="mt-4 text-lg font-semibold">No subscriptions found</h2>
+                        <h2 className="mt-4 text-lg font-semibold">
+                          No subscriptions found
+                        </h2>
                         <p className="text-muted-foreground mt-2 text-sm">
-                          Create the first draft subscription to begin the lifecycle flow.
+                          Create the first draft subscription to begin the
+                          lifecycle flow.
                         </p>
                         <Link
                           href="/internal/subscriptions/new"
@@ -213,7 +223,10 @@ export default async function InternalSubscriptionsPage({
                 ) : (
                   subscriptions.map((subscription) => {
                     const displayName =
-                      [subscription.contact.firstName, subscription.contact.lastName]
+                      [
+                        subscription.contact.firstName,
+                        subscription.contact.lastName,
+                      ]
                         .filter(Boolean)
                         .join(" ")
                         .trim() ||
@@ -224,7 +237,9 @@ export default async function InternalSubscriptionsPage({
                       <tr key={subscription.id} className="hover:bg-muted/20">
                         <td className="px-5 py-4">
                           <div>
-                            <p className="font-semibold">{subscription.subscriptionNumber}</p>
+                            <p className="font-semibold">
+                              {subscription.subscriptionNumber}
+                            </p>
                             <p className="text-muted-foreground text-sm">
                               Updated {formatDate(subscription.updatedAt)}
                             </p>
@@ -238,22 +253,29 @@ export default async function InternalSubscriptionsPage({
                             </p>
                           </div>
                         </td>
-                        <td className="px-5 py-4 text-sm text-muted-foreground">
+                        <td className="text-muted-foreground px-5 py-4 text-sm">
                           {subscription.recurringPlan.name}
                         </td>
                         <td className="px-5 py-4">
                           <SubscriptionStatusBadge
-                            status={normalizeSubscriptionStatus(subscription.status)}
+                            status={normalizeSubscriptionStatus(
+                              subscription.status
+                            )}
                           />
                         </td>
-                        <td className="px-5 py-4 text-sm text-muted-foreground">
-                          {subscription.startDate ? formatDate(subscription.startDate) : "Not set"}
+                        <td className="text-muted-foreground px-5 py-4 text-sm">
+                          {subscription.startDate
+                            ? formatDate(subscription.startDate)
+                            : "Not set"}
                         </td>
                         <td className="px-5 py-4 text-sm font-medium">
                           {formatCurrency(
                             roundCurrency(
-                              subscription.lines.reduce((sum, line) => sum + line.subtotal, 0),
-                            ),
+                              subscription.lines.reduce(
+                                (sum, line) => sum + line.subtotal,
+                                0
+                              )
+                            )
                           )}
                         </td>
                         <td className="px-5 py-4 text-right">
@@ -275,9 +297,10 @@ export default async function InternalSubscriptionsPage({
         </div>
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Showing {(page - 1) * pageSize + (subscriptions.length ? 1 : 0)}-
-            {(page - 1) * pageSize + subscriptions.length} of {totalSubscriptions} subscription
+            {(page - 1) * pageSize + subscriptions.length} of{" "}
+            {totalSubscriptions} subscription
             {totalSubscriptions === 1 ? "" : "s"}.
           </p>
 
@@ -288,11 +311,14 @@ export default async function InternalSubscriptionsPage({
             >
               Previous
             </PaginationLink>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-muted-foreground text-sm">
               Page {page} of {totalPages}
             </span>
             <PaginationLink
-              href={buildPageHref(rawSearchParams, Math.min(totalPages, page + 1))}
+              href={buildPageHref(
+                rawSearchParams,
+                Math.min(totalPages, page + 1)
+              )}
               disabled={page >= totalPages}
             >
               Next
@@ -315,7 +341,7 @@ function PaginationLink({
 }) {
   if (disabled) {
     return (
-      <span className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-muted-foreground/60">
+      <span className="border-border text-muted-foreground/60 rounded-full border px-4 py-2 text-sm font-semibold">
         {children}
       </span>
     )
@@ -324,7 +350,7 @@ function PaginationLink({
   return (
     <Link
       href={href}
-      className="rounded-full border border-border px-4 py-2 text-sm font-semibold transition-colors hover:bg-muted"
+      className="border-border hover:bg-muted rounded-full border px-4 py-2 text-sm font-semibold transition-colors"
     >
       {children}
     </Link>
@@ -343,11 +369,29 @@ function buildSubscriptionWhereClause({
     ...(q
       ? {
           OR: [
-            { subscriptionNumber: { contains: q, mode: "insensitive" as const } },
-            { contact: { firstName: { contains: q, mode: "insensitive" as const } } },
-            { contact: { lastName: { contains: q, mode: "insensitive" as const } } },
-            { contact: { company: { contains: q, mode: "insensitive" as const } } },
-            { contact: { user: { email: { contains: q, mode: "insensitive" as const } } } },
+            {
+              subscriptionNumber: { contains: q, mode: "insensitive" as const },
+            },
+            {
+              contact: {
+                firstName: { contains: q, mode: "insensitive" as const },
+              },
+            },
+            {
+              contact: {
+                lastName: { contains: q, mode: "insensitive" as const },
+              },
+            },
+            {
+              contact: {
+                company: { contains: q, mode: "insensitive" as const },
+              },
+            },
+            {
+              contact: {
+                user: { email: { contains: q, mode: "insensitive" as const } },
+              },
+            },
           ],
         }
       : {}),
@@ -356,7 +400,7 @@ function buildSubscriptionWhereClause({
 
 function buildStatusHref(
   searchParams: Record<string, string | string[] | undefined>,
-  nextStatus: "all" | SubscriptionStatus,
+  nextStatus: "all" | SubscriptionStatus
 ) {
   const params = new URLSearchParams()
   const q = firstValue(searchParams.q)
@@ -377,7 +421,7 @@ function buildStatusHref(
 
 function buildPageHref(
   searchParams: Record<string, string | string[] | undefined>,
-  nextPage: number,
+  nextPage: number
 ) {
   const params = new URLSearchParams()
   const q = firstValue(searchParams.q)

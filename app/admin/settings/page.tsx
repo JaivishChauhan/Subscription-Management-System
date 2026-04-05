@@ -29,33 +29,36 @@ export default async function AdminSettingsPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-card via-card to-indigo-500/5 p-6 shadow-sm">
+      <section className="border-border from-card via-card rounded-[2rem] border bg-gradient-to-br to-indigo-500/5 p-6 shadow-sm">
         <p className="text-xs font-semibold tracking-[0.28em] text-indigo-600 uppercase">
           Settings
         </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">System configuration overview</h1>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight">
+          System configuration overview
+        </h1>
         <p className="text-muted-foreground mt-3 max-w-2xl text-sm sm:text-base">
-          High-level admin visibility into user roles and configurable business foundations.
+          High-level admin visibility into user roles and configurable business
+          foundations.
         </p>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-[2rem] border border-border bg-card p-6 shadow-sm">
+        <section className="border-border bg-card rounded-[2rem] border p-6 shadow-sm">
           <h2 className="text-lg font-semibold">User Roles</h2>
           <div className="mt-5 space-y-3">
             {Object.entries(roleCounts).map(([role, count]) => (
               <div
                 key={role}
-                className="flex items-center justify-between rounded-2xl border border-border p-4"
+                className="border-border flex items-center justify-between rounded-2xl border p-4"
               >
-                <span className="capitalize text-muted-foreground">{role}</span>
+                <span className="text-muted-foreground capitalize">{role}</span>
                 <span className="text-xl font-semibold">{count}</span>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="rounded-[2rem] border border-border bg-card p-6 shadow-sm">
+        <section className="border-border bg-card rounded-[2rem] border p-6 shadow-sm">
           <h2 className="text-lg font-semibold">Business Configuration</h2>
           <div className="mt-5 space-y-3">
             <ConfigRow label="Recurring Plans" value={plans} />
@@ -70,7 +73,7 @@ export default async function AdminSettingsPage() {
 
 function ConfigRow({ label, value }: { label: string; value: number }) {
   return (
-    <div className="flex items-center justify-between rounded-2xl border border-border p-4">
+    <div className="border-border flex items-center justify-between rounded-2xl border p-4">
       <span className="text-muted-foreground">{label}</span>
       <span className="text-xl font-semibold">{value}</span>
     </div>

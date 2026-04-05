@@ -8,22 +8,30 @@ export async function GET(request: NextRequest) {
   const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
 
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
-    return NextResponse.json({ error: "Missing Google OAuth credentials" }, { status: 500 })
+    return NextResponse.json(
+      { error: "Missing Google OAuth credentials" },
+      { status: 500 }
+    )
   }
 
   const url = new URL(request.url)
+  const protocol = request.headers.get("x-forwarded-proto") || "http"
+  const host = request.headers.get("host") || url.host
+  const appUrl = `${protocol}://${host}`
   const code = url.searchParams.get("code")
   const state = url.searchParams.get("state")
   const error = url.searchParams.get("error")
 
   if (error || !code) {
-    return NextResponse.redirect(`${url.origin}/login?error=OAuthCallbackError`)
+    return NextResponse.redirect(`${appUrl}/login?error=OAuthCallbackError`)
   }
 
   let finalCallbackUrl = "/"
   if (state) {
     try {
-      const decodedState = JSON.parse(Buffer.from(state, 'base64url').toString('utf-8'))
+      const decodedState = JSON.parse(
+        Buffer.from(state, "base64url").toString("utf-8")
+      )
       if (decodedState.callbackUrl) {
         finalCallbackUrl = decodedState.callbackUrl
       }
@@ -32,7 +40,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const redirectUri = `${url.origin}/api/auth/google/callback`
+  const redirectUri = `${appUrl}/api/auth/google/callback`
 
   try {
     // Exchange code for tokens
@@ -52,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     if (!tokenResponse.ok || !tokenData.id_token) {
       console.error("[Google OAuth] Token exchange failed:", tokenData)
-      return NextResponse.redirect(`${url.origin}/login?error=OAuthExchangeError`)
+      return NextResponse.redirect(`${appUrl}/login?error=OAuthExchangeError`)
     }
 
     // Decode the Google ID token to get the user's profile
@@ -65,7 +73,7 @@ export async function GET(request: NextRequest) {
     }>(tokenData.id_token)
 
     if (!decodedToken.email || !decodedToken.sub) {
-      return NextResponse.redirect(`${url.origin}/login?error=OAuthProfileMissing`)
+      return NextResponse.redirect(`${appUrl}/login?error=OAuthProfileMissing`)
     }
 
     // Pass to our internal logic to upsert user and create session cookie
@@ -77,7 +85,9 @@ export async function GET(request: NextRequest) {
     })
 
     if (result.error || !result.session) {
-      return NextResponse.redirect(`${url.origin}/login?error=AccountActionRequired`)
+      return NextResponse.redirect(
+        `${appUrl}/login?error=AccountActionRequired`
+      )
     }
 
     // Determine correct dashboard redirect if a default callback wasn't given
@@ -86,9 +96,9 @@ export async function GET(request: NextRequest) {
     }
 
     // We successfully signed in — redirect to the app!
-    return NextResponse.redirect(`${url.origin}${finalCallbackUrl}`)
+    return NextResponse.redirect(`${appUrl}${finalCallbackUrl}`)
   } catch (err) {
     console.error("[Google OAuth] Server error:", err)
-    return NextResponse.redirect(`${url.origin}/login?error=InternalError`)
+    return NextResponse.redirect(`${appUrl}/login?error=InternalError`)
   }
 }

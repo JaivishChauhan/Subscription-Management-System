@@ -1,89 +1,184 @@
-import { DashboardClient } from "./_components/DashboardClient";
-import { requireAdminPage } from "@/lib/admin";
-import { prisma } from "@/lib/db";
+import { DashboardClient } from "./_components/DashboardClient"
+import { requireAdminPage } from "@/lib/admin"
+import { prisma } from "@/lib/db"
 
 // Force dynamic since we're displaying real-time data
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"
 
 export default async function AdminDashboardPage() {
-  await requireAdminPage();
+  await requireAdminPage()
 
   // Fetch real data from Prisma for aggregates
   const activeSubsCount = await prisma.subscription.count({
     where: { status: "active" },
-  });
+  })
 
   const invoiceAgg = await prisma.invoice.aggregate({
     _sum: { total: true },
     where: { status: "paid" }, // Approximation for Revenue
-  });
+  })
 
   const outstandingAgg = await prisma.invoice.aggregate({
     _sum: { amountDue: true },
     where: { status: "confirmed" }, // Not paid, but confirmed
-  });
+  })
 
   const overdueCount = await prisma.invoice.count({
     where: {
       status: "confirmed",
       dueDate: { lt: new Date() },
     },
-  });
+  })
 
   const stats = {
-    activeSubscriptions: activeSubsCount || 247, // fallback to demo if 0
-    revenueMTD: invoiceAgg._sum.total || 482300,
-    outstanding: outstandingAgg._sum.amountDue || 62500,
-    overdue: overdueCount || 3,
-  };
+    activeSubscriptions: activeSubsCount || 0,
+    revenueMTD: invoiceAgg._sum.total || 0,
+    outstanding: outstandingAgg._sum.amountDue || 0,
+    overdue: overdueCount || 0,
+  }
 
-  // Remaining mock data - will implement actuals in next phases
-  const revenueData = [
-    { month: "JAN", actual: 320000, forecast: 310000 },
-    { month: "FEB", actual: 340000, forecast: 330000 },
-    { month: "MAR", actual: 380000, forecast: 360000 },
-    { month: "APR", actual: 420000, forecast: 400000 },
-    { month: "MAY", actual: 460000, forecast: 450000 },
-    { month: "JUN", actual: 482300, forecast: 500000 },
-  ];
+  // 1. REVENUE DATA (Real calculation over past 6 months)
+  const sixMonthsAgo = new Date()
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5)
+  sixMonthsAgo.setDate(1)
 
-  const churnData = [
-    { name: "Vanguard Systems", sub: "Last active 4 days ago", initials: null },
-    {
-      name: "Nexus Labs Inc.",
-      sub: "Payment failure (2 retries)",
-      initials: null,
+  const recentInvoices = await prisma.invoice.findMany({
+    where: {
+      status: "paid",
+      paidAt: { gte: sixMonthsAgo },
     },
-    { name: "AquaDynamics", sub: "Usage dropped by 80%", initials: "AQ" },
-    { name: "Orbit Data Hub", sub: "Logged 12 support tickets", initials: null },
-  ];
+    select: { paidAt: true, total: true },
+  })
 
-  const timeline = [
-    {
-      color: "#00E5FF",
-      title: "New Subscription Activated",
-      desc: 'Solaris Creative Agency started "Enterprise Tier" plan.',
-      time: "12 Minutes ago",
-    },
-    {
-      color: "#7C3AED",
-      title: "AI Model Updated",
-      desc: "Forecasting engine calibrated with Q1 actuals.",
-      time: "2 Hours ago",
-    },
-    {
-      color: "#EF4444",
-      title: "Failed Payment Notification",
-      desc: "Transaction of ₹45,000 for Helix Corp was declined.",
-      time: "5 Hours ago",
-    },
-  ];
+  const monthNames = [
+    "JAN",
+    "FEB",
+    "MAR",
+    "APR",
+    "MAY",
+    "JUN",
+    "JUL",
+    "AUG",
+    "SEP",
+    "OCT",
+    "NOV",
+    "DEC",
+  ]
+  const monthlyRevenue: Record<string, number> = {}
 
-  const planDist = [
-    { name: "Enterprise", pct: "45%", color: "#00E5FF" },
-    { name: "Pro / Growth", pct: "38%", color: "#7C3AED" },
-    { name: "Starter", pct: "17%", color: "#1A2535" },
-  ];
+  const currentMonthIdx = new Date().getMonth()
+  for (let i = 0; i < 6; i++) {
+    let mIdx = currentMonthIdx - (5 - i)
+    if (mIdx < 0) mIdx += 12
+    monthlyRevenue[monthNames[mIdx]] = 0
+  }
+
+  recentInvoices.forEach((inv) => {
+    if (inv.paidAt) {
+      const m = monthNames[inv.paidAt.getMonth()]
+      if (monthlyRevenue[m] !== undefined) {
+        monthlyRevenue[m] += inv.total
+      }
+    }
+  })
+
+  let lastVal = 0
+  const revenueData = Object.keys(monthlyRevenue).map((month) => {
+    const actual = monthlyRevenue[month]
+    let forecast = 0
+    if (actual > 0) {
+      forecast = actual * 1.05
+      lastVal = actual
+    } else {
+      forecast = lastVal > 0 ? lastVal * 1.05 : 0
+    }
+    return { month, actual, forecast: Math.round(forecast) }
+  })
+
+  // 2. CHURN DATA
+  const churnCustomers = await prisma.invoice.findMany({
+    where: { status: "confirmed", dueDate: { lt: new Date() } },
+    take: 4,
+    include: { contact: true },
+    orderBy: { dueDate: "asc" },
+  })
+
+  let churnData = churnCustomers.map((inv) => {
+    const name =
+      inv.contact?.company ||
+      `${inv.contact?.firstName || ""} ${inv.contact?.lastName || ""}`.trim() ||
+      "Unknown"
+    const daysOverdue = inv.dueDate
+      ? Math.floor((new Date().getTime() - inv.dueDate.getTime()) / 86400000)
+      : 0
+    return {
+      name,
+      sub: `Overdue by ${daysOverdue} days (₹${inv.amountDue.toLocaleString()})`,
+      initials: name.substring(0, 2).toUpperCase(),
+    }
+  })
+
+  if (churnData.length === 0) {
+    churnData = [
+      { name: "Healthy Accounts", sub: "No overdue payments", initials: "OK" },
+    ]
+  }
+
+  // 3. TIMELINE
+  const recentSubs = await prisma.subscription.findMany({
+    take: 3,
+    orderBy: { createdAt: "desc" },
+    include: { contact: true, recurringPlan: true },
+  })
+
+  const colors = ["#00E5FF", "#7C3AED", "#EF4444", "#F59E0B"]
+  let timeline = recentSubs.map((sub, i) => {
+    const name = sub.contact?.company || sub.contact?.firstName || "A customer"
+    return {
+      color: colors[i % colors.length],
+      title: "New Subscription",
+      desc: `${name} started the "${sub.recurringPlan?.name || "Custom"}" plan.`,
+      time: sub.createdAt.toLocaleDateString(),
+    }
+  })
+
+  if (timeline.length === 0) {
+    timeline = [
+      {
+        color: "#00E5FF",
+        title: "System Ready",
+        desc: "Awaiting new subscriptions.",
+        time: "Just now",
+      },
+    ]
+  }
+
+  // 4. PLAN DISTRIBUTION
+  const activeSubsForPlan = await prisma.subscription.findMany({
+    where: { status: "active" },
+    include: { recurringPlan: true },
+  })
+
+  const planCounts: Record<string, number> = {}
+  let totalActive = 0
+  activeSubsForPlan.forEach((sub) => {
+    if (sub.recurringPlan) {
+      planCounts[sub.recurringPlan.name] =
+        (planCounts[sub.recurringPlan.name] || 0) + 1
+      totalActive++
+    }
+  })
+
+  const planColors = ["#00E5FF", "#7C3AED", "#1A2535", "#F59E0B", "#EF4444"]
+  let planDist = Object.entries(planCounts).map(([name, count], idx) => ({
+    name,
+    pct: Math.round((count / totalActive) * 100) + "%",
+    color: planColors[idx % planColors.length],
+  }))
+
+  if (planDist.length === 0) {
+    planDist = [{ name: "No active plans", pct: "100%", color: "#1A2535" }]
+  }
 
   return (
     <DashboardClient
@@ -93,5 +188,5 @@ export default async function AdminDashboardPage() {
       timeline={timeline}
       planDist={planDist}
     />
-  );
+  )
 }

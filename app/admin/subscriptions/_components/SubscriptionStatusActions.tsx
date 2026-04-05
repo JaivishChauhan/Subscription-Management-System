@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { IconLoader2 } from "@tabler/icons-react";
-import { toast } from "sonner";
-import { getNextAllowedStatus } from "@/lib/validations/subscription-helpers";
-import type { SubscriptionStatus } from "@/lib/validations/subscription";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { IconLoader2 } from "@tabler/icons-react"
+import { toast } from "sonner"
+import { getNextAllowedStatus } from "@/lib/validations/subscription-helpers"
+import type { SubscriptionStatus } from "@/lib/validations/subscription"
 
 const STATUS_ACTION_LABELS: Record<SubscriptionStatus, string> = {
   draft: "Confirm as quotation",
@@ -13,62 +13,65 @@ const STATUS_ACTION_LABELS: Record<SubscriptionStatus, string> = {
   confirmed: "Activate subscription",
   active: "Close subscription",
   closed: "Closed",
-};
+}
 
 export function SubscriptionStatusActions({
   subscriptionId,
   status,
   closable,
 }: {
-  subscriptionId: string;
-  status: SubscriptionStatus;
-  closable: boolean;
+  subscriptionId: string
+  status: SubscriptionStatus
+  closable: boolean
 }) {
-  const router = useRouter();
-  const [isPending, setIsPending] = useState(false);
+  const router = useRouter()
+  const [isPending, setIsPending] = useState(false)
 
-  const nextStatus = getNextAllowedStatus(status);
-  const isBlockedClose = status === "active" && !closable;
+  const nextStatus = getNextAllowedStatus(status)
+  const isBlockedClose = status === "active" && !closable
 
   async function handleTransition() {
     if (!nextStatus) {
-      return;
+      return
     }
 
-    setIsPending(true);
+    setIsPending(true)
 
     try {
-      const response = await fetch(`/api/subscriptions/${subscriptionId}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: nextStatus }),
-      });
-      const result = await response.json();
+      const response = await fetch(
+        `/api/subscriptions/${subscriptionId}/status`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: nextStatus }),
+        }
+      )
+      const result = await response.json()
 
       if (!response.ok) {
-        toast.error(result.error ?? "Unable to update subscription status.");
-        return;
+        toast.error(result.error ?? "Unable to update subscription status.")
+        return
       }
 
       toast.success(
         nextStatus === "active"
           ? "Subscription activated. Invoice generation is the next implementation step."
-          : `Subscription moved to ${nextStatus}.`,
-      );
-      router.refresh();
+          : `Subscription moved to ${nextStatus}.`
+      )
+      router.refresh()
     } catch {
-      toast.error("Unable to update subscription status right now.");
+      toast.error("Unable to update subscription status right now.")
     } finally {
-      setIsPending(false);
+      setIsPending(false)
     }
   }
 
   if (!nextStatus) {
     return (
-      <div className="rounded-2xl border border-border bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
+      <div className="border-border bg-muted/20 text-muted-foreground rounded-2xl border px-4 py-3 text-sm">
         This subscription is already at the final lifecycle state.
       </div>
-    );
+    )
   }
 
   return (
@@ -88,5 +91,5 @@ export function SubscriptionStatusActions({
         </p>
       ) : null}
     </div>
-  );
+  )
 }

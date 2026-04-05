@@ -1,30 +1,36 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { requireApiRole } from "@/lib/admin";
-import { invoiceFiltersSchema } from "@/lib/validations/invoice";
+import { NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/db"
+import { requireApiRole } from "@/lib/admin"
+import { invoiceFiltersSchema } from "@/lib/validations/invoice"
 
 export async function GET(request: NextRequest) {
-  const { error, session } = await requireApiRole(["admin", "internal", "portal"]);
+  const { error, session } = await requireApiRole([
+    "admin",
+    "internal",
+    "portal",
+  ])
   if (error || !session?.user?.id) {
-    return error ?? NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return (
+      error ?? NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    )
   }
 
-  const searchParams = request.nextUrl.searchParams;
+  const searchParams = request.nextUrl.searchParams
   const parsed = invoiceFiltersSchema.safeParse({
     q: searchParams.get("q") ?? undefined,
     status: searchParams.get("status") ?? undefined,
     page: searchParams.get("page") ?? undefined,
     pageSize: searchParams.get("pageSize") ?? undefined,
-  });
+  })
 
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? "Invalid filters." },
-      { status: 400 },
-    );
+      { status: 400 }
+    )
   }
 
-  const { q, status, page, pageSize } = parsed.data;
+  const { q, status, page, pageSize } = parsed.data
   const where = {
     ...(session.user.role === "portal" ? { userId: session.user.id } : {}),
     ...(status === "all" ? {} : { status }),
@@ -32,14 +38,30 @@ export async function GET(request: NextRequest) {
       ? {
           OR: [
             { invoiceNumber: { contains: q, mode: "insensitive" as const } },
-            { contact: { firstName: { contains: q, mode: "insensitive" as const } } },
-            { contact: { lastName: { contains: q, mode: "insensitive" as const } } },
-            { contact: { company: { contains: q, mode: "insensitive" as const } } },
-            { contact: { user: { email: { contains: q, mode: "insensitive" as const } } } },
+            {
+              contact: {
+                firstName: { contains: q, mode: "insensitive" as const },
+              },
+            },
+            {
+              contact: {
+                lastName: { contains: q, mode: "insensitive" as const },
+              },
+            },
+            {
+              contact: {
+                company: { contains: q, mode: "insensitive" as const },
+              },
+            },
+            {
+              contact: {
+                user: { email: { contains: q, mode: "insensitive" as const } },
+              },
+            },
           ],
         }
       : {}),
-  };
+  }
 
   const [total, invoices] = await prisma.$transaction([
     prisma.invoice.count({ where }),
@@ -70,7 +92,7 @@ export async function GET(request: NextRequest) {
         },
       },
     }),
-  ]);
+  ])
 
   return NextResponse.json({
     invoices,
@@ -80,5 +102,5 @@ export async function GET(request: NextRequest) {
       total,
       totalPages: Math.max(1, Math.ceil(total / pageSize)),
     },
-  });
+  })
 }

@@ -50,7 +50,10 @@ export default async function NewInternalSubscriptionPage() {
       contacts={contacts.map((contact) => ({
         id: contact.id,
         name:
-          [contact.firstName, contact.lastName].filter(Boolean).join(" ").trim() ||
+          [contact.firstName, contact.lastName]
+            .filter(Boolean)
+            .join(" ")
+            .trim() ||
           contact.company ||
           "Customer",
         email: contact.user.email,

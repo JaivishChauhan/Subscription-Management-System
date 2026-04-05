@@ -21,55 +21,56 @@ export default async function InternalSubscriptionDetailPage({
   await requireInternalPage()
 
   const { id } = await params
-  const [subscription, contacts, plans, paymentTerms, products, taxes] = await Promise.all([
-    prisma.subscription.findUnique({
-      where: { id },
-      include: {
-        contact: {
-          include: {
-            user: {
-              select: {
-                email: true,
+  const [subscription, contacts, plans, paymentTerms, products, taxes] =
+    await Promise.all([
+      prisma.subscription.findUnique({
+        where: { id },
+        include: {
+          contact: {
+            include: {
+              user: {
+                select: {
+                  email: true,
+                },
               },
             },
           },
-        },
-        recurringPlan: true,
-        paymentTerms: true,
-        lines: {
-          orderBy: { id: "asc" },
-        },
-      },
-    }),
-    prisma.contact.findMany({
-      orderBy: [{ company: "asc" }, { firstName: "asc" }],
-      include: {
-        user: {
-          select: {
-            email: true,
+          recurringPlan: true,
+          paymentTerms: true,
+          lines: {
+            orderBy: { id: "asc" },
           },
         },
-      },
-    }),
-    prisma.recurringPlan.findMany({
-      orderBy: { name: "asc" },
-    }),
-    prisma.paymentTerms.findMany({
-      orderBy: { dueDays: "asc" },
-    }),
-    prisma.product.findMany({
-      orderBy: { name: "asc" },
-      include: {
-        variants: {
-          orderBy: [{ attribute: "asc" }, { value: "asc" }],
+      }),
+      prisma.contact.findMany({
+        orderBy: [{ company: "asc" }, { firstName: "asc" }],
+        include: {
+          user: {
+            select: {
+              email: true,
+            },
+          },
         },
-        recurringPrices: true,
-      },
-    }),
-    prisma.tax.findMany({
-      orderBy: { name: "asc" },
-    }),
-  ])
+      }),
+      prisma.recurringPlan.findMany({
+        orderBy: { name: "asc" },
+      }),
+      prisma.paymentTerms.findMany({
+        orderBy: { dueDays: "asc" },
+      }),
+      prisma.product.findMany({
+        orderBy: { name: "asc" },
+        include: {
+          variants: {
+            orderBy: [{ attribute: "asc" }, { value: "asc" }],
+          },
+          recurringPrices: true,
+        },
+      }),
+      prisma.tax.findMany({
+        orderBy: { name: "asc" },
+      }),
+    ])
 
   if (!subscription) {
     notFound()
@@ -80,7 +81,7 @@ export default async function InternalSubscriptionDetailPage({
 
   return (
     <div className="space-y-6">
-      <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+      <section className="border-border bg-card rounded-3xl border p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold tracking-[0.24em] text-sky-600 uppercase">
@@ -91,12 +92,14 @@ export default async function InternalSubscriptionDetailPage({
             </h1>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <SubscriptionStatusBadge status={status} />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Customer:{" "}
                 {[subscription.contact.firstName, subscription.contact.lastName]
                   .filter(Boolean)
                   .join(" ")
-                  .trim() || subscription.contact.company || "Customer"}
+                  .trim() ||
+                  subscription.contact.company ||
+                  "Customer"}
               </p>
             </div>
           </div>
@@ -134,7 +137,10 @@ export default async function InternalSubscriptionDetailPage({
         contacts={contacts.map((contact) => ({
           id: contact.id,
           name:
-            [contact.firstName, contact.lastName].filter(Boolean).join(" ").trim() ||
+            [contact.firstName, contact.lastName]
+              .filter(Boolean)
+              .join(" ")
+              .trim() ||
             contact.company ||
             "Customer",
           email: contact.user.email,

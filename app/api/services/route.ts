@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { requireAdminApi } from "@/lib/admin";
+import { NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/db"
+import { requireAdminApi } from "@/lib/admin"
 
 /**
  * GET /api/services
@@ -8,10 +8,10 @@ import { requireAdminApi } from "@/lib/admin";
  * Supports ?category=streaming and ?featured=true query params.
  */
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const category = searchParams.get("category");
-  const featured = searchParams.get("featured") === "true";
-  const search = searchParams.get("q")?.trim();
+  const { searchParams } = new URL(req.url)
+  const category = searchParams.get("category")
+  const featured = searchParams.get("featured") === "true"
+  const search = searchParams.get("q")?.trim()
 
   try {
     const services = await prisma.service.findMany({
@@ -19,17 +19,18 @@ export async function GET(req: NextRequest) {
         isActive: true,
         ...(category ? { category } : {}),
         ...(featured ? { isFeatured: true } : {}),
-        ...(search
-          ? { name: { contains: search, mode: "insensitive" } }
-          : {}),
+        ...(search ? { name: { contains: search, mode: "insensitive" } } : {}),
       },
       orderBy: [{ isFeatured: "desc" }, { name: "asc" }],
-    });
+    })
 
-    return NextResponse.json(services);
+    return NextResponse.json(services)
   } catch (err) {
-    console.error("[GET /api/services]", err);
-    return NextResponse.json({ error: "Failed to fetch services" }, { status: 500 });
+    console.error("[GET /api/services]", err)
+    return NextResponse.json(
+      { error: "Failed to fetch services" },
+      { status: 500 }
+    )
   }
 }
 
@@ -38,19 +39,26 @@ export async function GET(req: NextRequest) {
  * @security Admin-only. Role verified server-side.
  */
 export async function POST(req: NextRequest) {
-  const { error } = await requireAdminApi();
+  const { error } = await requireAdminApi()
   if (error) {
-    return error;
+    return error
   }
 
   try {
-    const body = await req.json();
+    const body = await req.json()
 
-    if (!body.name || !body.slug || !body.category || body.monthlyPrice == null) {
+    if (
+      !body.name ||
+      !body.slug ||
+      !body.category ||
+      body.monthlyPrice == null
+    ) {
       return NextResponse.json(
-        { error: "Missing required fields: name, slug, category, monthlyPrice" },
+        {
+          error: "Missing required fields: name, slug, category, monthlyPrice",
+        },
         { status: 400 }
-      );
+      )
     }
 
     const service = await prisma.service.create({
@@ -67,9 +75,9 @@ export async function POST(req: NextRequest) {
         isActive: body.isActive ?? true,
         isFeatured: body.isFeatured ?? false,
       },
-    });
+    })
 
-    return NextResponse.json(service, { status: 201 });
+    return NextResponse.json(service, { status: 201 })
   } catch (err: unknown) {
     if (
       typeof err === "object" &&
@@ -77,9 +85,15 @@ export async function POST(req: NextRequest) {
       "code" in err &&
       (err as { code: string }).code === "P2002"
     ) {
-      return NextResponse.json({ error: "Slug already exists" }, { status: 409 });
+      return NextResponse.json(
+        { error: "Slug already exists" },
+        { status: 409 }
+      )
     }
-    console.error("[POST /api/services]", err);
-    return NextResponse.json({ error: "Failed to create service" }, { status: 500 });
+    console.error("[POST /api/services]", err)
+    return NextResponse.json(
+      { error: "Failed to create service" },
+      { status: 500 }
+    )
   }
 }

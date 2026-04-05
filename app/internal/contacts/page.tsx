@@ -18,7 +18,9 @@ type ContactsPageProps = {
  * Internal Contacts page — read-only view of all CRM contacts.
  * @security Requires internal role. Internal users cannot create/delete contacts.
  */
-export default async function InternalContactsPage({ searchParams }: ContactsPageProps) {
+export default async function InternalContactsPage({
+  searchParams,
+}: ContactsPageProps) {
   await requireInternalPage()
 
   const rawParams = await searchParams
@@ -55,39 +57,42 @@ export default async function InternalContactsPage({ searchParams }: ContactsPag
 
   return (
     <div className="space-y-8">
-      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-card via-card to-sky-500/5 p-6 shadow-sm">
-        <p className="text-xs font-semibold tracking-[0.28em] text-sky-600 uppercase">CRM</p>
+      <section className="border-border from-card via-card rounded-[2rem] border bg-gradient-to-br to-sky-500/5 p-6 shadow-sm">
+        <p className="text-xs font-semibold tracking-[0.28em] text-sky-600 uppercase">
+          CRM
+        </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight">Contacts</h1>
-        <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-          View all registered customers and contacts. Use this to look up accounts, companies, and subscription counts.
+        <p className="text-muted-foreground mt-3 max-w-2xl text-sm">
+          View all registered customers and contacts. Use this to look up
+          accounts, companies, and subscription counts.
         </p>
       </section>
 
-      <section className="rounded-[2rem] border border-border bg-card p-6 shadow-sm">
+      <section className="border-border bg-card rounded-[2rem] border p-6 shadow-sm">
         <form className="grid gap-4 lg:grid-cols-[1fr_auto]">
           <label className="relative block">
             <span className="sr-only">Search contacts</span>
-            <IconSearch className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <IconSearch className="text-muted-foreground absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2" />
             <input
               type="search"
               name="q"
               defaultValue={q ?? ""}
               placeholder="Search by name, company, or email"
-              className="w-full rounded-2xl border border-input bg-background py-3 pl-11 pr-4 text-sm outline-none transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+              className="border-input bg-background w-full rounded-2xl border py-3 pr-4 pl-11 text-sm transition-colors outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
             />
           </label>
           <button
             type="submit"
-            className="rounded-2xl border border-border px-5 py-3 text-sm font-semibold hover:bg-muted"
+            className="border-border hover:bg-muted rounded-2xl border px-5 py-3 text-sm font-semibold"
           >
             Search
           </button>
         </form>
 
-        <div className="mt-6 overflow-hidden rounded-3xl border border-border">
-          <table className="min-w-full divide-y divide-border">
+        <div className="border-border mt-6 overflow-hidden rounded-3xl border">
+          <table className="divide-border min-w-full divide-y">
             <thead className="bg-muted/40">
-              <tr className="text-left text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+              <tr className="text-muted-foreground text-left text-xs font-semibold tracking-widest uppercase">
                 <th className="px-5 py-4">Contact</th>
                 <th className="px-5 py-4">Company</th>
                 <th className="px-5 py-4">Email</th>
@@ -95,32 +100,41 @@ export default async function InternalContactsPage({ searchParams }: ContactsPag
                 <th className="px-5 py-4 text-right">Details</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border bg-card">
+            <tbody className="divide-border bg-card divide-y">
               {contacts.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-5 py-14 text-center">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
-                      <IconUsers className="h-6 w-6 text-muted-foreground" />
+                    <div className="bg-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl">
+                      <IconUsers className="text-muted-foreground h-6 w-6" />
                     </div>
-                    <h2 className="mt-4 text-lg font-semibold">No contacts found</h2>
+                    <h2 className="mt-4 text-lg font-semibold">
+                      No contacts found
+                    </h2>
                   </td>
                 </tr>
               ) : (
                 contacts.map((c) => {
-                  const fullName = [c.firstName, c.lastName].filter(Boolean).join(" ") || "—"
+                  const fullName =
+                    [c.firstName, c.lastName].filter(Boolean).join(" ") || "—"
                   return (
                     <tr key={c.id} className="hover:bg-muted/20">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-700 text-xs font-bold dark:bg-sky-900/30 dark:text-sky-400">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sky-100 text-xs font-bold text-sky-700 dark:bg-sky-900/30 dark:text-sky-400">
                             {(c.firstName || "?").charAt(0).toUpperCase()}
                           </div>
                           <span className="font-medium">{fullName}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-sm text-muted-foreground">{c.company ?? "—"}</td>
-                      <td className="px-5 py-4 text-sm text-muted-foreground">{c.user?.email ?? "—"}</td>
-                      <td className="px-5 py-4 text-sm">{c._count.subscriptions}</td>
+                      <td className="text-muted-foreground px-5 py-4 text-sm">
+                        {c.company ?? "—"}
+                      </td>
+                      <td className="text-muted-foreground px-5 py-4 text-sm">
+                        {c.user?.email ?? "—"}
+                      </td>
+                      <td className="px-5 py-4 text-sm">
+                        {c._count.subscriptions}
+                      </td>
                       <td className="px-5 py-4 text-right">
                         <Link
                           href={`/admin/contacts/${c.id}`}
@@ -139,23 +153,25 @@ export default async function InternalContactsPage({ searchParams }: ContactsPag
         </div>
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {total} contact{total === 1 ? "" : "s"} total
           </p>
           <div className="flex items-center gap-2">
             {page > 1 && (
               <Link
                 href={buildHref(rawParams, page - 1)}
-                className="rounded-full border border-border px-4 py-2 text-sm font-semibold hover:bg-muted"
+                className="border-border hover:bg-muted rounded-full border px-4 py-2 text-sm font-semibold"
               >
                 Previous
               </Link>
             )}
-            <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+            <span className="text-muted-foreground text-sm">
+              Page {page} of {totalPages}
+            </span>
             {page < totalPages && (
               <Link
                 href={buildHref(rawParams, page + 1)}
-                className="rounded-full border border-border px-4 py-2 text-sm font-semibold hover:bg-muted"
+                className="border-border hover:bg-muted rounded-full border px-4 py-2 text-sm font-semibold"
               >
                 Next
               </Link>
@@ -171,7 +187,10 @@ function firstValue(v: string | string[] | undefined) {
   return Array.isArray(v) ? v[0] : v
 }
 
-function buildHref(params: Record<string, string | string[] | undefined>, nextPage: number) {
+function buildHref(
+  params: Record<string, string | string[] | undefined>,
+  nextPage: number
+) {
   const p = new URLSearchParams()
   const q = firstValue(params.q)
   if (q) p.set("q", q)

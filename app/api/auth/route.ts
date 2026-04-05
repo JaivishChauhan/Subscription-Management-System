@@ -31,10 +31,18 @@ export async function POST(request: NextRequest) {
       const { email, name, image, googleId } = body
 
       if (!email || !googleId) {
-        return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+        return NextResponse.json(
+          { error: "Missing required fields" },
+          { status: 400 }
+        )
       }
 
-      const result = await signInWithGoogle({ id: googleId, email, name, image })
+      const result = await signInWithGoogle({
+        id: googleId,
+        email,
+        name,
+        image,
+      })
       if (result.error) {
         return NextResponse.json({ error: result.error }, { status: 401 })
       }
@@ -44,7 +52,10 @@ export async function POST(request: NextRequest) {
         role: result.session!.user.role,
       })
     } catch {
-      return NextResponse.json({ error: "Invalid request body" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 }
+      )
     }
   }
 
@@ -71,7 +82,10 @@ export async function POST(request: NextRequest) {
       role: result.session!.user.role,
     })
   } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 })
+    return NextResponse.json(
+      { error: "Invalid request body." },
+      { status: 400 }
+    )
   }
 }
 

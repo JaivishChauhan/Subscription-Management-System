@@ -16,7 +16,9 @@ export const metadata: Metadata = {
   title: "Invoice Details",
 }
 
-export default async function InternalInvoiceDetailPage({ params }: InvoiceDetailPageProps) {
+export default async function InternalInvoiceDetailPage({
+  params,
+}: InvoiceDetailPageProps) {
   await requireInternalPage()
 
   const { id } = await params
@@ -62,13 +64,16 @@ export default async function InternalInvoiceDetailPage({ params }: InvoiceDetai
 
   const status = normalizeInvoiceStatus(invoice.status)
   const customerName =
-    [invoice.contact.firstName, invoice.contact.lastName].filter(Boolean).join(" ").trim() ||
+    [invoice.contact.firstName, invoice.contact.lastName]
+      .filter(Boolean)
+      .join(" ")
+      .trim() ||
     invoice.contact.company ||
     "Customer"
 
   return (
     <div className="space-y-6">
-      <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+      <section className="border-border bg-card rounded-3xl border p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <Link
@@ -81,11 +86,15 @@ export default async function InternalInvoiceDetailPage({ params }: InvoiceDetai
             <p className="mt-4 text-xs font-semibold tracking-[0.24em] text-sky-600 uppercase">
               Invoice Detail
             </p>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight">{invoice.invoiceNumber}</h1>
+            <h1 className="mt-2 text-2xl font-bold tracking-tight">
+              {invoice.invoiceNumber}
+            </h1>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <InvoiceStatusBadge status={status} />
-              <p className="text-sm text-muted-foreground">{customerName}</p>
-              <p className="text-sm text-muted-foreground">{invoice.contact.user.email}</p>
+              <p className="text-muted-foreground text-sm">{customerName}</p>
+              <p className="text-muted-foreground text-sm">
+                {invoice.contact.user.email}
+              </p>
             </div>
           </div>
 
@@ -94,33 +103,35 @@ export default async function InternalInvoiceDetailPage({ params }: InvoiceDetai
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold text-muted-foreground"
+                className="border-border text-muted-foreground inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold"
                 disabled
               >
                 <IconMail className="h-4 w-4" />
                 Send invoice
               </button>
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold text-muted-foreground"
-                disabled
+              <a
+                href={`/api/invoices/${invoice.id}/pdf`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border-border hover:bg-muted inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors"
+                title="Download Invoice PDF"
               >
                 <IconPrinter className="h-4 w-4" />
                 Print PDF
-              </button>
+              </a>
             </div>
           </div>
         </div>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[1.3fr_0.9fr]">
-        <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+        <section className="border-border bg-card rounded-3xl border p-6 shadow-sm">
           <h2 className="text-lg font-semibold">Line Items</h2>
-          <div className="mt-5 overflow-hidden rounded-3xl border border-border">
+          <div className="border-border mt-5 overflow-hidden rounded-3xl border">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-border">
+              <table className="divide-border min-w-full divide-y">
                 <thead className="bg-muted/40">
-                  <tr className="text-left text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                  <tr className="text-muted-foreground text-left text-xs font-semibold tracking-[0.18em] uppercase">
                     <th className="px-5 py-4">Item</th>
                     <th className="px-5 py-4">Qty</th>
                     <th className="px-5 py-4">Unit Price</th>
@@ -128,20 +139,24 @@ export default async function InternalInvoiceDetailPage({ params }: InvoiceDetai
                     <th className="px-5 py-4 text-right">Subtotal</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border bg-card">
+                <tbody className="divide-border bg-card divide-y">
                   {invoice.lines.map((line) => (
                     <tr key={line.id}>
                       <td className="px-5 py-4">
                         <div>
                           <p className="font-medium">{line.name}</p>
-                          <p className="text-muted-foreground text-sm">{line.productId}</p>
+                          <p className="text-muted-foreground text-sm">
+                            {line.productId}
+                          </p>
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-sm text-muted-foreground">{line.quantity}</td>
-                      <td className="px-5 py-4 text-sm text-muted-foreground">
+                      <td className="text-muted-foreground px-5 py-4 text-sm">
+                        {line.quantity}
+                      </td>
+                      <td className="text-muted-foreground px-5 py-4 text-sm">
                         {formatCurrency(line.unitPrice)}
                       </td>
-                      <td className="px-5 py-4 text-sm text-muted-foreground">
+                      <td className="text-muted-foreground px-5 py-4 text-sm">
                         {formatCurrency(line.taxAmount)}
                       </td>
                       <td className="px-5 py-4 text-right text-sm font-medium">
@@ -156,20 +171,36 @@ export default async function InternalInvoiceDetailPage({ params }: InvoiceDetai
         </section>
 
         <aside className="space-y-6">
-          <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+          <section className="border-border bg-card rounded-3xl border p-6 shadow-sm">
             <h2 className="text-lg font-semibold">Totals</h2>
             <div className="mt-5 space-y-4">
-              <SummaryRow label="Subtotal" value={formatCurrency(invoice.subtotal)} />
-              <SummaryRow label="Tax total" value={formatCurrency(invoice.taxTotal)} />
-              <SummaryRow label="Discount total" value={formatCurrency(invoice.discountTotal)} />
-              <SummaryRow label="Amount due" value={formatCurrency(invoice.amountDue)} />
-              <SummaryRow label="Grand total" value={formatCurrency(invoice.total)} strong />
+              <SummaryRow
+                label="Subtotal"
+                value={formatCurrency(invoice.subtotal)}
+              />
+              <SummaryRow
+                label="Tax total"
+                value={formatCurrency(invoice.taxTotal)}
+              />
+              <SummaryRow
+                label="Discount total"
+                value={formatCurrency(invoice.discountTotal)}
+              />
+              <SummaryRow
+                label="Amount due"
+                value={formatCurrency(invoice.amountDue)}
+              />
+              <SummaryRow
+                label="Grand total"
+                value={formatCurrency(invoice.total)}
+                strong
+              />
             </div>
           </section>
 
-          <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+          <section className="border-border bg-card rounded-3xl border p-6 shadow-sm">
             <h2 className="text-lg font-semibold">Reference</h2>
-            <div className="mt-5 space-y-3 text-sm text-muted-foreground">
+            <div className="text-muted-foreground mt-5 space-y-3 text-sm">
               <p>Subscription: {invoice.subscription.subscriptionNumber}</p>
               <p>Plan: {invoice.subscription.recurringPlan.name}</p>
               <p>
@@ -179,26 +210,33 @@ export default async function InternalInvoiceDetailPage({ params }: InvoiceDetai
                   : "Not set"}
               </p>
               <p>Created: {formatDate(invoice.createdAt)}</p>
-              <p>Due date: {invoice.dueDate ? formatDate(invoice.dueDate) : "Not set"}</p>
+              <p>
+                Due date:{" "}
+                {invoice.dueDate ? formatDate(invoice.dueDate) : "Not set"}
+              </p>
             </div>
           </section>
 
-          <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+          <section className="border-border bg-card rounded-3xl border p-6 shadow-sm">
             <h2 className="text-lg font-semibold">Payments</h2>
             {invoice.payments.length === 0 ? (
-              <p className="mt-3 text-sm text-muted-foreground">
-                No payment records yet. Payment recording is the next module in the flow.
+              <p className="text-muted-foreground mt-3 text-sm">
+                No payment records yet. Payment recording is the next module in
+                the flow.
               </p>
             ) : (
               <div className="mt-4 space-y-3">
                 {invoice.payments.map((payment) => (
                   <div
                     key={payment.id}
-                    className="rounded-2xl border border-border bg-muted/20 p-4 text-sm"
+                    className="border-border bg-muted/20 rounded-2xl border p-4 text-sm"
                   >
-                    <p className="font-semibold">{formatCurrency(payment.amount)}</p>
+                    <p className="font-semibold">
+                      {formatCurrency(payment.amount)}
+                    </p>
                     <p className="text-muted-foreground mt-1 capitalize">
-                      {payment.paymentMethod.replaceAll("_", " ")} on {formatDate(payment.paymentDate)}
+                      {payment.paymentMethod.replaceAll("_", " ")} on{" "}
+                      {formatDate(payment.paymentDate)}
                     </p>
                   </div>
                 ))}

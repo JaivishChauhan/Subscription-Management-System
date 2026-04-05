@@ -1,6 +1,7 @@
-"use client";
+"use client"
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react"
+import { IconSparkles, IconDotsVertical } from "@tabler/icons-react"
 import {
   AreaChart,
   Area,
@@ -9,25 +10,25 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-} from "recharts";
-import { CountUp } from "countup.js";
+} from "recharts"
+import { CountUp } from "countup.js"
 
 interface DashboardClientProps {
   stats: {
-    activeSubscriptions: number;
-    revenueMTD: number;
-    outstanding: number;
-    overdue: number;
-  };
-  revenueData: Array<{ month: string; actual: number; forecast: number }>;
-  churnData: Array<{ name: string; sub: string; initials: string | null }>;
+    activeSubscriptions: number
+    revenueMTD: number
+    outstanding: number
+    overdue: number
+  }
+  revenueData: Array<{ month: string; actual: number; forecast: number }>
+  churnData: Array<{ name: string; sub: string; initials: string | null }>
   timeline: Array<{
-    color: string;
-    title: string;
-    desc: string;
-    time: string;
-  }>;
-  planDist: Array<{ name: string; pct: string; color: string }>;
+    color: string
+    title: string
+    desc: string
+    time: string
+  }>
+  planDist: Array<{ name: string; pct: string; color: string }>
 }
 
 export function DashboardClient({
@@ -37,56 +38,51 @@ export function DashboardClient({
   timeline,
   planDist,
 }: DashboardClientProps) {
-  const subsRef = useRef<HTMLHeadingElement>(null);
-  const revRef = useRef<HTMLHeadingElement>(null);
-  const outRef = useRef<HTMLHeadingElement>(null);
+  const subsRef = useRef<HTMLHeadingElement>(null)
+  const revRef = useRef<HTMLHeadingElement>(null)
+  const outRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
     if (subsRef.current)
       new CountUp(subsRef.current, stats.activeSubscriptions, {
         duration: 1.5,
         separator: ",",
-      }).start();
+      }).start()
     if (revRef.current)
       new CountUp(revRef.current, stats.revenueMTD, {
         duration: 1.5,
         prefix: "₹",
         separator: ",",
-      }).start();
+      }).start()
     if (outRef.current)
       new CountUp(outRef.current, stats.outstanding, {
         duration: 1.5,
         prefix: "₹",
         separator: ",",
-      }).start();
-  }, [stats]);
+      }).start()
+  }, [stats])
 
   return (
-    <div className="mx-auto w-full max-w-[1600px] space-y-8 anim-up">
+    <div className="anim-up mx-auto w-full max-w-[1600px] space-y-8">
       {/* AI WEEKLY DIGEST */}
-      <section className="relative overflow-hidden rounded-r-lg border-l-4 border-indigo-500 bg-white shadow-sm p-5 border border-border">
-        <div className="absolute right-0 top-0 h-full w-64 opacity-10">
+      <section className="border-border relative overflow-hidden rounded-r-lg border border-l-4 border-indigo-500 bg-white p-5 shadow-sm">
+        <div className="absolute top-0 right-0 h-full w-64 opacity-10">
           <div className="h-full w-full bg-gradient-to-br from-indigo-500 to-transparent"></div>
         </div>
         <div className="relative z-10 flex items-start gap-4">
           <div className="mt-1">
-            <span
-              className="material-symbols-outlined text-indigo-500"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              auto_awesome
-            </span>
+            <IconSparkles className="h-5 w-5 text-indigo-500" />
           </div>
           <div>
-            <h3 className="f-syne mb-1 text-[13px] font-bold text-foreground">
+            <h3 className="f-syne text-foreground mb-1 text-[13px] font-bold">
               Weekly Intelligence Digest
             </h3>
-            <p className="f-mono max-w-4xl text-[11px] leading-relaxed text-muted-foreground">
+            <p className="f-mono text-muted-foreground max-w-4xl text-[11px] leading-relaxed">
               8 new subscriptions this week (+23%).{" "}
-              <span className="text-indigo-600 font-bold">₹1.24L</span> revenue collected.
-              2 customers flagged as high churn risk based on activity patterns.
-              Forecasted MRR growth remains stable at{" "}
-              <span className="text-emerald-500 font-bold">4.2%</span>.
+              <span className="font-bold text-indigo-600">₹1.24L</span> revenue
+              collected. 2 customers flagged as high churn risk based on
+              activity patterns. Forecasted MRR growth remains stable at{" "}
+              <span className="font-bold text-emerald-500">4.2%</span>.
             </p>
           </div>
         </div>
@@ -94,15 +90,15 @@ export function DashboardClient({
 
       {/* STAT CARDS */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <div className="group relative overflow-hidden rounded-lg bg-card shadow-sm border border-border p-6 hover:shadow-md transition-shadow">
-          <div className="absolute bottom-0 left-0 top-0 w-[2px] bg-indigo-500"></div>
-          <p className="f-mono mb-4 text-[11px] uppercase tracking-wider text-muted-foreground">
+        <div className="group bg-card border-border relative overflow-hidden rounded-lg border p-6 shadow-sm transition-shadow hover:shadow-md">
+          <div className="absolute top-0 bottom-0 left-0 w-[2px] bg-indigo-500"></div>
+          <p className="f-mono text-muted-foreground mb-4 text-[11px] tracking-wider uppercase">
             Active Subscriptions
           </p>
           <div className="flex items-baseline gap-3">
             <h4
               ref={subsRef}
-              className="f-syne text-4xl font-extrabold text-foreground"
+              className="f-syne text-foreground text-4xl font-extrabold"
             >
               0
             </h4>
@@ -111,23 +107,23 @@ export function DashboardClient({
             </span>
           </div>
         </div>
-        <div className="group relative overflow-hidden rounded-lg bg-card shadow-sm border border-border p-6 hover:shadow-md transition-shadow">
-          <div className="absolute bottom-0 left-0 top-0 w-[2px] bg-transparent transition-colors group-hover:bg-indigo-500"></div>
-          <p className="f-mono mb-4 text-[11px] uppercase tracking-wider text-muted-foreground">
+        <div className="group bg-card border-border relative overflow-hidden rounded-lg border p-6 shadow-sm transition-shadow hover:shadow-md">
+          <div className="absolute top-0 bottom-0 left-0 w-[2px] bg-transparent transition-colors group-hover:bg-indigo-500"></div>
+          <p className="f-mono text-muted-foreground mb-4 text-[11px] tracking-wider uppercase">
             Revenue MTD
           </p>
           <div className="flex items-baseline gap-3">
             <h4
               ref={revRef}
-              className="f-syne text-4xl font-extrabold text-foreground"
+              className="f-syne text-foreground text-4xl font-extrabold"
             >
               0
             </h4>
           </div>
         </div>
-        <div className="group relative overflow-hidden rounded-lg bg-card shadow-sm border border-border p-6 hover:shadow-md transition-shadow">
-          <div className="absolute bottom-0 left-0 top-0 w-[2px] bg-transparent transition-colors group-hover:bg-amber-500"></div>
-          <p className="f-mono mb-4 text-[11px] uppercase tracking-wider text-muted-foreground">
+        <div className="group bg-card border-border relative overflow-hidden rounded-lg border p-6 shadow-sm transition-shadow hover:shadow-md">
+          <div className="absolute top-0 bottom-0 left-0 w-[2px] bg-transparent transition-colors group-hover:bg-amber-500"></div>
+          <p className="f-mono text-muted-foreground mb-4 text-[11px] tracking-wider uppercase">
             Outstanding
           </p>
           <div className="flex items-baseline gap-3">
@@ -139,9 +135,9 @@ export function DashboardClient({
             </h4>
           </div>
         </div>
-        <div className="group relative overflow-hidden rounded-lg bg-card shadow-sm border border-border p-6 hover:shadow-md transition-shadow">
-          <div className="absolute bottom-0 left-0 top-0 w-[2px] bg-transparent transition-colors group-hover:bg-red-500"></div>
-          <p className="f-mono mb-4 text-[11px] uppercase tracking-wider text-muted-foreground">
+        <div className="group bg-card border-border relative overflow-hidden rounded-lg border p-6 shadow-sm transition-shadow hover:shadow-md">
+          <div className="absolute top-0 bottom-0 left-0 w-[2px] bg-transparent transition-colors group-hover:bg-red-500"></div>
+          <p className="f-mono text-muted-foreground mb-4 text-[11px] tracking-wider uppercase">
             Overdue
           </p>
           <div className="flex items-baseline gap-3">
@@ -158,26 +154,26 @@ export function DashboardClient({
       {/* CHARTS (60/40) */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-10">
         {/* Revenue Overview */}
-        <div className="rounded-lg bg-card border border-border shadow-sm p-6 lg:col-span-6">
+        <div className="bg-card border-border rounded-lg border p-6 shadow-sm lg:col-span-6">
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h3 className="f-syne text-lg font-bold text-foreground">
+              <h3 className="f-syne text-foreground text-lg font-bold">
                 Revenue Overview
               </h3>
-              <p className="f-mono text-[11px] text-muted-foreground">
+              <p className="f-mono text-muted-foreground text-[11px]">
                 Real-time performance vs AI Forecast
               </p>
             </div>
             <div className="flex gap-4">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-indigo-500"></span>
-                <span className="f-mono text-[10px] text-muted-foreground">
+                <span className="f-mono text-muted-foreground text-[10px]">
                   Actual
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-violet-400 border border-violet-500 border-dashed"></span>
-                <span className="f-mono text-[10px] text-muted-foreground">
+                <span className="h-2 w-2 rounded-full border border-dashed border-violet-500 bg-violet-400"></span>
+                <span className="f-mono text-muted-foreground text-[10px]">
                   Forecast
                 </span>
               </div>
@@ -218,7 +214,7 @@ export function DashboardClient({
                   borderRadius: 8,
                   fontFamily: "DM Mono",
                   fontSize: 12,
-                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)"
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                 }}
                 labelStyle={{ color: "var(--foreground)" }}
                 itemStyle={{ color: "var(--muted-foreground)" }}
@@ -245,20 +241,22 @@ export function DashboardClient({
         </div>
 
         {/* Plan Distribution */}
-        <div className="flex flex-col rounded-lg bg-card shadow-sm border border-border p-6 lg:col-span-4">
-          <h3 className="f-syne mb-2 text-lg font-bold text-foreground">
+        <div className="bg-card border-border flex flex-col rounded-lg border p-6 shadow-sm lg:col-span-4">
+          <h3 className="f-syne text-foreground mb-2 text-lg font-bold">
             Plan Distribution
           </h3>
-          <p className="f-mono mb-8 text-[11px] text-muted-foreground">
+          <p className="f-mono text-muted-foreground mb-8 text-[11px]">
             Active users by tier
           </p>
           <div className="relative flex flex-1 items-center justify-center">
             <div className="relative h-48 w-48 rounded-full border-[16px] border-slate-100">
-              <div className="absolute inset-0 rotate-45 rounded-full border-[16px] border-indigo-500 border-r-transparent border-t-transparent"></div>
+              <div className="absolute inset-0 rotate-45 rounded-full border-[16px] border-indigo-500 border-t-transparent border-r-transparent"></div>
               <div className="absolute inset-0 -rotate-12 rounded-full border-[16px] border-violet-500 border-b-transparent border-l-transparent"></div>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="f-syne text-2xl font-bold text-foreground">3 Tiers</span>
-                <span className="f-mono text-[10px] text-muted-foreground">
+                <span className="f-syne text-foreground text-2xl font-bold">
+                  3 Tiers
+                </span>
+                <span className="f-mono text-muted-foreground text-[10px]">
                   Scale Ready
                 </span>
               </div>
@@ -287,12 +285,12 @@ export function DashboardClient({
       {/* BOTTOM ROW (50/50) */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Churn Risk Monitor */}
-        <div className="rounded-lg bg-card border border-border shadow-sm p-6">
+        <div className="bg-card border-border rounded-lg border p-6 shadow-sm">
           <div className="mb-6 flex items-center justify-between">
-            <h3 className="f-syne text-lg font-bold text-foreground">
+            <h3 className="f-syne text-foreground text-lg font-bold">
               Churn Risk Monitor
             </h3>
-            <button className="f-mono text-[10px] uppercase text-indigo-600 hover:underline">
+            <button className="f-mono text-[10px] text-indigo-600 uppercase hover:underline">
               View All
             </button>
           </div>
@@ -300,32 +298,30 @@ export function DashboardClient({
             {churnData.map((c, i) => (
               <div
                 key={i}
-                className="group flex items-center justify-between rounded bg-muted/40 border border-transparent p-3 transition-colors hover:border-border hover:bg-muted"
+                className="group bg-muted/40 hover:border-border hover:bg-muted flex items-center justify-between rounded border border-transparent p-3 transition-colors"
               >
                 <div className="flex items-center gap-4">
                   {c.initials ? (
-                    <div className="f-syne flex h-8 w-8 items-center justify-center rounded-full bg-card border border-border shadow-sm text-[10px] font-bold text-foreground/70">
+                    <div className="f-syne bg-card border-border text-foreground/70 flex h-8 w-8 items-center justify-center rounded-full border text-[10px] font-bold shadow-sm">
                       {c.initials}
                     </div>
                   ) : (
-                    <div className="h-8 w-8 rounded-full bg-muted"></div>
+                    <div className="bg-muted h-8 w-8 rounded-full"></div>
                   )}
                   <div>
-                    <p className="f-syne text-sm font-medium text-foreground">
+                    <p className="f-syne text-foreground text-sm font-medium">
                       {c.name}
                     </p>
-                    <p className="f-mono text-[10px] text-muted-foreground">
+                    <p className="f-mono text-muted-foreground text-[10px]">
                       {c.sub}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="f-mono rounded border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[9px] font-bold uppercase text-red-500">
+                  <span className="f-mono rounded border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[9px] font-bold text-red-500 uppercase">
                     HIGH RISK
                   </span>
-                  <span className="material-symbols-outlined cursor-pointer text-lg text-muted-foreground transition-colors group-hover:text-foreground">
-                    more_vert
-                  </span>
+                  <IconDotsVertical className="text-muted-foreground group-hover:text-foreground h-5 w-5 cursor-pointer transition-colors" />
                 </div>
               </div>
             ))}
@@ -333,26 +329,27 @@ export function DashboardClient({
         </div>
 
         {/* Recent Activity Timeline */}
-        <div className="rounded-lg bg-card border border-border shadow-sm p-6">
-          <h3 className="f-syne mb-6 text-lg font-bold text-foreground">
+        <div className="bg-card border-border rounded-lg border p-6 shadow-sm">
+          <h3 className="f-syne text-foreground mb-6 text-lg font-bold">
             Recent Activity
           </h3>
-          <div className="relative space-y-8 before:absolute before:bottom-0 before:left-[11px] before:top-2 before:w-[1px] before:bg-border">
+          <div className="before:bg-border relative space-y-8 before:absolute before:top-2 before:bottom-0 before:left-[11px] before:w-[1px]">
             {timeline.map((t, i) => (
               <div key={i} className="relative pl-10">
-                <div
-                  className="absolute left-0 top-1 z-10 flex h-[22px] w-[22px] items-center justify-center rounded-full border-4 border-card bg-card"
-                >
-                  <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: t.color }}></div>
+                <div className="border-card bg-card absolute top-1 left-0 z-10 flex h-[22px] w-[22px] items-center justify-center rounded-full border-4">
+                  <div
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: t.color }}
+                  ></div>
                 </div>
                 <div>
-                  <p className="f-syne text-sm font-medium text-foreground">
+                  <p className="f-syne text-foreground text-sm font-medium">
                     {t.title}
                   </p>
-                  <p className="f-mono mt-1 text-[11px] text-muted-foreground">
+                  <p className="f-mono text-muted-foreground mt-1 text-[11px]">
                     {t.desc}
                   </p>
-                  <p className="f-mono mt-2 text-[10px] uppercase text-muted-foreground/60">
+                  <p className="f-mono text-muted-foreground/60 mt-2 text-[10px] uppercase">
                     {t.time}
                   </p>
                 </div>
@@ -362,5 +359,5 @@ export function DashboardClient({
         </div>
       </div>
     </div>
-  );
+  )
 }

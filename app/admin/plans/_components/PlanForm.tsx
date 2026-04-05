@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useForm, type UseFormRegisterReturn } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useMemo, useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useForm, type UseFormRegisterReturn } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
 import {
   IconAlertTriangle,
   IconArrowLeft,
@@ -13,46 +13,46 @@ import {
   IconLoader2,
   IconRefresh,
   IconRepeat,
-} from "@tabler/icons-react";
-import { toast } from "sonner";
+} from "@tabler/icons-react"
+import { toast } from "sonner"
 import {
   recurringPlanCreateSchema,
   type BillingPeriod,
   type RecurringPlanCreateInput,
-} from "@/lib/validations/plan";
+} from "@/lib/validations/plan"
 
 type PlanRecord = {
-  id: string;
-  name: string;
-  billingPeriod: BillingPeriod;
-  price: number;
-  minQuantity: number;
-  startDate: Date | null;
-  endDate: Date | null;
-  autoClose: boolean;
-  closable: boolean;
-  pausable: boolean;
-  renewable: boolean;
-  isActive: boolean;
-};
+  id: string
+  name: string
+  billingPeriod: BillingPeriod
+  price: number
+  minQuantity: number
+  startDate: Date | null
+  endDate: Date | null
+  autoClose: boolean
+  closable: boolean
+  pausable: boolean
+  renewable: boolean
+  isActive: boolean
+}
 
 type PlanFormProps = {
-  mode: "create" | "edit";
-  initialPlan?: PlanRecord;
-  activeSubscriptionsCount?: number;
-};
+  mode: "create" | "edit"
+  initialPlan?: PlanRecord
+  activeSubscriptionsCount?: number
+}
 
-type PlanFormInput = z.input<typeof recurringPlanCreateSchema>;
+type PlanFormInput = z.input<typeof recurringPlanCreateSchema>
 
 export function PlanForm({
   mode,
   initialPlan,
   activeSubscriptionsCount = 0,
 }: PlanFormProps) {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isArchiving, setIsArchiving] = useState(false);
-  const [isReactivating, setIsReactivating] = useState(false);
+  const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isArchiving, setIsArchiving] = useState(false)
+  const [isReactivating, setIsReactivating] = useState(false)
 
   const defaultValues = useMemo<PlanFormInput>(
     () => ({
@@ -68,8 +68,8 @@ export function PlanForm({
       renewable: initialPlan?.renewable ?? true,
       isActive: initialPlan?.isActive ?? true,
     }),
-    [initialPlan],
-  );
+    [initialPlan]
+  )
 
   const {
     register,
@@ -80,109 +80,114 @@ export function PlanForm({
   } = useForm<PlanFormInput, unknown, RecurringPlanCreateInput>({
     resolver: zodResolver(recurringPlanCreateSchema),
     defaultValues,
-  });
+  })
 
-  const watchedBillingPeriod = watch("billingPeriod");
-  const watchedPrice = watch("price");
-  const billingPeriodLabel = watchedBillingPeriod ?? "monthly";
-  const isEditing = mode === "edit" && initialPlan;
+  const watchedBillingPeriod = watch("billingPeriod")
+  const watchedPrice = watch("price")
+  const billingPeriodLabel = watchedBillingPeriod ?? "monthly"
+  const isEditing = mode === "edit" && initialPlan
 
   async function onSubmit(values: RecurringPlanCreateInput) {
-    setIsSubmitting(true);
+    setIsSubmitting(true)
 
     try {
-      const response = await fetch(isEditing ? `/api/plans/${initialPlan.id}` : "/api/plans", {
-        method: isEditing ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
+      const response = await fetch(
+        isEditing ? `/api/plans/${initialPlan.id}` : "/api/plans",
+        {
+          method: isEditing ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        }
+      )
 
-      const result = await response.json();
+      const result = await response.json()
 
       if (!response.ok) {
-        toast.error(result.error ?? "Unable to save the plan.");
-        return;
+        toast.error(result.error ?? "Unable to save the plan.")
+        return
       }
 
-      toast.success(isEditing ? "Plan updated successfully." : "Plan created successfully.");
+      toast.success(
+        isEditing ? "Plan updated successfully." : "Plan created successfully."
+      )
 
-      const nextPlanId = isEditing ? initialPlan.id : result.plan?.id;
+      const nextPlanId = isEditing ? initialPlan.id : result.plan?.id
 
       if (nextPlanId) {
-        router.push(`/admin/plans/${nextPlanId}`);
+        router.push(`/admin/plans/${nextPlanId}`)
       } else {
-        router.push("/admin/plans");
+        router.push("/admin/plans")
       }
 
-      router.refresh();
+      router.refresh()
     } catch {
-      toast.error("Something went wrong while saving the plan.");
+      toast.error("Something went wrong while saving the plan.")
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
   }
 
   async function handleDeactivate() {
     if (!initialPlan) {
-      return;
+      return
     }
 
     const confirmed = window.confirm(
-      "Deactivate this plan? Existing records stay intact, but it will stop appearing as active.",
-    );
+      "Deactivate this plan? Existing records stay intact, but it will stop appearing as active."
+    )
 
     if (!confirmed) {
-      return;
+      return
     }
 
-    setIsArchiving(true);
+    setIsArchiving(true)
 
     try {
       const response = await fetch(`/api/plans/${initialPlan.id}`, {
         method: "DELETE",
-      });
-      const result = await response.json();
+      })
+      const result = await response.json()
 
       if (!response.ok) {
-        toast.error(result.error ?? "Unable to deactivate plan.");
-        return;
+        toast.error(result.error ?? "Unable to deactivate plan.")
+        return
       }
 
-      toast.success("Plan deactivated.");
-      router.refresh();
+      toast.success("Plan deactivated.")
+      router.refresh()
     } catch {
-      toast.error("Unable to deactivate plan right now.");
+      toast.error("Unable to deactivate plan right now.")
     } finally {
-      setIsArchiving(false);
+      setIsArchiving(false)
     }
   }
 
   async function handleReactivate() {
     if (!initialPlan) {
-      return;
+      return
     }
 
-    setIsReactivating(true);
+    setIsReactivating(true)
 
     try {
       const response = await fetch(`/api/plans/${initialPlan.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: true }),
-      });
-      const result = await response.json();
+      })
+      const result = await response.json()
 
       if (!response.ok) {
-        toast.error(result.error ?? "Unable to reactivate plan.");
-        return;
+        toast.error(result.error ?? "Unable to reactivate plan.")
+        return
       }
 
-      toast.success("Plan reactivated.");
-      router.refresh();
+      toast.success("Plan reactivated.")
+      router.refresh()
     } catch {
-      toast.error("Unable to reactivate plan right now.");
+      toast.error("Unable to reactivate plan right now.")
     } finally {
-      setIsReactivating(false);
+      setIsReactivating(false)
     }
   }
 
@@ -222,8 +227,11 @@ export function PlanForm({
         ) : null}
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6 lg:grid-cols-[1.35fr_0.9fr]">
-        <section className="space-y-5 rounded-3xl border border-border bg-card p-6 shadow-sm">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="grid gap-6 lg:grid-cols-[1.35fr_0.9fr]"
+      >
+        <section className="border-border bg-card space-y-5 rounded-3xl border p-6 shadow-sm">
           <div>
             <p className="text-xs font-semibold tracking-[0.24em] text-indigo-600 uppercase">
               Billing Configuration
@@ -232,7 +240,8 @@ export function PlanForm({
               {isEditing ? "Edit Plan" : "Create Recurring Plan"}
             </h1>
             <p className="text-muted-foreground mt-2 text-sm">
-              Plans define cadence, pricing, and lifecycle options that subscriptions depend on.
+              Plans define cadence, pricing, and lifecycle options that
+              subscriptions depend on.
             </p>
           </div>
 
@@ -243,11 +252,12 @@ export function PlanForm({
                 <div>
                   <p className="text-sm font-semibold text-amber-900">
                     {activeSubscriptionsCount} active subscription
-                    {activeSubscriptionsCount === 1 ? "" : "s"} depend on this plan
+                    {activeSubscriptionsCount === 1 ? "" : "s"} depend on this
+                    plan
                   </p>
                   <p className="mt-1 text-sm text-amber-800">
-                    Pricing, dates, or option changes can affect ongoing business logic. Review
-                    edits carefully before saving.
+                    Pricing, dates, or option changes can affect ongoing
+                    business logic. Review edits carefully before saving.
                   </p>
                 </div>
               </div>
@@ -337,17 +347,17 @@ export function PlanForm({
           </div>
 
           {isEditing ? (
-            <label className="flex items-start gap-3 rounded-2xl border border-border bg-muted/30 p-4">
+            <label className="border-border bg-muted/30 flex items-start gap-3 rounded-2xl border p-4">
               <input
                 type="checkbox"
-                className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                className="border-border text-primary focus:ring-primary mt-1 h-4 w-4 rounded"
                 {...register("isActive")}
               />
               <span>
                 <span className="block text-sm font-semibold">Active plan</span>
                 <span className="text-muted-foreground mt-1 block text-sm">
-                  Disable this to keep the plan in history while removing it from active admin
-                  lists and future selection flows.
+                  Disable this to keep the plan in history while removing it
+                  from active admin lists and future selection flows.
                 </span>
               </span>
             </label>
@@ -376,7 +386,7 @@ export function PlanForm({
                 type="button"
                 onClick={() => reset(defaultValues)}
                 disabled={!isDirty || isSubmitting}
-                className="rounded-full border border-border px-5 py-3 text-sm font-semibold transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+                className="border-border hover:bg-muted rounded-full border px-5 py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Discard
               </button>
@@ -385,7 +395,7 @@ export function PlanForm({
         </section>
 
         <aside className="space-y-5">
-          <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+          <section className="border-border bg-card rounded-3xl border p-6 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700">
                 <IconRepeat className="h-5 w-5" />
@@ -398,11 +408,13 @@ export function PlanForm({
               </div>
             </div>
 
-            <div className="mt-5 rounded-3xl border border-border bg-muted/20 p-5">
-              <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+            <div className="border-border bg-muted/20 mt-5 rounded-3xl border p-5">
+              <p className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
                 Billing cadence
               </p>
-              <p className="mt-2 text-2xl font-bold capitalize">{billingPeriodLabel}</p>
+              <p className="mt-2 text-2xl font-bold capitalize">
+                {billingPeriodLabel}
+              </p>
               <p className="mt-4 text-3xl font-bold tracking-tight">
                 {formatCurrency(Number(watchedPrice ?? 0))}
               </p>
@@ -412,7 +424,7 @@ export function PlanForm({
             </div>
           </section>
 
-          <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+          <section className="border-border bg-card rounded-3xl border p-6 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
                 <IconCalendarTime className="h-5 w-5" />
@@ -426,9 +438,18 @@ export function PlanForm({
             </div>
 
             <ul className="text-muted-foreground mt-4 space-y-3 text-sm">
-              <li>Plans can be deactivated without deleting historical subscriptions.</li>
-              <li>Product-specific recurring price overrides can be layered onto this plan later.</li>
-              <li>Changing a live plan is higher risk than creating a new version for new sales.</li>
+              <li>
+                Plans can be deactivated without deleting historical
+                subscriptions.
+              </li>
+              <li>
+                Product-specific recurring price overrides can be layered onto
+                this plan later.
+              </li>
+              <li>
+                Changing a live plan is higher risk than creating a new version
+                for new sales.
+              </li>
             </ul>
           </section>
 
@@ -441,8 +462,8 @@ export function PlanForm({
                     This plan is currently inactive
                   </h2>
                   <p className="mt-1 text-sm text-amber-800">
-                    You can still edit the record, or reactivate it when it should be offered
-                    again.
+                    You can still edit the record, or reactivate it when it
+                    should be offered again.
                   </p>
                 </div>
               </div>
@@ -451,7 +472,7 @@ export function PlanForm({
         </aside>
       </form>
     </div>
-  );
+  )
 }
 
 function Field({
@@ -459,17 +480,19 @@ function Field({
   error,
   children,
 }: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
+  label: string
+  error?: string
+  children: React.ReactNode
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-sm font-semibold text-foreground/90">{label}</label>
+      <label className="text-foreground/90 text-sm font-semibold">
+        {label}
+      </label>
       {children}
-      {error ? <p className="text-xs text-destructive">{error}</p> : null}
+      {error ? <p className="text-destructive text-xs">{error}</p> : null}
     </div>
-  );
+  )
 }
 
 function CheckboxField({
@@ -477,34 +500,36 @@ function CheckboxField({
   description,
   registration,
 }: {
-  title: string;
-  description: string;
-  registration: UseFormRegisterReturn;
+  title: string
+  description: string
+  registration: UseFormRegisterReturn
 }) {
-  const { name, onBlur, onChange, ref } = registration;
+  const { name, onBlur, onChange, ref } = registration
 
   return (
-    <label className="flex items-start gap-3 rounded-2xl border border-border bg-muted/20 p-4">
+    <label className="border-border bg-muted/20 flex items-start gap-3 rounded-2xl border p-4">
       <input
         type="checkbox"
         name={name}
         onBlur={onBlur}
         onChange={onChange}
         ref={ref}
-        className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary"
+        className="border-border text-primary focus:ring-primary mt-1 h-4 w-4 rounded"
       />
       <span>
         <span className="block text-sm font-semibold">{title}</span>
-        <span className="text-muted-foreground mt-1 block text-sm">{description}</span>
+        <span className="text-muted-foreground mt-1 block text-sm">
+          {description}
+        </span>
       </span>
     </label>
-  );
+  )
 }
 
 function inputClassName(hasError: boolean) {
   return `w-full rounded-2xl border bg-background px-4 py-3 text-sm transition-colors outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 ${
     hasError ? "border-destructive" : "border-input"
-  }`;
+  }`
 }
 
 function formatCurrency(value: number) {
@@ -512,26 +537,26 @@ function formatCurrency(value: number) {
     style: "currency",
     currency: "INR",
     maximumFractionDigits: 2,
-  }).format(value);
+  }).format(value)
 }
 
 function formatDateInput(value: Date | null) {
   if (!value) {
-    return "";
+    return ""
   }
 
-  return value.toISOString().slice(0, 10);
+  return value.toISOString().slice(0, 10)
 }
 
 function formatBillingUnit(period: BillingPeriod) {
   switch (period) {
     case "daily":
-      return "day";
+      return "day"
     case "weekly":
-      return "week";
+      return "week"
     case "yearly":
-      return "year";
+      return "year"
     default:
-      return "month";
+      return "month"
   }
 }

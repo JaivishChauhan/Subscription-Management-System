@@ -18,4 +18,3 @@ export async function generateSubscriptionNumber(date = new Date()) {
 
   return `${prefix}-${String(existingCount + 1).padStart(4, "0")}`
 }
-

@@ -33,23 +33,35 @@ interface AdminDiscountsClientProps {
   initialTotal: number
 }
 
-const INR = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 })
+const INR = new Intl.NumberFormat("en-IN", {
+  style: "currency",
+  currency: "INR",
+  maximumFractionDigits: 2,
+})
 
 /**
  * Admin Discounts management client component.
  * Handles full CRUD with optimistic toggle and deletion.
  * @security Admin-only — server component enforces role.
  */
-export function AdminDiscountsClient({ initialDiscounts, initialTotal }: AdminDiscountsClientProps) {
+export function AdminDiscountsClient({
+  initialDiscounts,
+  initialTotal,
+}: AdminDiscountsClientProps) {
   const [discounts, setDiscounts] = useState<Discount[]>(initialDiscounts)
   const [total, setTotal] = useState(initialTotal)
   const [search, setSearch] = useState("")
-  const [typeFilter, setTypeFilter] = useState<"all" | "fixed" | "percentage">("all")
+  const [typeFilter, setTypeFilter] = useState<"all" | "fixed" | "percentage">(
+    "all"
+  )
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingDiscount, setEditingDiscount] = useState<Discount | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  async function fetchDiscounts(q: string, type: "all" | "fixed" | "percentage") {
+  async function fetchDiscounts(
+    q: string,
+    type: "all" | "fixed" | "percentage"
+  ) {
     const params = new URLSearchParams({ q, type })
     const res = await fetch(`/api/discounts?${params}`)
     if (res.ok) {
@@ -67,7 +79,9 @@ export function AdminDiscountsClient({ initialDiscounts, initialTotal }: AdminDi
   async function handleToggleActive(discount: Discount) {
     const previous = discounts
     setDiscounts((prev) =>
-      prev.map((d) => (d.id === discount.id ? { ...d, isActive: !d.isActive } : d))
+      prev.map((d) =>
+        d.id === discount.id ? { ...d, isActive: !d.isActive } : d
+      )
     )
 
     const res = await fetch(`/api/discounts/${discount.id}`, {
@@ -79,7 +93,9 @@ export function AdminDiscountsClient({ initialDiscounts, initialTotal }: AdminDi
       setDiscounts(previous)
       toast.error("Failed to update discount status.")
     } else {
-      toast.success(`Discount ${discount.isActive ? "deactivated" : "activated"}.`)
+      toast.success(
+        `Discount ${discount.isActive ? "deactivated" : "activated"}.`
+      )
     }
   }
 
@@ -127,13 +143,13 @@ export function AdminDiscountsClient({ initialDiscounts, initialTotal }: AdminDi
         </div>
         <div className="flex gap-3">
           <div className="relative">
-            <IconSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <IconSearch className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search code or name…"
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              className="h-9 rounded-lg border border-border bg-muted/40 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+              className="border-border bg-muted/40 h-9 rounded-lg border pr-3 pl-9 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <button
@@ -148,11 +164,11 @@ export function AdminDiscountsClient({ initialDiscounts, initialTotal }: AdminDi
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="border-border bg-card overflow-hidden rounded-2xl border">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-border">
+          <table className="divide-border min-w-full divide-y">
             <thead className="bg-muted/40">
-              <tr className="text-left text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+              <tr className="text-muted-foreground text-left text-xs font-semibold tracking-widest uppercase">
                 <th className="px-5 py-4">Code</th>
                 <th className="px-5 py-4">Type / Value</th>
                 <th className="px-5 py-4">Usage</th>
@@ -161,10 +177,13 @@ export function AdminDiscountsClient({ initialDiscounts, initialTotal }: AdminDi
                 <th className="px-5 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border bg-card">
+            <tbody className="divide-border bg-card divide-y">
               {discounts.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-14 text-center text-muted-foreground">
+                  <td
+                    colSpan={6}
+                    className="text-muted-foreground px-5 py-14 text-center"
+                  >
                     No discounts found.
                   </td>
                 </tr>
@@ -175,23 +194,42 @@ export function AdminDiscountsClient({ initialDiscounts, initialTotal }: AdminDi
                       <div className="flex items-center gap-2">
                         <IconTag className="h-4 w-4 shrink-0 text-indigo-500" />
                         <div>
-                          <p className="font-semibold font-mono">{d.code}</p>
-                          <p className="text-xs text-muted-foreground">{d.name}</p>
+                          <p className="font-mono font-semibold">{d.code}</p>
+                          <p className="text-muted-foreground text-xs">
+                            {d.name}
+                          </p>
                         </div>
                       </div>
                     </td>
                     <td className="px-5 py-4">
                       <span className="font-semibold text-indigo-600">
-                        {d.type === "percentage" ? `${d.value}%` : INR.format(d.value)}
+                        {d.type === "percentage"
+                          ? `${d.value}%`
+                          : INR.format(d.value)}
                       </span>
-                      <span className="ml-1 text-xs text-muted-foreground capitalize">{d.type}</span>
+                      <span className="text-muted-foreground ml-1 text-xs capitalize">
+                        {d.type}
+                      </span>
                     </td>
                     <td className="px-5 py-4 text-sm">
                       {d.usageCount} / {d.usageLimit ?? "∞"}
                     </td>
-                    <td className="px-5 py-4 text-sm text-muted-foreground">
-                      <p>{new Date(d.startDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
-                      <p>→ {new Date(d.endDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
+                    <td className="text-muted-foreground px-5 py-4 text-sm">
+                      <p>
+                        {new Date(d.startDate).toLocaleDateString("en-IN", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                      <p>
+                        →{" "}
+                        {new Date(d.endDate).toLocaleDateString("en-IN", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
                       {isExpired(d) && (
                         <span className="mt-1 inline-flex rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-600">
                           Expired
@@ -222,7 +260,7 @@ export function AdminDiscountsClient({ initialDiscounts, initialTotal }: AdminDi
                         <button
                           type="button"
                           onClick={() => setEditingDiscount(d)}
-                          className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+                          className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg p-2"
                           aria-label={`Edit ${d.code}`}
                         >
                           <IconPencil className="h-4 w-4" />
@@ -230,7 +268,7 @@ export function AdminDiscountsClient({ initialDiscounts, initialTotal }: AdminDi
                         <button
                           type="button"
                           onClick={() => handleDelete(d.id, d.name)}
-                          className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg p-2"
                           aria-label={`Delete ${d.code}`}
                         >
                           <IconTrash className="h-4 w-4" />
@@ -263,7 +301,9 @@ export function AdminDiscountsClient({ initialDiscounts, initialTotal }: AdminDi
           initial={editingDiscount}
           onClose={() => setEditingDiscount(null)}
           onSaved={(updated) => {
-            setDiscounts((prev) => prev.map((d) => (d.id === updated.id ? updated : d)))
+            setDiscounts((prev) =>
+              prev.map((d) => (d.id === updated.id ? updated : d))
+            )
             setEditingDiscount(null)
           }}
         />
@@ -299,8 +339,12 @@ function DiscountFormModal({
       code: (fd.get("code") as string).toUpperCase(),
       type: fd.get("type") as "fixed" | "percentage",
       value: parseFloat(fd.get("value") as string),
-      minPurchase: fd.get("minPurchase") ? parseFloat(fd.get("minPurchase") as string) : null,
-      usageLimit: fd.get("usageLimit") ? parseInt(fd.get("usageLimit") as string, 10) : null,
+      minPurchase: fd.get("minPurchase")
+        ? parseFloat(fd.get("minPurchase") as string)
+        : null,
+      usageLimit: fd.get("usageLimit")
+        ? parseInt(fd.get("usageLimit") as string, 10)
+        : null,
       startDate: fd.get("startDate") as string,
       endDate: fd.get("endDate") as string,
       isActive: fd.get("isActive") === "true",
@@ -330,84 +374,202 @@ function DiscountFormModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose()
+      }}
     >
-      <div className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl">
-        <button type="button" onClick={onClose} className="absolute right-4 top-4 rounded-lg p-1.5 text-muted-foreground hover:bg-muted">
+      <div className="border-border bg-card relative w-full max-w-lg rounded-2xl border p-6 shadow-2xl">
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-muted-foreground hover:bg-muted absolute top-4 right-4 rounded-lg p-1.5"
+        >
           <IconX className="h-4 w-4" />
         </button>
         <h2 className="mb-6 text-xl font-bold">{title}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="discount-name" className="mb-1.5 block text-sm font-medium">Name</label>
-              <input id="discount-name" name="name" type="text" required defaultValue={initial?.name}
-                className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+              <label
+                htmlFor="discount-name"
+                className="mb-1.5 block text-sm font-medium"
+              >
+                Name
+              </label>
+              <input
+                id="discount-name"
+                name="name"
+                type="text"
+                required
+                defaultValue={initial?.name}
+                className="border-border bg-background h-10 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
             <div>
-              <label htmlFor="discount-code" className="mb-1.5 block text-sm font-medium">Code</label>
-              <input id="discount-code" name="code" type="text" required defaultValue={initial?.code} placeholder="SUMMER20"
-                className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm font-mono uppercase outline-none focus:ring-2 focus:ring-indigo-500" />
+              <label
+                htmlFor="discount-code"
+                className="mb-1.5 block text-sm font-medium"
+              >
+                Code
+              </label>
+              <input
+                id="discount-code"
+                name="code"
+                type="text"
+                required
+                defaultValue={initial?.code}
+                placeholder="SUMMER20"
+                className="border-border bg-background h-10 w-full rounded-lg border px-3 font-mono text-sm uppercase outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="discount-type" className="mb-1.5 block text-sm font-medium">Type</label>
-              <select id="discount-type" name="type" defaultValue={initial?.type ?? "percentage"}
-                className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm">
+              <label
+                htmlFor="discount-type"
+                className="mb-1.5 block text-sm font-medium"
+              >
+                Type
+              </label>
+              <select
+                id="discount-type"
+                name="type"
+                defaultValue={initial?.type ?? "percentage"}
+                className="border-border bg-background h-10 w-full rounded-lg border px-3 text-sm"
+              >
                 <option value="percentage">Percentage (%)</option>
                 <option value="fixed">Fixed (₹)</option>
               </select>
             </div>
             <div>
-              <label htmlFor="discount-value" className="mb-1.5 block text-sm font-medium">Value</label>
-              <input id="discount-value" name="value" type="number" step="0.01" min="0" required defaultValue={initial?.value}
-                className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+              <label
+                htmlFor="discount-value"
+                className="mb-1.5 block text-sm font-medium"
+              >
+                Value
+              </label>
+              <input
+                id="discount-value"
+                name="value"
+                type="number"
+                step="0.01"
+                min="0"
+                required
+                defaultValue={initial?.value}
+                className="border-border bg-background h-10 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="discount-start" className="mb-1.5 block text-sm font-medium">Start Date</label>
-              <input id="discount-start" name="startDate" type="date" required defaultValue={fmt(initial?.startDate ?? "")}
-                className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+              <label
+                htmlFor="discount-start"
+                className="mb-1.5 block text-sm font-medium"
+              >
+                Start Date
+              </label>
+              <input
+                id="discount-start"
+                name="startDate"
+                type="date"
+                required
+                defaultValue={fmt(initial?.startDate ?? "")}
+                className="border-border bg-background h-10 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
             <div>
-              <label htmlFor="discount-end" className="mb-1.5 block text-sm font-medium">End Date</label>
-              <input id="discount-end" name="endDate" type="date" required defaultValue={fmt(initial?.endDate ?? "")}
-                className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+              <label
+                htmlFor="discount-end"
+                className="mb-1.5 block text-sm font-medium"
+              >
+                End Date
+              </label>
+              <input
+                id="discount-end"
+                name="endDate"
+                type="date"
+                required
+                defaultValue={fmt(initial?.endDate ?? "")}
+                className="border-border bg-background h-10 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="discount-minpurchase" className="mb-1.5 block text-sm font-medium">Min Purchase (₹)</label>
-              <input id="discount-minpurchase" name="minPurchase" type="number" step="0.01" min="0" defaultValue={initial?.minPurchase ?? ""}
-                className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+              <label
+                htmlFor="discount-minpurchase"
+                className="mb-1.5 block text-sm font-medium"
+              >
+                Min Purchase (₹)
+              </label>
+              <input
+                id="discount-minpurchase"
+                name="minPurchase"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={initial?.minPurchase ?? ""}
+                className="border-border bg-background h-10 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
             <div>
-              <label htmlFor="discount-usagelimit" className="mb-1.5 block text-sm font-medium">Usage Limit</label>
-              <input id="discount-usagelimit" name="usageLimit" type="number" min="1" defaultValue={initial?.usageLimit ?? ""}
+              <label
+                htmlFor="discount-usagelimit"
+                className="mb-1.5 block text-sm font-medium"
+              >
+                Usage Limit
+              </label>
+              <input
+                id="discount-usagelimit"
+                name="usageLimit"
+                type="number"
+                min="1"
+                defaultValue={initial?.usageLimit ?? ""}
                 placeholder="Unlimited"
-                className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+                className="border-border bg-background h-10 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
           </div>
           <div>
-            <label htmlFor="discount-status" className="mb-1.5 block text-sm font-medium">Status</label>
-            <select id="discount-status" name="isActive" defaultValue={initial?.isActive !== false ? "true" : "false"}
-              className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm">
+            <label
+              htmlFor="discount-status"
+              className="mb-1.5 block text-sm font-medium"
+            >
+              Status
+            </label>
+            <select
+              id="discount-status"
+              name="isActive"
+              defaultValue={initial?.isActive !== false ? "true" : "false"}
+              className="border-border bg-background h-10 w-full rounded-lg border px-3 text-sm"
+            >
               <option value="true">Active</option>
               <option value="false">Inactive</option>
             </select>
           </div>
           {formError && (
-            <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{formError}</p>
+            <p className="bg-destructive/10 text-destructive rounded-lg px-3 py-2 text-sm">
+              {formError}
+            </p>
           )}
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border-border hover:bg-muted rounded-lg border px-4 py-2 text-sm"
+            >
               Cancel
             </button>
-            <button type="submit" disabled={isPending}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60">
-              {isPending ? "Saving…" : isEditing ? "Save Changes" : "Create Discount"}
+            <button
+              type="submit"
+              disabled={isPending}
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
+            >
+              {isPending
+                ? "Saving…"
+                : isEditing
+                  ? "Save Changes"
+                  : "Create Discount"}
             </button>
           </div>
         </form>

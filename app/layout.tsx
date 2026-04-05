@@ -1,11 +1,11 @@
-import type { Metadata, Viewport } from "next";
-import { Syne, DM_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next"
+import { Syne, DM_Mono } from "next/font/google"
 
-import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "sonner";
-import { Providers } from "@/components/providers";
-import { ConditionalHeader } from "@/components/conditional-header";
+import "./globals.css"
+import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "sonner"
+import { Providers } from "@/components/providers"
+import { ConditionalHeader } from "@/components/conditional-header"
 
 /**
  * Primary brand typeface — Syne.
@@ -16,7 +16,7 @@ const fontSans = Syne({
   variable: "--font-sans",
   display: "swap",
   weight: ["400", "500", "600", "700", "800"],
-});
+})
 
 /**
  * Monospace typeface for code blocks and data displays.
@@ -27,7 +27,7 @@ const fontMono = DM_Mono({
   variable: "--font-mono",
   display: "swap",
   weight: ["400", "500"],
-});
+})
 
 export const metadata: Metadata = {
   title: {
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     siteName: "SubsMS",
   },
-};
+}
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -61,12 +61,12 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
     { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
   ],
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html
@@ -91,5 +91,5 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  );
+  )
 }

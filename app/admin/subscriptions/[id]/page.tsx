@@ -1,86 +1,89 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { SubscriptionForm } from "../_components/SubscriptionForm";
-import { SubscriptionStatusActions } from "../_components/SubscriptionStatusActions";
-import { SubscriptionStatusBadge } from "../_components/SubscriptionStatusBadge";
-import { prisma } from "@/lib/db";
-import { requirePageRole } from "@/lib/admin";
-import type { SubscriptionStatus } from "@/lib/validations/subscription";
+import type { Metadata } from "next"
+import { notFound } from "next/navigation"
+import { SubscriptionForm } from "../_components/SubscriptionForm"
+import { SubscriptionStatusActions } from "../_components/SubscriptionStatusActions"
+import { SubscriptionStatusBadge } from "../_components/SubscriptionStatusBadge"
+import { prisma } from "@/lib/db"
+import { requirePageRole } from "@/lib/admin"
+import type { SubscriptionStatus } from "@/lib/validations/subscription"
 
 type SubscriptionDetailPageProps = {
-  params: Promise<{ id: string }>;
-};
+  params: Promise<{ id: string }>
+}
 
 export const metadata: Metadata = {
   title: "Subscription Details",
-};
+}
 
 export default async function SubscriptionDetailPage({
   params,
 }: SubscriptionDetailPageProps) {
-  await requirePageRole(["admin", "internal"]);
+  await requirePageRole(["admin", "internal"])
 
-  const { id } = await params;
-  const [subscription, contacts, plans, paymentTerms, products, taxes] = await Promise.all([
-    prisma.subscription.findUnique({
-      where: { id },
-      include: {
-        contact: {
-          include: {
-            user: {
-              select: {
-                email: true,
-              },
+  const { id } = await params
+  const subscription = await prisma.subscription.findUnique({
+    where: { id },
+    include: {
+      contact: {
+        include: {
+          user: {
+            select: {
+              email: true,
             },
           },
         },
-        recurringPlan: true,
-        paymentTerms: true,
-        lines: {
-          orderBy: { id: "asc" },
+      },
+      recurringPlan: true,
+      paymentTerms: true,
+      lines: {
+        orderBy: { id: "asc" },
+      },
+    },
+  })
+
+  const contacts = await prisma.contact.findMany({
+    orderBy: [{ company: "asc" }, { firstName: "asc" }],
+    include: {
+      user: {
+        select: {
+          email: true,
         },
       },
-    }),
-    prisma.contact.findMany({
-      orderBy: [{ company: "asc" }, { firstName: "asc" }],
-      include: {
-        user: {
-          select: {
-            email: true,
-          },
-        },
+    },
+  })
+
+  const plans = await prisma.recurringPlan.findMany({
+    orderBy: { name: "asc" },
+  })
+
+  const paymentTerms = await prisma.paymentTerms.findMany({
+    orderBy: { dueDays: "asc" },
+  })
+
+  const products = await prisma.product.findMany({
+    orderBy: { name: "asc" },
+    include: {
+      variants: {
+        orderBy: [{ attribute: "asc" }, { value: "asc" }],
       },
-    }),
-    prisma.recurringPlan.findMany({
-      orderBy: { name: "asc" },
-    }),
-    prisma.paymentTerms.findMany({
-      orderBy: { dueDays: "asc" },
-    }),
-    prisma.product.findMany({
-      orderBy: { name: "asc" },
-      include: {
-        variants: {
-          orderBy: [{ attribute: "asc" }, { value: "asc" }],
-        },
-        recurringPrices: true,
-      },
-    }),
-    prisma.tax.findMany({
-      orderBy: { name: "asc" },
-    }),
-  ]);
+      recurringPrices: true,
+    },
+  })
+
+  const taxes = await prisma.tax.findMany({
+    orderBy: { name: "asc" },
+  })
 
   if (!subscription) {
-    notFound();
+    notFound()
   }
 
-  const status = normalizeSubscriptionStatus(subscription.status);
-  const editable = status === "draft" || status === "quotation";
+  const status = normalizeSubscriptionStatus(subscription.status)
+  const editable = status === "draft" || status === "quotation"
 
   return (
     <div className="space-y-6">
-      <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+      <section className="border-border bg-card rounded-3xl border p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold tracking-[0.24em] text-indigo-600 uppercase">
@@ -91,12 +94,14 @@ export default async function SubscriptionDetailPage({
             </h1>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <SubscriptionStatusBadge status={status} />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Customer:{" "}
                 {[subscription.contact.firstName, subscription.contact.lastName]
                   .filter(Boolean)
                   .join(" ")
-                  .trim() || subscription.contact.company || "Customer"}
+                  .trim() ||
+                  subscription.contact.company ||
+                  "Customer"}
               </p>
             </div>
           </div>
@@ -133,7 +138,10 @@ export default async function SubscriptionDetailPage({
         contacts={contacts.map((contact) => ({
           id: contact.id,
           name:
-            [contact.firstName, contact.lastName].filter(Boolean).join(" ").trim() ||
+            [contact.firstName, contact.lastName]
+              .filter(Boolean)
+              .join(" ")
+              .trim() ||
             contact.company ||
             "Customer",
           email: contact.user.email,
@@ -177,24 +185,24 @@ export default async function SubscriptionDetailPage({
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+        <section className="border-border bg-card rounded-3xl border p-6 shadow-sm">
           <h2 className="text-lg font-semibold">Invoice History</h2>
           <p className="text-muted-foreground mt-2 text-sm">
-            Auto-generated invoices will appear here once invoice generation is wired into the
-            activation flow.
+            Auto-generated invoices will appear here once invoice generation is
+            wired into the activation flow.
           </p>
         </section>
 
-        <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+        <section className="border-border bg-card rounded-3xl border p-6 shadow-sm">
           <h2 className="text-lg font-semibold">Payment History</h2>
           <p className="text-muted-foreground mt-2 text-sm">
-            Payment records will populate here after the payments module is connected to invoice
-            settlement.
+            Payment records will populate here after the payments module is
+            connected to invoice settlement.
           </p>
         </section>
       </div>
     </div>
-  );
+  )
 }
 
 function normalizeSubscriptionStatus(value: string): SubscriptionStatus {
@@ -203,8 +211,8 @@ function normalizeSubscriptionStatus(value: string): SubscriptionStatus {
     case "confirmed":
     case "active":
     case "closed":
-      return value;
+      return value
     default:
-      return "draft";
+      return "draft"
   }
 }

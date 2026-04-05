@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from "next/server"
 
 /**
  * POST /api/auth/register — No longer needed with Google OAuth.
@@ -6,7 +6,10 @@ import { NextResponse } from "next/server";
  */
 export async function POST() {
   return NextResponse.json(
-    { error: "Registration is handled via Google OAuth. Please use the sign-in button." },
-    { status: 410 },
-  );
+    {
+      error:
+        "Registration is handled via Google OAuth. Please use the sign-in button.",
+    },
+    { status: 410 }
+  )
 }

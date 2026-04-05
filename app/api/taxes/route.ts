@@ -1,31 +1,31 @@
-import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/db";
-import { requireApiRole, requireAdminApi } from "@/lib/admin";
-import { taxCreateSchema, taxFiltersSchema } from "@/lib/validations/tax";
+import { NextRequest, NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
+import { prisma } from "@/lib/db"
+import { requireApiRole, requireAdminApi } from "@/lib/admin"
+import { taxCreateSchema, taxFiltersSchema } from "@/lib/validations/tax"
 
 export async function GET(request: NextRequest) {
-  const { error } = await requireApiRole(["admin", "internal"]);
+  const { error } = await requireApiRole(["admin", "internal"])
   if (error) {
-    return error;
+    return error
   }
 
-  const searchParams = request.nextUrl.searchParams;
+  const searchParams = request.nextUrl.searchParams
   const parsed = taxFiltersSchema.safeParse({
     q: searchParams.get("q") ?? undefined,
     status: searchParams.get("status") ?? undefined,
     page: searchParams.get("page") ?? undefined,
     pageSize: searchParams.get("pageSize") ?? undefined,
-  });
+  })
 
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? "Invalid filters." },
-      { status: 400 },
-    );
+      { status: 400 }
+    )
   }
 
-  const { q, status, page, pageSize } = parsed.data;
+  const { q, status, page, pageSize } = parsed.data
   const where = {
     ...(q
       ? {
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
         }
       : {}),
     ...(status === "all" ? {} : { isActive: status === "active" }),
-  };
+  }
 
   const [total, taxes] = await prisma.$transaction([
     prisma.tax.count({ where }),
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
         createdAt: true,
       },
     }),
-  ]);
+  ])
 
   return NextResponse.json({
     taxes,
@@ -65,24 +65,24 @@ export async function GET(request: NextRequest) {
       total,
       totalPages: Math.max(1, Math.ceil(total / pageSize)),
     },
-  });
+  })
 }
 
 export async function POST(request: NextRequest) {
-  const { error } = await requireAdminApi();
+  const { error } = await requireAdminApi()
   if (error) {
-    return error;
+    return error
   }
 
   try {
-    const body = await request.json();
-    const parsed = taxCreateSchema.safeParse(body);
+    const body = await request.json()
+    const parsed = taxCreateSchema.safeParse(body)
 
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0]?.message ?? "Invalid tax data." },
-        { status: 400 },
-      );
+        { status: 400 }
+      )
     }
 
     const tax = await prisma.tax.create({
@@ -95,17 +95,17 @@ export async function POST(request: NextRequest) {
         description: true,
         isActive: true,
       },
-    });
+    })
 
-    revalidatePath("/admin/taxes");
-    revalidatePath(`/admin/taxes/${tax.id}`);
+    revalidatePath("/admin/taxes")
+    revalidatePath(`/admin/taxes/${tax.id}`)
 
-    return NextResponse.json({ tax }, { status: 201 });
+    return NextResponse.json({ tax }, { status: 201 })
   } catch (error) {
-    console.error("[TAX_CREATE_ERROR]", error);
+    console.error("[TAX_CREATE_ERROR]", error)
     return NextResponse.json(
       { error: "Unable to create tax right now." },
-      { status: 500 },
-    );
+      { status: 500 }
+    )
   }
 }

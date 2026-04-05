@@ -18,6 +18,9 @@ export function ServiceCardClient({ service }: { service: Service }) {
   const { services, addService, removeService } = useBundleStore()
   const { addItem } = useCartStore()
   const [mounted, setMounted] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<
+    "Monthly" | "Yearly" | "Weekly" | "Daily" | "Quarterly"
+  >("Monthly")
 
   // Dynamically resolve Tabler Icon
   const IconComponent =
@@ -30,6 +33,25 @@ export function ServiceCardClient({ service }: { service: Service }) {
   }, [])
 
   const isAddedToBundle = services.some((s) => s.id === service.id)
+
+  const getPrice = () => {
+    switch (selectedPlan) {
+      case "Daily":
+        return service.monthlyPrice / 30
+      case "Weekly":
+        return service.monthlyPrice / 4
+      case "Monthly":
+        return service.monthlyPrice
+      case "Quarterly":
+        return service.monthlyPrice * 3
+      case "Yearly":
+        return service.yearlyPrice || service.monthlyPrice * 12
+      default:
+        return service.monthlyPrice
+    }
+  }
+
+  const currentPrice = getPrice()
 
   const handleToggleBundle = () => {
     if (isAddedToBundle) {
@@ -51,11 +73,11 @@ export function ServiceCardClient({ service }: { service: Service }) {
 
   const handleAddToCart = () => {
     addItem({
-      id: service.id,
-      name: service.name,
-      price: service.monthlyPrice,
+      id: `${service.id}-${selectedPlan.toLowerCase()}`,
+      name: `${service.name} (${selectedPlan} Plan)`,
+      price: currentPrice,
       quantity: 1,
-      plan: "Monthly",
+      plan: selectedPlan,
       type: "plan",
     })
     toast.success(`${service.name} added to cart`)
@@ -84,9 +106,34 @@ export function ServiceCardClient({ service }: { service: Service }) {
         </div>
         <div className="text-right">
           <span className="text-foreground text-lg font-bold">
-            {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(service.monthlyPrice)}
+            {new Intl.NumberFormat("en-IN", {
+              style: "currency",
+              currency: "INR",
+              maximumFractionDigits: 0,
+            }).format(currentPrice)}
           </span>
-          <p className="text-muted-foreground text-xs font-medium">/ month</p>
+          <div className="mt-1">
+            <select
+              value={selectedPlan}
+              onChange={(e) =>
+                setSelectedPlan(
+                  e.target.value as
+                    | "Monthly"
+                    | "Yearly"
+                    | "Weekly"
+                    | "Daily"
+                    | "Quarterly"
+                )
+              }
+              className="border-border bg-card text-muted-foreground rounded border px-1 py-0.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            >
+              <option value="Daily">Daily</option>
+              <option value="Weekly">Weekly</option>
+              <option value="Monthly">Monthly</option>
+              <option value="Quarterly">Quarterly</option>
+              <option value="Yearly">Yearly</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -133,4 +180,3 @@ export function ServiceCardClient({ service }: { service: Service }) {
     </div>
   )
 }
-

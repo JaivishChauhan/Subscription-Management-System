@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 /**
  * Providers — global client wrappers.
@@ -6,5 +6,5 @@
  * Only Sonner, ThemeProvider, etc. live here.
  */
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <>{children}</>
 }

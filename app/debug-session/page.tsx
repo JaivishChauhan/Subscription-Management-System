@@ -1,22 +1,22 @@
-"use client";
+"use client"
 
-import { useSession } from "@/hooks/use-session";
-import Link from "next/link";
+import { useSession } from "@/hooks/use-session"
+import Link from "next/link"
 
 /**
  * Debug page — shows current session data (dev only).
  * Uses our custom useSession hook, not next-auth/react.
  */
 export default function DebugSessionPage() {
-  const { session, status } = useSession();
+  const { session, status } = useSession()
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="bg-background min-h-screen p-8">
       <div className="mx-auto max-w-2xl">
         <h1 className="mb-6 text-3xl font-bold">Session Debug</h1>
 
         <div className="space-y-4">
-          <div className="rounded-lg border border-border bg-card p-6">
+          <div className="border-border bg-card rounded-lg border p-6">
             <h2 className="mb-2 text-xl font-semibold">Status</h2>
             <p className="font-mono text-sm">
               {status === "loading" && "Loading..."}
@@ -25,17 +25,18 @@ export default function DebugSessionPage() {
             </p>
           </div>
 
-          <div className="rounded-lg border border-border bg-card p-6">
+          <div className="border-border bg-card rounded-lg border p-6">
             <h2 className="mb-2 text-xl font-semibold">Session Data</h2>
-            <pre className="overflow-auto rounded bg-muted p-4 text-xs">
+            <pre className="bg-muted overflow-auto rounded p-4 text-xs">
               {JSON.stringify(session, null, 2)}
             </pre>
           </div>
 
-          <div className="rounded-lg border border-border bg-card p-6">
+          <div className="border-border bg-card rounded-lg border p-6">
             <h2 className="mb-2 text-xl font-semibold">Auth Cookie</h2>
-            <p className="font-mono text-xs text-muted-foreground">
-              sms.session cookie is httpOnly — not visible to JS (this is correct).
+            <p className="text-muted-foreground font-mono text-xs">
+              sms.session cookie is httpOnly — not visible to JS (this is
+              correct).
             </p>
           </div>
 
@@ -48,13 +49,13 @@ export default function DebugSessionPage() {
             </Link>
             <Link
               href="/login"
-              className="rounded-full border border-border bg-card px-6 py-2 text-sm font-semibold hover:bg-muted"
+              className="border-border bg-card hover:bg-muted rounded-full border px-6 py-2 text-sm font-semibold"
             >
               Go to Login
             </Link>
             <Link
               href="/dashboard"
-              className="rounded-full border border-border bg-card px-6 py-2 text-sm font-semibold hover:bg-muted"
+              className="border-border bg-card hover:bg-muted rounded-full border px-6 py-2 text-sm font-semibold"
             >
               Go to Dashboard
             </Link>
@@ -62,5 +63,5 @@ export default function DebugSessionPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -12,7 +12,10 @@ export const discountCreateSchema = z.object({
     .min(2, "Code must be at least 2 characters")
     .max(50)
     .toUpperCase()
-    .regex(/^[A-Z0-9_-]+$/, "Code can only contain letters, numbers, hyphens, and underscores"),
+    .regex(
+      /^[A-Z0-9_-]+$/,
+      "Code can only contain letters, numbers, hyphens, and underscores"
+    ),
   type: z.enum(["fixed", "percentage"]),
   value: z.number().positive("Discount value must be positive"),
   minPurchase: z.number().min(0).optional().nullable(),

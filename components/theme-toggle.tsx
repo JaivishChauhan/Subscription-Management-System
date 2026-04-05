@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
 
 /**
  * ThemeToggle — compact icon button that switches between light and dark mode.
@@ -10,32 +10,32 @@ import { useEffect, useState } from "react";
  * @client Requires next-themes ThemeProvider in the tree.
  */
 export function ThemeToggle({ className = "" }: { className?: string }) {
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
   // Avoid SSR mismatch — only render after hydration
   useEffect(() => {
     // Using a timeout to defer the state update to avoid cascading renders
-    const timer = setTimeout(() => setMounted(true), 0);
-    return () => clearTimeout(timer);
-  }, []);
+    const timer = setTimeout(() => setMounted(true), 0)
+    return () => clearTimeout(timer)
+  }, [])
 
   if (!mounted) {
     return (
       <div
-        className={`h-9 w-9 rounded-lg border border-border bg-muted ${className}`}
+        className={`border-border bg-muted h-9 w-9 rounded-lg border ${className}`}
         aria-hidden="true"
       />
-    );
+    )
   }
 
-  const isDark = resolvedTheme === "dark";
+  const isDark = resolvedTheme === "dark"
 
   return (
     <button
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className={`flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-foreground/70 transition-all hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${className}`}
+      className={`border-border bg-card text-foreground/70 hover:bg-muted hover:text-foreground focus-visible:ring-ring flex h-9 w-9 items-center justify-center rounded-lg border transition-all focus-visible:ring-2 focus-visible:outline-none ${className}`}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
@@ -74,5 +74,5 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         </svg>
       )}
     </button>
-  );
+  )
 }

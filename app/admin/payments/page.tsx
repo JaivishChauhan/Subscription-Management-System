@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
-import { IconCreditCard } from "@tabler/icons-react"
+import Link from "next/link"
+import { IconCreditCard, IconArrowRight, IconPlus } from "@tabler/icons-react"
 import { requireAdminPage } from "@/lib/admin"
 import { prisma } from "@/lib/db"
 
@@ -32,34 +33,51 @@ export default async function AdminPaymentsPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-card via-card to-indigo-500/5 p-6 shadow-sm">
-        <p className="text-xs font-semibold tracking-[0.28em] text-indigo-600 uppercase">
-          Payments
-        </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">Settlement audit trail</h1>
+      <section className="border-border from-card via-card rounded-[2rem] border bg-gradient-to-br to-indigo-500/5 p-6 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold tracking-[0.28em] text-indigo-600 uppercase">
+              Payments
+            </p>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight">
+              Settlement audit trail
+            </h1>
+          </div>
+          <Link
+            href="/admin/payments/new"
+            className="inline-flex max-w-fit items-center justify-center gap-2 rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+          >
+            <IconPlus className="h-4 w-4" />
+            Record Payment
+          </Link>
+        </div>
         <p className="text-muted-foreground mt-3 max-w-2xl text-sm sm:text-base">
-          Admin users can review recorded invoice settlements and their operational provenance.
+          Admin users can review recorded invoice settlements and their
+          operational provenance.
         </p>
       </section>
 
-      <section className="rounded-[2rem] border border-border bg-card p-6 shadow-sm">
-        <div className="overflow-hidden rounded-3xl border border-border">
+      <section className="border-border bg-card rounded-[2rem] border p-6 shadow-sm">
+        <div className="border-border overflow-hidden rounded-3xl border">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border">
+            <table className="divide-border min-w-full divide-y">
               <thead className="bg-muted/40">
-                <tr className="text-left text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                <tr className="text-muted-foreground text-left text-xs font-semibold tracking-[0.18em] uppercase">
                   <th className="px-5 py-4">Invoice</th>
                   <th className="px-5 py-4">Method</th>
                   <th className="px-5 py-4">Amount</th>
                   <th className="px-5 py-4">Recorded By</th>
                   <th className="px-5 py-4">Date</th>
+                  <th className="px-5 py-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border bg-card">
+              <tbody className="divide-border bg-card divide-y">
                 {payments.map((payment) => (
                   <tr key={payment.id} className="hover:bg-muted/20">
-                    <td className="px-5 py-4 font-semibold">{payment.invoice.invoiceNumber}</td>
-                    <td className="px-5 py-4 text-sm capitalize text-muted-foreground">
+                    <td className="px-5 py-4 font-semibold">
+                      {payment.invoice.invoiceNumber}
+                    </td>
+                    <td className="text-muted-foreground px-5 py-4 text-sm capitalize">
                       {payment.paymentMethod.replaceAll("_", " ")}
                     </td>
                     <td className="px-5 py-4 text-sm font-medium">
@@ -68,11 +86,22 @@ export default async function AdminPaymentsPage() {
                     <td className="px-5 py-4">
                       <div>
                         <p className="font-medium">{payment.createdBy.name}</p>
-                        <p className="text-muted-foreground text-sm">{payment.createdBy.email}</p>
+                        <p className="text-muted-foreground text-sm">
+                          {payment.createdBy.email}
+                        </p>
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-sm text-muted-foreground">
+                    <td className="text-muted-foreground px-5 py-4 text-sm">
                       {formatDate(payment.paymentDate)}
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <Link
+                        href={`/admin/payments/${payment.id}`}
+                        className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-500"
+                      >
+                        Edit
+                        <IconArrowRight className="h-4 w-4" />
+                      </Link>
                     </td>
                   </tr>
                 ))}
@@ -80,12 +109,15 @@ export default async function AdminPaymentsPage() {
                   <tr>
                     <td colSpan={5} className="px-5 py-14 text-center">
                       <div className="mx-auto max-w-md">
-                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
-                          <IconCreditCard className="h-6 w-6 text-muted-foreground" />
+                        <div className="bg-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl">
+                          <IconCreditCard className="text-muted-foreground h-6 w-6" />
                         </div>
-                        <h2 className="mt-4 text-lg font-semibold">No payments found</h2>
+                        <h2 className="mt-4 text-lg font-semibold">
+                          No payments found
+                        </h2>
                         <p className="text-muted-foreground mt-2 text-sm">
-                          Payment records will appear here as invoices are settled.
+                          Payment records will appear here as invoices are
+                          settled.
                         </p>
                       </div>
                     </td>

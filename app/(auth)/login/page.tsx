@@ -137,7 +137,11 @@ function LoginContent() {
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit(handleLoginSubmit)} className="space-y-4" noValidate>
+      <form
+        onSubmit={handleSubmit(handleLoginSubmit)}
+        className="space-y-4"
+        noValidate
+      >
         {/* Demo credentials banner */}
         <div className="rounded-lg border border-indigo-100 bg-indigo-50/70 p-3">
           <div className="flex items-center justify-between gap-3">
@@ -215,7 +219,9 @@ function LoginContent() {
             />
           </div>
           {errors.password && (
-            <p className="text-destructive text-xs">{errors.password.message}</p>
+            <p className="text-destructive text-xs">
+              {errors.password.message}
+            </p>
           )}
         </div>
 
@@ -239,7 +245,7 @@ function LoginContent() {
       {/* Divider */}
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border"></div>
+          <div className="border-border w-full border-t"></div>
         </div>
         <div className="relative flex justify-center text-xs uppercase">
           <span className="bg-background text-muted-foreground px-2">
@@ -253,7 +259,7 @@ function LoginContent() {
         type="button"
         onClick={handleGoogleSignIn}
         disabled={isSubmitting || isGoogleLoading}
-        className="flex w-full items-center justify-center gap-3 rounded-full border border-input bg-background py-3 text-sm font-semibold transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+        className="border-input bg-background hover:bg-accent flex w-full items-center justify-center gap-3 rounded-full border py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isGoogleLoading ? (
           <>
@@ -267,6 +273,17 @@ function LoginContent() {
           </>
         )}
       </button>
+
+      {/* Dev Bypass for Network testing */}
+      {process.env.NODE_ENV === "development" && (
+        <a
+          href="/api/auth/dev-bypass"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border-2 border-indigo-600 bg-indigo-50/50 py-3 text-sm font-semibold text-indigo-700 transition-colors hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400"
+        >
+          <IconLock className="h-4 w-4" />
+          Dev Bypass (LAN without Google)
+        </a>
+      )}
 
       {/* Footer */}
       <p className="text-muted-foreground mt-6 text-center text-sm">

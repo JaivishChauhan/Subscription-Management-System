@@ -1,42 +1,42 @@
-import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/db";
-import { requireApiRole } from "@/lib/admin";
+import { NextRequest, NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
+import { prisma } from "@/lib/db"
+import { requireApiRole } from "@/lib/admin"
 import {
   calculateLineSubtotal,
   calculateTaxAmount,
   generateSubscriptionNumber,
   roundCurrency,
-} from "@/lib/subscriptions";
+} from "@/lib/subscriptions"
 import {
   subscriptionCreateSchema,
   subscriptionFiltersSchema,
   type SubscriptionCreateInput,
-} from "@/lib/validations/subscription";
+} from "@/lib/validations/subscription"
 
 export async function GET(request: NextRequest) {
-  const { error } = await requireApiRole(["admin", "internal"]);
+  const { error } = await requireApiRole(["admin", "internal"])
   if (error) {
-    return error;
+    return error
   }
 
-  const searchParams = request.nextUrl.searchParams;
+  const searchParams = request.nextUrl.searchParams
   const parsed = subscriptionFiltersSchema.safeParse({
     q: searchParams.get("q") ?? undefined,
     status: searchParams.get("status") ?? undefined,
     page: searchParams.get("page") ?? undefined,
     pageSize: searchParams.get("pageSize") ?? undefined,
-  });
+  })
 
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? "Invalid filters." },
-      { status: 400 },
-    );
+      { status: 400 }
+    )
   }
 
-  const { q, status, page, pageSize } = parsed.data;
-  const where = buildSubscriptionWhereClause({ q, status });
+  const { q, status, page, pageSize } = parsed.data
+  const where = buildSubscriptionWhereClause({ q, status })
 
   const [total, subscriptions] = await prisma.$transaction([
     prisma.subscription.count({ where }),
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
         },
       },
     }),
-  ]);
+  ])
 
   return NextResponse.json({
     subscriptions: subscriptions.map((subscription) => ({
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
       startDate: subscription.startDate,
       updatedAt: subscription.updatedAt,
       total: roundCurrency(
-        subscription.lines.reduce((sum, line) => sum + line.subtotal, 0),
+        subscription.lines.reduce((sum, line) => sum + line.subtotal, 0)
       ),
     })),
     pagination: {
@@ -90,34 +90,37 @@ export async function GET(request: NextRequest) {
       total,
       totalPages: Math.max(1, Math.ceil(total / pageSize)),
     },
-  });
+  })
 }
 
 export async function POST(request: NextRequest) {
-  const { error, session } = await requireApiRole(["admin", "internal"]);
+  const { error, session } = await requireApiRole(["admin", "internal"])
   if (error) {
-    return error;
+    return error
   }
 
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   try {
-    const body = await request.json();
-    const parsed = subscriptionCreateSchema.safeParse(body);
+    const body = await request.json()
+    const parsed = subscriptionCreateSchema.safeParse(body)
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "Invalid subscription data." },
-        { status: 400 },
-      );
+        {
+          error:
+            parsed.error.issues[0]?.message ?? "Invalid subscription data.",
+        },
+        { status: 400 }
+      )
     }
 
-    const prepared = await prepareSubscriptionWrite(parsed.data);
+    const prepared = await prepareSubscriptionWrite(parsed.data)
 
     if ("error" in prepared) {
-      return NextResponse.json({ error: prepared.error }, { status: 400 });
+      return NextResponse.json({ error: prepared.error }, { status: 400 })
     }
 
     const subscription = await prisma.subscription.create({
@@ -141,32 +144,41 @@ export async function POST(request: NextRequest) {
         subscriptionNumber: true,
         status: true,
       },
-    });
+    })
 
-    revalidatePath("/admin/subscriptions");
-    revalidatePath(`/admin/subscriptions/${subscription.id}`);
+    revalidatePath("/admin/subscriptions")
+    revalidatePath(`/admin/subscriptions/${subscription.id}`)
 
-    return NextResponse.json({ subscription }, { status: 201 });
+    return NextResponse.json({ subscription }, { status: 201 })
   } catch (error) {
     if (error instanceof Error) {
       if (error.message.startsWith("PRODUCT_NOT_FOUND:")) {
-        return NextResponse.json({ error: "One or more products were not found." }, { status: 400 });
+        return NextResponse.json(
+          { error: "One or more products were not found." },
+          { status: 400 }
+        )
       }
 
       if (error.message.startsWith("VARIANT_NOT_FOUND:")) {
-        return NextResponse.json({ error: "Selected product variant was not found." }, { status: 400 });
+        return NextResponse.json(
+          { error: "Selected product variant was not found." },
+          { status: 400 }
+        )
       }
 
       if (error.message.startsWith("TAX_NOT_FOUND:")) {
-        return NextResponse.json({ error: "Selected tax rule was not found." }, { status: 400 });
+        return NextResponse.json(
+          { error: "Selected tax rule was not found." },
+          { status: 400 }
+        )
       }
     }
 
-    console.error("[SUBSCRIPTION_CREATE_ERROR]", error);
+    console.error("[SUBSCRIPTION_CREATE_ERROR]", error)
     return NextResponse.json(
       { error: "Unable to create subscription right now." },
-      { status: 500 },
-    );
+      { status: 500 }
+    )
   }
 }
 
@@ -220,48 +232,50 @@ async function prepareSubscriptionWrite(data: SubscriptionCreateInput) {
         rate: true,
       },
     }),
-  ]);
+  ])
 
   if (!contact) {
-    return { error: "Selected customer could not be found." } as const;
+    return { error: "Selected customer could not be found." } as const
   }
 
   if (!plan) {
-    return { error: "Selected plan could not be found." } as const;
+    return { error: "Selected plan could not be found." } as const
   }
 
   if (data.paymentTermsId && !paymentTerms) {
-    return { error: "Selected payment terms could not be found." } as const;
+    return { error: "Selected payment terms could not be found." } as const
   }
 
-  const totalQuantity = data.lines.reduce((sum, line) => sum + line.quantity, 0);
+  const totalQuantity = data.lines.reduce((sum, line) => sum + line.quantity, 0)
   if (totalQuantity < plan.minQuantity) {
     return {
       error: `This plan requires a minimum quantity of ${plan.minQuantity}.`,
-    } as const;
+    } as const
   }
 
-  const productMap = new Map(products.map((product) => [product.id, product]));
-  const taxMap = new Map(taxes.map((tax) => [tax.id, tax]));
+  const productMap = new Map(products.map((product) => [product.id, product]))
+  const taxMap = new Map(taxes.map((tax) => [tax.id, tax]))
 
   const lines = data.lines.map((line) => {
-    const product = productMap.get(line.productId);
+    const product = productMap.get(line.productId)
     if (!product) {
-      throw new Error(`PRODUCT_NOT_FOUND:${line.productId}`);
+      throw new Error(`PRODUCT_NOT_FOUND:${line.productId}`)
     }
 
     if (line.variantId) {
-      const variant = product.variants.find((item) => item.id === line.variantId);
+      const variant = product.variants.find(
+        (item) => item.id === line.variantId
+      )
       if (!variant) {
-        throw new Error(`VARIANT_NOT_FOUND:${line.variantId}`);
+        throw new Error(`VARIANT_NOT_FOUND:${line.variantId}`)
       }
     }
 
     const resolvedTaxAmount = line.taxId
       ? (() => {
-          const tax = taxMap.get(line.taxId);
+          const tax = taxMap.get(line.taxId)
           if (!tax) {
-            throw new Error(`TAX_NOT_FOUND:${line.taxId}`);
+            throw new Error(`TAX_NOT_FOUND:${line.taxId}`)
           }
 
           return calculateTaxAmount({
@@ -269,9 +283,9 @@ async function prepareSubscriptionWrite(data: SubscriptionCreateInput) {
             unitPrice: line.unitPrice,
             taxType: tax.type,
             taxRate: tax.rate,
-          });
+          })
         })()
-      : roundCurrency(line.taxAmount);
+      : roundCurrency(line.taxAmount)
 
     return {
       productId: line.productId,
@@ -284,23 +298,23 @@ async function prepareSubscriptionWrite(data: SubscriptionCreateInput) {
         unitPrice: line.unitPrice,
         taxAmount: resolvedTaxAmount,
       }),
-    };
-  });
+    }
+  })
 
   return {
     contact,
     plan,
     paymentTermsId: paymentTerms?.id,
     lines,
-  } as const;
+  } as const
 }
 
 function buildSubscriptionWhereClause({
   q,
   status,
 }: {
-  q?: string;
-  status: "all" | "draft" | "quotation" | "confirmed" | "active" | "closed";
+  q?: string
+  status: "all" | "draft" | "quotation" | "confirmed" | "active" | "closed"
 }) {
   return {
     ...(status === "all" ? {} : { status }),
@@ -350,14 +364,17 @@ function buildSubscriptionWhereClause({
           ],
         }
       : {}),
-  };
+  }
 }
 
 function formatContactName(contact: {
-  firstName: string;
-  lastName: string;
-  company: string | null;
+  firstName: string
+  lastName: string
+  company: string | null
 }) {
-  const fullName = [contact.firstName, contact.lastName].filter(Boolean).join(" ").trim();
-  return fullName || contact.company || "Customer";
+  const fullName = [contact.firstName, contact.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim()
+  return fullName || contact.company || "Customer"
 }

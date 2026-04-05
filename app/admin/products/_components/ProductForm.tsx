@@ -1,49 +1,49 @@
-"use client";
+"use client"
 
-import { useMemo, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useMemo, useState } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
 import {
   IconArrowLeft,
   IconLoader2,
   IconPhoto,
   IconRefresh,
   IconShieldLock,
-} from "@tabler/icons-react";
-import { toast } from "sonner";
+} from "@tabler/icons-react"
+import { toast } from "sonner"
 import {
   productCreateSchema,
   type ProductCreateInput,
-} from "@/lib/validations/product";
+} from "@/lib/validations/product"
 
 type ProductRecord = {
-  id: string;
-  name: string;
-  type: "service" | "goods";
-  salesPrice: number;
-  costPrice: number;
-  description: string | null;
-  notes: string | null;
-  image: string | null;
-  isActive: boolean;
-};
+  id: string
+  name: string
+  type: "service" | "goods"
+  salesPrice: number
+  costPrice: number
+  description: string | null
+  notes: string | null
+  image: string | null
+  isActive: boolean
+}
 
 type ProductFormProps = {
-  mode: "create" | "edit";
-  initialProduct?: ProductRecord;
-};
+  mode: "create" | "edit"
+  initialProduct?: ProductRecord
+}
 
-type ProductFormInput = z.input<typeof productCreateSchema>;
+type ProductFormInput = z.input<typeof productCreateSchema>
 
 export function ProductForm({ mode, initialProduct }: ProductFormProps) {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isArchiving, setIsArchiving] = useState(false);
-  const [isReactivating, setIsReactivating] = useState(false);
+  const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isArchiving, setIsArchiving] = useState(false)
+  const [isReactivating, setIsReactivating] = useState(false)
 
   const defaultValues = useMemo<ProductFormInput>(
     () => ({
@@ -56,8 +56,8 @@ export function ProductForm({ mode, initialProduct }: ProductFormProps) {
       image: initialProduct?.image ?? "",
       isActive: initialProduct?.isActive ?? true,
     }),
-    [initialProduct],
-  );
+    [initialProduct]
+  )
 
   const {
     register,
@@ -68,14 +68,14 @@ export function ProductForm({ mode, initialProduct }: ProductFormProps) {
   } = useForm<ProductFormInput, unknown, ProductCreateInput>({
     resolver: zodResolver(productCreateSchema),
     defaultValues,
-  });
+  })
 
-  const imageUrl = watch("image");
-  const previewImageUrl = typeof imageUrl === "string" ? imageUrl : "";
-  const isEditing = mode === "edit" && initialProduct;
+  const imageUrl = watch("image")
+  const previewImageUrl = typeof imageUrl === "string" ? imageUrl : ""
+  const isEditing = mode === "edit" && initialProduct
 
   async function onSubmit(values: ProductCreateInput) {
-    setIsSubmitting(true);
+    setIsSubmitting(true)
 
     try {
       const response = await fetch(
@@ -84,97 +84,99 @@ export function ProductForm({ mode, initialProduct }: ProductFormProps) {
           method: isEditing ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(values),
-        },
-      );
+        }
+      )
 
-      const result = await response.json();
+      const result = await response.json()
 
       if (!response.ok) {
-        toast.error(result.error ?? "Unable to save the product.");
-        return;
+        toast.error(result.error ?? "Unable to save the product.")
+        return
       }
 
       toast.success(
-        isEditing ? "Product updated successfully." : "Product created successfully.",
-      );
+        isEditing
+          ? "Product updated successfully."
+          : "Product created successfully."
+      )
 
-      const nextProductId = isEditing ? initialProduct.id : result.product?.id;
+      const nextProductId = isEditing ? initialProduct.id : result.product?.id
 
       if (nextProductId) {
-        router.push(`/admin/products/${nextProductId}`);
+        router.push(`/admin/products/${nextProductId}`)
       } else {
-        router.push("/admin/products");
+        router.push("/admin/products")
       }
 
-      router.refresh();
+      router.refresh()
     } catch {
-      toast.error("Something went wrong while saving the product.");
+      toast.error("Something went wrong while saving the product.")
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
   }
 
   async function handleDeactivate() {
     if (!initialProduct) {
-      return;
+      return
     }
 
     const confirmed = window.confirm(
-      "Deactivate this product? It will stay in history but stop appearing as active.",
-    );
+      "Deactivate this product? It will stay in history but stop appearing as active."
+    )
 
     if (!confirmed) {
-      return;
+      return
     }
 
-    setIsArchiving(true);
+    setIsArchiving(true)
 
     try {
       const response = await fetch(`/api/products/${initialProduct.id}`, {
         method: "DELETE",
-      });
-      const result = await response.json();
+      })
+      const result = await response.json()
 
       if (!response.ok) {
-        toast.error(result.error ?? "Unable to deactivate product.");
-        return;
+        toast.error(result.error ?? "Unable to deactivate product.")
+        return
       }
 
-      toast.success("Product deactivated.");
-      router.refresh();
+      toast.success("Product deactivated.")
+      router.refresh()
     } catch {
-      toast.error("Unable to deactivate product right now.");
+      toast.error("Unable to deactivate product right now.")
     } finally {
-      setIsArchiving(false);
+      setIsArchiving(false)
     }
   }
 
   async function handleReactivate() {
     if (!initialProduct) {
-      return;
+      return
     }
 
-    setIsReactivating(true);
+    setIsReactivating(true)
 
     try {
       const response = await fetch(`/api/products/${initialProduct.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: true }),
-      });
-      const result = await response.json();
+      })
+      const result = await response.json()
 
       if (!response.ok) {
-        toast.error(result.error ?? "Unable to reactivate product.");
-        return;
+        toast.error(result.error ?? "Unable to reactivate product.")
+        return
       }
 
-      toast.success("Product reactivated.");
-      router.refresh();
+      toast.success("Product reactivated.")
+      router.refresh()
     } catch {
-      toast.error("Unable to reactivate product right now.");
+      toast.error("Unable to reactivate product right now.")
     } finally {
-      setIsReactivating(false);
+      setIsReactivating(false)
     }
   }
 
@@ -214,8 +216,11 @@ export function ProductForm({ mode, initialProduct }: ProductFormProps) {
         ) : null}
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6 lg:grid-cols-[1.35fr_0.9fr]">
-        <section className="space-y-5 rounded-3xl border border-border bg-card p-6 shadow-sm">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="grid gap-6 lg:grid-cols-[1.35fr_0.9fr]"
+      >
+        <section className="border-border bg-card space-y-5 rounded-3xl border p-6 shadow-sm">
           <div>
             <p className="text-xs font-semibold tracking-[0.24em] text-indigo-600 uppercase">
               Product Details
@@ -224,8 +229,8 @@ export function ProductForm({ mode, initialProduct }: ProductFormProps) {
               {isEditing ? "Edit Product" : "Create Product"}
             </h1>
             <p className="text-muted-foreground mt-2 text-sm">
-              Capture the base catalog data first. Variants and recurring price overrides can
-              layer on after this product exists.
+              Capture the base catalog data first. Variants and recurring price
+              overrides can layer on after this product exists.
             </p>
           </div>
 
@@ -240,7 +245,10 @@ export function ProductForm({ mode, initialProduct }: ProductFormProps) {
             </Field>
 
             <Field label="Product Type" error={errors.type?.message}>
-              <select className={inputClassName(Boolean(errors.type))} {...register("type")}>
+              <select
+                className={inputClassName(Boolean(errors.type))}
+                {...register("type")}
+              >
                 <option value="service">Service</option>
                 <option value="goods">Goods</option>
               </select>
@@ -307,17 +315,19 @@ export function ProductForm({ mode, initialProduct }: ProductFormProps) {
           </Field>
 
           {isEditing ? (
-            <label className="flex items-start gap-3 rounded-2xl border border-border bg-muted/30 p-4">
+            <label className="border-border bg-muted/30 flex items-start gap-3 rounded-2xl border p-4">
               <input
                 type="checkbox"
-                className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                className="border-border text-primary focus:ring-primary mt-1 h-4 w-4 rounded"
                 {...register("isActive")}
               />
               <span>
-                <span className="block text-sm font-semibold">Active product</span>
+                <span className="block text-sm font-semibold">
+                  Active product
+                </span>
                 <span className="text-muted-foreground mt-1 block text-sm">
-                  Disable this to remove it from active catalog views without losing billing
-                  history.
+                  Disable this to remove it from active catalog views without
+                  losing billing history.
                 </span>
               </span>
             </label>
@@ -346,7 +356,7 @@ export function ProductForm({ mode, initialProduct }: ProductFormProps) {
                 type="button"
                 onClick={() => reset(defaultValues)}
                 disabled={!isDirty || isSubmitting}
-                className="rounded-full border border-border px-5 py-3 text-sm font-semibold transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+                className="border-border hover:bg-muted rounded-full border px-5 py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Discard
               </button>
@@ -355,7 +365,7 @@ export function ProductForm({ mode, initialProduct }: ProductFormProps) {
         </section>
 
         <aside className="space-y-5">
-          <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+          <section className="border-border bg-card rounded-3xl border p-6 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700">
                 <IconPhoto className="h-5 w-5" />
@@ -368,7 +378,7 @@ export function ProductForm({ mode, initialProduct }: ProductFormProps) {
               </div>
             </div>
 
-            <div className="mt-5 overflow-hidden rounded-3xl border border-dashed border-border bg-muted/30">
+            <div className="border-border bg-muted/30 mt-5 overflow-hidden rounded-3xl border border-dashed">
               {previewImageUrl ? (
                 <div className="relative aspect-[4/3]">
                   <Image
@@ -392,7 +402,7 @@ export function ProductForm({ mode, initialProduct }: ProductFormProps) {
             </div>
           </section>
 
-          <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+          <section className="border-border bg-card rounded-3xl border p-6 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
                 <IconShieldLock className="h-5 w-5" />
@@ -400,15 +410,25 @@ export function ProductForm({ mode, initialProduct }: ProductFormProps) {
               <div>
                 <h2 className="font-semibold">Lifecycle Notes</h2>
                 <p className="text-muted-foreground text-sm">
-                  This module uses soft deactivation to preserve billing history.
+                  This module uses soft deactivation to preserve billing
+                  history.
                 </p>
               </div>
             </div>
 
             <ul className="text-muted-foreground mt-4 space-y-3 text-sm">
-              <li>Products remain referenced by subscriptions and invoices after deactivation.</li>
-              <li>Recurring plan pricing overrides can be added once the base catalog is in place.</li>
-              <li>Variants are intentionally separate so this form stays lightweight.</li>
+              <li>
+                Products remain referenced by subscriptions and invoices after
+                deactivation.
+              </li>
+              <li>
+                Recurring plan pricing overrides can be added once the base
+                catalog is in place.
+              </li>
+              <li>
+                Variants are intentionally separate so this form stays
+                lightweight.
+              </li>
             </ul>
           </section>
 
@@ -421,8 +441,8 @@ export function ProductForm({ mode, initialProduct }: ProductFormProps) {
                     This product is currently inactive
                   </h2>
                   <p className="mt-1 text-sm text-amber-800">
-                    You can still edit the record, or reactivate it when it should return to the
-                    active catalog.
+                    You can still edit the record, or reactivate it when it
+                    should return to the active catalog.
                   </p>
                 </div>
               </div>
@@ -431,7 +451,7 @@ export function ProductForm({ mode, initialProduct }: ProductFormProps) {
         </aside>
       </form>
     </div>
-  );
+  )
 }
 
 function Field({
@@ -440,23 +460,27 @@ function Field({
   hint,
   children,
 }: {
-  label: string;
-  error?: string;
-  hint?: string;
-  children: React.ReactNode;
+  label: string
+  error?: string
+  hint?: string
+  children: React.ReactNode
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-sm font-semibold text-foreground/90">{label}</label>
+      <label className="text-foreground/90 text-sm font-semibold">
+        {label}
+      </label>
       {children}
-      {error ? <p className="text-xs text-destructive">{error}</p> : null}
-      {!error && hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+      {error ? <p className="text-destructive text-xs">{error}</p> : null}
+      {!error && hint ? (
+        <p className="text-muted-foreground text-xs">{hint}</p>
+      ) : null}
     </div>
-  );
+  )
 }
 
 function inputClassName(hasError: boolean) {
   return `w-full rounded-2xl border bg-background px-4 py-3 text-sm transition-colors outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 ${
     hasError ? "border-destructive" : "border-input"
-  }`;
+  }`
 }

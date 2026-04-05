@@ -118,7 +118,6 @@ export function Header() {
               {userRole === "portal" ? (
                 <>
                   <NavLink href="/subscriptions" label="Subscriptions" />
-                  <NavLink href="/invoices" label="Invoices" />
                 </>
               ) : null}
             </>
@@ -240,7 +239,6 @@ export function Header() {
                       href="/subscriptions"
                       label="Subscriptions"
                     />
-                    <MobileNavLink href="/invoices" label="Invoices" />
                   </>
                 ) : null}
                 <MobileNavLink href="/profile" label="Profile" />

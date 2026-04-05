@@ -1,0 +1,160 @@
+import React from "react"
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer"
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+  }).format(amount)
+}
+
+const styles = StyleSheet.create({
+  page: { padding: 40, fontFamily: "Helvetica", fontSize: 12, color: "#333" },
+  header: {
+    marginBottom: 30,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  title: { fontSize: 24, fontWeight: "bold", color: "#111" },
+  section: { marginBottom: 20 },
+  label: {
+    fontSize: 10,
+    color: "#666",
+    marginBottom: 4,
+    textTransform: "uppercase",
+  },
+  value: { fontSize: 12, marginBottom: 4 },
+  table: { display: "flex", flexDirection: "column", marginTop: 20 },
+  tableHeader: {
+    display: "flex",
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eaeaea",
+    paddingBottom: 8,
+    marginBottom: 8,
+  },
+  tableRow: {
+    display: "flex",
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eaeaea",
+    paddingVertical: 8,
+  },
+  col1: { width: "40%" },
+  col2: { width: "15%", textAlign: "center" },
+  col3: { width: "20%", textAlign: "right" },
+  col4: { width: "25%", textAlign: "right" },
+  footer: {
+    marginTop: 40,
+    borderTopWidth: 1,
+    borderTopColor: "#eaeaea",
+    paddingTop: 16,
+  },
+  summaryRow: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+})
+
+export function InvoicePDF({ invoice }: { invoice: any }) {
+  const customerName =
+    [invoice.contact.firstName, invoice.contact.lastName]
+      .filter(Boolean)
+      .join(" ")
+      .trim() ||
+    invoice.contact.company ||
+    "Customer"
+
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.title}>INVOICE</Text>
+            <Text style={styles.value}>{invoice.invoiceNumber}</Text>
+            <Text style={styles.value}>
+              Status: {invoice.status.toUpperCase()}
+            </Text>
+          </View>
+          <View style={{ textAlign: "right" }}>
+            <Text style={styles.label}>Billed To</Text>
+            <Text style={styles.value}>{customerName}</Text>
+            <Text style={styles.value}>{invoice.contact.user.email}</Text>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.label}>Invoice Details</Text>
+          <Text style={styles.value}>
+            Date: {new Date(invoice.createdAt).toLocaleDateString()}
+          </Text>
+          {invoice.dueDate && (
+            <Text style={styles.value}>
+              Due Date: {new Date(invoice.dueDate).toLocaleDateString()}
+            </Text>
+          )}
+        </View>
+
+        <View style={styles.table}>
+          <View style={styles.tableHeader}>
+            <Text style={[styles.col1, styles.label]}>Item</Text>
+            <Text style={[styles.col2, styles.label]}>Qty</Text>
+            <Text style={[styles.col3, styles.label]}>Unit Price</Text>
+            <Text style={[styles.col4, styles.label]}>Line Total</Text>
+          </View>
+
+          {invoice.lines.map((line: any) => (
+            <View key={line.id} style={styles.tableRow}>
+              <View style={styles.col1}>
+                <Text>{line.name}</Text>
+              </View>
+              <Text style={styles.col2}>{line.quantity}</Text>
+              <Text style={styles.col3}>{formatCurrency(line.unitPrice)}</Text>
+              <Text style={styles.col4}>
+                {formatCurrency(
+                  line.quantity * line.unitPrice + line.taxAmount
+                )}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={{ marginTop: 20, alignItems: "flex-end" }}>
+          <View style={{ width: "50%" }}>
+            <View style={styles.summaryRow}>
+              <Text style={styles.label}>Subtotal:</Text>
+              <Text style={styles.value}>
+                {formatCurrency(invoice.subtotal)}
+              </Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.label}>Tax Amount:</Text>
+              <Text style={styles.value}>
+                {formatCurrency(invoice.taxTotal)}
+              </Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={[styles.label, { fontWeight: "bold" }]}>
+                Total Details:
+              </Text>
+              <Text
+                style={[styles.value, { fontWeight: "bold", fontSize: 14 }]}
+              >
+                {formatCurrency(invoice.total)}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.footer}>
+          <Text style={{ fontSize: 10, color: "#888", textAlign: "center" }}>
+            Generated by Subscription Management System
+          </Text>
+        </View>
+      </Page>
+    </Document>
+  )
+}

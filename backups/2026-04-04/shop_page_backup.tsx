@@ -1,10 +1,10 @@
-import Link from "next/link";
+import Link from "next/link"
 import {
   IconCheck,
   IconArrowRight,
   IconShoppingCart,
   IconStar,
-} from "@tabler/icons-react";
+} from "@tabler/icons-react"
 
 /**
  * Shop page — lists available subscription products/plans.
@@ -26,7 +26,7 @@ export default function ShopPage() {
           aria-hidden="true"
         >
           <div className="absolute -top-40 left-1/4 h-80 w-80 rounded-full bg-indigo-400/15 blur-[120px]" />
-          <div className="absolute -bottom-20 right-1/4 h-64 w-64 rounded-full bg-violet-400/10 blur-[100px]" />
+          <div className="absolute right-1/4 -bottom-20 h-64 w-64 rounded-full bg-violet-400/10 blur-[100px]" />
         </div>
 
         <div className="mx-auto max-w-4xl text-center">
@@ -37,7 +37,7 @@ export default function ShopPage() {
           <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
             Choose Your <span className="text-gradient">Subscription Plan</span>
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+          <p className="text-muted-foreground mx-auto mt-4 max-w-2xl text-lg">
             Whether you&apos;re just starting out or scaling up, we have a plan
             that fits your needs.
           </p>
@@ -55,28 +55,26 @@ export default function ShopPage() {
 
           {/* Add-ons Section */}
           <div className="mt-16">
-            <h2 className="text-center text-2xl font-bold">
-              Boost Your Plan
-            </h2>
-            <p className="mx-auto mt-2 max-w-xl text-center text-sm text-muted-foreground">
+            <h2 className="text-center text-2xl font-bold">Boost Your Plan</h2>
+            <p className="text-muted-foreground mx-auto mt-2 max-w-xl text-center text-sm">
               Enhance your subscription with premium add-ons
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {ADD_ONS.map((addon, idx) => (
                 <div
                   key={idx}
-                  className="card-elevated flex items-center gap-4 rounded-xl border border-border bg-card p-5"
+                  className="card-elevated border-border bg-card flex items-center gap-4 rounded-xl border p-5"
                 >
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600/10 to-violet-600/10 dark:from-indigo-500/20 dark:to-violet-500/20">
                     <addon.icon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-bold">{addon.name}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-muted-foreground text-xs">
                       {addon.description}
                     </p>
                   </div>
-                  <p className="text-sm font-bold text-gradient">
+                  <p className="text-gradient text-sm font-bold">
                     +₹{addon.price}/mo
                   </p>
                 </div>
@@ -89,7 +87,7 @@ export default function ShopPage() {
       {/* Footer */}
       <ShopFooter />
     </div>
-  );
+  )
 }
 
 /* ============================================================================
@@ -98,25 +96,25 @@ export default function ShopPage() {
 
 function ShopNav() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/10 glass">
+    <header className="glass sticky top-0 z-50 w-full border-b border-white/10">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2.5 group">
+        <Link href="/" className="group flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 shadow-md transition-transform group-hover:scale-105">
             <IconShoppingCart className="h-5 w-5 text-white" stroke={2} />
           </div>
-          <span className="text-xl font-bold text-gradient">Shop</span>
+          <span className="text-gradient text-xl font-bold">Shop</span>
         </Link>
 
         <div className="flex items-center gap-3">
           <Link
             href="/"
-            className="rounded-lg px-3.5 py-2 text-sm font-medium text-foreground/70 transition-colors hover:text-foreground hover:bg-muted"
+            className="text-foreground/70 hover:text-foreground hover:bg-muted rounded-lg px-3.5 py-2 text-sm font-medium transition-colors"
           >
             Home
           </Link>
           <Link
             href="/login"
-            className="rounded-full px-5 py-2 text-sm font-semibold text-foreground/80 transition-colors hover:text-foreground hover:bg-muted"
+            className="text-foreground/80 hover:text-foreground hover:bg-muted rounded-full px-5 py-2 text-sm font-semibold transition-colors"
           >
             Log in
           </Link>
@@ -129,7 +127,7 @@ function ShopNav() {
         </div>
       </nav>
     </header>
-  );
+  )
 }
 
 /* ============================================================================
@@ -137,21 +135,21 @@ function ShopNav() {
    ============================================================================ */
 
 interface ShopProduct {
-  name: string;
-  description: string;
-  price: string;
-  period: string;
-  features: string[];
-  popular: boolean;
-  badge?: string;
+  name: string
+  description: string
+  price: string
+  period: string
+  features: string[]
+  popular: boolean
+  badge?: string
 }
 
 function ProductCard({ product }: { product: ShopProduct }) {
   return (
     <div
-      className={`relative flex flex-col rounded-2xl border p-6 sm:p-8 transition-all duration-300 ${
+      className={`relative flex flex-col rounded-2xl border p-6 transition-all duration-300 sm:p-8 ${
         product.popular
-          ? "border-indigo-500 bg-card shadow-xl shadow-indigo-500/10 scale-100 lg:scale-105 z-10"
+          ? "bg-card z-10 scale-100 border-indigo-500 shadow-xl shadow-indigo-500/10 lg:scale-105"
           : "border-border bg-card card-elevated"
       }`}
     >
@@ -162,15 +160,13 @@ function ProductCard({ product }: { product: ShopProduct }) {
       )}
 
       <h3 className="text-xl font-bold">{product.name}</h3>
-      <p className="mt-1.5 text-sm text-muted-foreground">
+      <p className="text-muted-foreground mt-1.5 text-sm">
         {product.description}
       </p>
 
       <div className="mt-6 flex items-baseline gap-1">
         <span className="text-4xl font-extrabold">₹{product.price}</span>
-        <span className="text-sm text-muted-foreground">
-          /{product.period}
-        </span>
+        <span className="text-muted-foreground text-sm">/{product.period}</span>
       </div>
 
       <Link
@@ -178,7 +174,7 @@ function ProductCard({ product }: { product: ShopProduct }) {
         className={`mt-8 flex items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold transition-all ${
           product.popular
             ? "btn-gradient"
-            : "border border-border bg-card text-foreground hover:bg-muted shadow-sm"
+            : "border-border bg-card text-foreground hover:bg-muted border shadow-sm"
         }`}
       >
         Get Started
@@ -194,7 +190,7 @@ function ProductCard({ product }: { product: ShopProduct }) {
         ))}
       </ul>
     </div>
-  );
+  )
 }
 
 /* ============================================================================
@@ -203,15 +199,15 @@ function ProductCard({ product }: { product: ShopProduct }) {
 
 function ShopFooter() {
   return (
-    <footer className="border-t border-border/50 px-4 py-8 sm:px-6 lg:px-8">
+    <footer className="border-border/50 border-t px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl text-center">
-        <p className="text-sm text-muted-foreground">
-          © {new Date().getFullYear()} SubsMS. All prices in INR. GST
-          applicable as per plan.
+        <p className="text-muted-foreground text-sm">
+          © {new Date().getFullYear()} SubsMS. All prices in INR. GST applicable
+          as per plan.
         </p>
       </div>
     </footer>
-  );
+  )
 }
 
 /* ============================================================================
@@ -222,7 +218,7 @@ import {
   IconHeadset,
   IconCloudComputing,
   IconShieldCheck,
-} from "@tabler/icons-react";
+} from "@tabler/icons-react"
 
 const SHOP_PRODUCTS: ShopProduct[] = [
   {
@@ -273,7 +269,7 @@ const SHOP_PRODUCTS: ShopProduct[] = [
       "Audit trail logging",
     ],
   },
-];
+]
 
 const ADD_ONS = [
   {
@@ -294,4 +290,4 @@ const ADD_ONS = [
     price: "3,000",
     icon: IconShieldCheck,
   },
-];
+]

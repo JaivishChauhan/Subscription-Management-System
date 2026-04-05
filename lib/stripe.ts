@@ -7,30 +7,30 @@
  * calls these functions without knowing if Stripe is live or stubbed.
  */
 
-const STRIPE_CONFIGURED = !!process.env.STRIPE_SECRET_KEY;
+const STRIPE_CONFIGURED = !!process.env.STRIPE_SECRET_KEY
 
 interface CreateCheckoutSessionParams {
   /** Customer email for Stripe. */
-  customerEmail: string;
+  customerEmail: string
   /** Line items for the checkout session. */
   lineItems: Array<{
-    name: string;
-    unitAmount: number; // In paisa (smallest currency unit)
-    quantity: number;
-  }>;
+    name: string
+    unitAmount: number // In paisa (smallest currency unit)
+    quantity: number
+  }>
   /** URL to redirect after successful payment. */
-  successUrl: string;
+  successUrl: string
   /** URL to redirect on cancel. */
-  cancelUrl: string;
+  cancelUrl: string
 }
 
 interface CheckoutSessionResult {
   /** Stripe checkout session URL. Null if stubbed. */
-  url: string | null;
+  url: string | null
   /** Session ID. */
-  sessionId: string;
+  sessionId: string
   /** Whether this is a real or stubbed session. */
-  isLive: boolean;
+  isLive: boolean
 }
 
 /**
@@ -38,7 +38,7 @@ interface CheckoutSessionResult {
  * Falls back to a stub if Stripe keys aren't configured.
  */
 export async function createCheckoutSession(
-  params: CreateCheckoutSessionParams,
+  params: CreateCheckoutSessionParams
 ): Promise<CheckoutSessionResult> {
   if (!STRIPE_CONFIGURED) {
     console.info("[STRIPE_STUB] Would create checkout session:", {
@@ -46,15 +46,15 @@ export async function createCheckoutSession(
       items: params.lineItems.length,
       total: params.lineItems.reduce(
         (sum, item) => sum + item.unitAmount * item.quantity,
-        0,
+        0
       ),
-    });
+    })
 
     return {
       url: params.successUrl + "?session_id=stub_session_" + Date.now(),
       sessionId: "stub_session_" + Date.now(),
       isLive: false,
-    };
+    }
   }
 
   // TODO: Replace with actual Stripe SDK integration
@@ -63,18 +63,23 @@ export async function createCheckoutSession(
   // return { url: session.url, sessionId: session.id, isLive: true };
 
   throw new Error(
-    "Stripe is configured but SDK integration is not yet implemented",
-  );
+    "Stripe is configured but SDK integration is not yet implemented"
+  )
 }
 
 /**
  * Verifies a Stripe webhook event signature.
  * Returns the parsed event or null if verification fails.
  */
-export async function verifyWebhookSignature(): Promise<{ type: string; data: Record<string, unknown> } | null> {
+export async function verifyWebhookSignature(): Promise<{
+  type: string
+  data: Record<string, unknown>
+} | null> {
   if (!STRIPE_CONFIGURED) {
-    console.warn("[STRIPE_STUB] Webhook verification skipped — Stripe not configured.");
-    return null;
+    console.warn(
+      "[STRIPE_STUB] Webhook verification skipped — Stripe not configured."
+    )
+    return null
   }
 
   // TODO: Implement actual webhook verification
@@ -82,8 +87,8 @@ export async function verifyWebhookSignature(): Promise<{ type: string; data: Re
   // const event = stripe.webhooks.constructEvent(rawBody, signature, process.env.STRIPE_WEBHOOK_SECRET!);
   // return event;
 
-  console.warn("[STRIPE] Webhook verification not yet implemented.");
-  return null;
+  console.warn("[STRIPE] Webhook verification not yet implemented.")
+  return null
 }
 
 /**
@@ -91,5 +96,5 @@ export async function verifyWebhookSignature(): Promise<{ type: string; data: Re
  * Use this in UI to show/hide payment-related features.
  */
 export function isPaymentEnabled(): boolean {
-  return STRIPE_CONFIGURED;
+  return STRIPE_CONFIGURED
 }

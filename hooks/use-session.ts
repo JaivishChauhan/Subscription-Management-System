@@ -51,7 +51,9 @@ export function useSession(): UseSessionResult {
     }
 
     fetchSession()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [tick])
 
   return {
@@ -64,7 +66,9 @@ export function useSession(): UseSessionResult {
 /**
  * Signs the user out by calling POST /api/auth?action=signout, then reloads.
  */
-export async function signOut(options?: { callbackUrl?: string }): Promise<void> {
+export async function signOut(options?: {
+  callbackUrl?: string
+}): Promise<void> {
   await fetch("/api/auth?action=signout", {
     method: "POST",
     credentials: "include",

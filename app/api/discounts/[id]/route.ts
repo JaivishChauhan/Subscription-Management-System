@@ -65,7 +65,10 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     })
 
     if (!existing) {
-      return NextResponse.json({ error: "Discount not found." }, { status: 404 })
+      return NextResponse.json(
+        { error: "Discount not found." },
+        { status: 404 }
+      )
     }
 
     const { productIds, ...discountData } = parsed.data
@@ -86,7 +89,10 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         await tx.discountProduct.deleteMany({ where: { discountId: id } })
         if (productIds.length > 0) {
           await tx.discountProduct.createMany({
-            data: productIds.map((productId) => ({ discountId: id, productId })),
+            data: productIds.map((productId) => ({
+              discountId: id,
+              productId,
+            })),
             skipDuplicates: true,
           })
         }
@@ -136,7 +142,10 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     })
 
     if (!existing) {
-      return NextResponse.json({ error: "Discount not found." }, { status: 404 })
+      return NextResponse.json(
+        { error: "Discount not found." },
+        { status: 404 }
+      )
     }
 
     await prisma.discount.delete({ where: { id } })

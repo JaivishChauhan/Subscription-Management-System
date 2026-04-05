@@ -28,16 +28,22 @@ export default async function AdminReportsPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-card via-card to-indigo-500/5 p-6 shadow-sm">
+      <section className="border-border from-card via-card rounded-[2rem] border bg-gradient-to-br to-indigo-500/5 p-6 shadow-sm">
         <p className="text-xs font-semibold tracking-[0.28em] text-indigo-600 uppercase">
           Reports
         </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">Operational snapshot</h1>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight">
+          Operational snapshot
+        </h1>
         <p className="text-muted-foreground mt-3 max-w-2xl text-sm sm:text-base">
-          Quick system-level reporting across subscription and invoice lifecycles.
+          Quick system-level reporting across subscription and invoice
+          lifecycles.
         </p>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <MetricCard label="Total Invoiced" value={formatCurrency(totals._sum.total ?? 0)} />
+          <MetricCard
+            label="Total Invoiced"
+            value={formatCurrency(totals._sum.total ?? 0)}
+          />
           <MetricCard
             label="Outstanding Amount"
             value={formatCurrency(totals._sum.amountDue ?? 0)}
@@ -69,8 +75,8 @@ export default async function AdminReportsPage() {
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-3xl border border-border bg-card/80 p-5">
-      <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+    <div className="border-border bg-card/80 rounded-3xl border p-5">
+      <p className="text-muted-foreground text-xs font-semibold tracking-[0.2em] uppercase">
         {label}
       </p>
       <p className="mt-3 text-3xl font-bold tracking-tight">{value}</p>
@@ -86,23 +92,25 @@ function ReportTable({
   rows: Array<{ label: string; primary: string; secondary: string }>
 }) {
   return (
-    <section className="rounded-[2rem] border border-border bg-card p-6 shadow-sm">
+    <section className="border-border bg-card rounded-[2rem] border p-6 shadow-sm">
       <h2 className="text-lg font-semibold">{title}</h2>
-      <div className="mt-5 overflow-hidden rounded-3xl border border-border">
-        <table className="min-w-full divide-y divide-border">
+      <div className="border-border mt-5 overflow-hidden rounded-3xl border">
+        <table className="divide-border min-w-full divide-y">
           <thead className="bg-muted/40">
-            <tr className="text-left text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+            <tr className="text-muted-foreground text-left text-xs font-semibold tracking-[0.18em] uppercase">
               <th className="px-5 py-4">Status</th>
               <th className="px-5 py-4">Count</th>
               <th className="px-5 py-4">Value</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border bg-card">
+          <tbody className="divide-border bg-card divide-y">
             {rows.map((row) => (
               <tr key={row.label}>
                 <td className="px-5 py-4 capitalize">{row.label}</td>
                 <td className="px-5 py-4 font-medium">{row.primary}</td>
-                <td className="px-5 py-4 text-sm text-muted-foreground">{row.secondary}</td>
+                <td className="text-muted-foreground px-5 py-4 text-sm">
+                  {row.secondary}
+                </td>
               </tr>
             ))}
           </tbody>

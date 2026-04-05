@@ -52,18 +52,24 @@ export default async function AdminDiscountsPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-card via-card to-violet-500/5 p-6 shadow-sm">
+      <section className="border-border from-card via-card rounded-[2rem] border bg-gradient-to-br to-violet-500/5 p-6 shadow-sm">
         <p className="text-xs font-semibold tracking-[0.28em] text-violet-600 uppercase">
           Promotions
         </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">Discounts &amp; Promo Codes</h1>
-        <p className="mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
-          Create and manage discount rules — fixed amount, percentage-based, with
-          optional usage limits, minimum purchase thresholds, and product restrictions.
+        <h1 className="mt-2 text-3xl font-bold tracking-tight">
+          Discounts &amp; Promo Codes
+        </h1>
+        <p className="text-muted-foreground mt-3 max-w-2xl text-sm sm:text-base">
+          Create and manage discount rules — fixed amount, percentage-based,
+          with optional usage limits, minimum purchase thresholds, and product
+          restrictions.
         </p>
       </section>
 
-      <AdminDiscountsClient initialDiscounts={safeDiscounts} initialTotal={total} />
+      <AdminDiscountsClient
+        initialDiscounts={safeDiscounts}
+        initialTotal={total}
+      />
     </div>
   )
 }

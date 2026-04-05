@@ -83,11 +83,9 @@ async function verifySessionToken(
   token: string
 ): Promise<SessionJWTPayload | null> {
   try {
-    const { payload } = await jwtVerify<SessionJWTPayload>(
-      token,
-      getSecret(),
-      { algorithms: ["HS256"] }
-    )
+    const { payload } = await jwtVerify<SessionJWTPayload>(token, getSecret(), {
+      algorithms: ["HS256"],
+    })
     return payload
   } catch {
     return null
@@ -112,7 +110,9 @@ export async function auth(): Promise<Session | null> {
   const payload = await verifySessionToken(token)
   if (!payload || !payload.id || !payload.email) return null
 
-  const expiresAt = payload.exp ? new Date(payload.exp * 1000) : new Date(Date.now() + SESSION_MAX_AGE * 1000)
+  const expiresAt = payload.exp
+    ? new Date(payload.exp * 1000)
+    : new Date(Date.now() + SESSION_MAX_AGE * 1000)
 
   return {
     user: {
@@ -191,7 +191,9 @@ export async function destroySession(): Promise<void> {
 export async function signInWithCredentials(
   email: string,
   password: string
-): Promise<{ session: Session; error: null } | { session: null; error: string }> {
+): Promise<
+  { session: Session; error: null } | { session: null; error: string }
+> {
   try {
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase().trim() },
@@ -245,7 +247,10 @@ export async function signInWithCredentials(
     }
   } catch (error) {
     console.error("[auth] signInWithCredentials error:", error)
-    return { session: null, error: "Authentication service error. Please try again." }
+    return {
+      session: null,
+      error: "Authentication service error. Please try again.",
+    }
   }
 }
 
@@ -260,7 +265,9 @@ export async function signInWithGoogle(googleUser: {
   email: string
   name: string
   image: string | null
-}): Promise<{ session: Session; error: null } | { session: null; error: string }> {
+}): Promise<
+  { session: Session; error: null } | { session: null; error: string }
+> {
   try {
     let dbUser = await prisma.user.findUnique({
       where: { email: googleUser.email },

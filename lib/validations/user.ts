@@ -14,11 +14,7 @@ export const adminCreateUserSchema = z.object({
     .string()
     .min(2, "Name must be at least 2 characters")
     .max(100, "Name too long"),
-  email: z
-    .string()
-    .email("Valid email required")
-    .toLowerCase()
-    .trim(),
+  email: z.string().email("Valid email required").toLowerCase().trim(),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
@@ -36,11 +32,7 @@ export const adminUpdateUserSchema = z.object({
   phone: z.string().max(20).optional().nullable(),
   role: z.enum(["internal", "portal"]).optional(),
   /** When true, the password field is required and will be re-hashed. */
-  password: z
-    .string()
-    .min(8)
-    .regex(PASSWORD_REGEX)
-    .optional(),
+  password: z.string().min(8).regex(PASSWORD_REGEX).optional(),
 })
 
 /** Pagination + search filters for the user list. */
