@@ -2,28 +2,17 @@
  * @fileoverview Auth API route handlers.
  *
  * POST /api/auth/signin   — credentials sign-in
- * POST /api/auth/signout  — destroys session
  * GET  /api/auth/session  — returns current session (for client components)
  * POST /api/auth/google   — exchanges Google ID token for a session
  */
 
 import { NextRequest, NextResponse } from "next/server"
-import {
-  auth,
-  signInWithCredentials,
-  signInWithGoogle,
-  destroySession,
-} from "@/lib/auth"
+import { auth, signInWithCredentials, signInWithGoogle } from "@/lib/auth"
 
 // ─── POST /api/auth/signin ────────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
   const url = new URL(request.url)
   const action = url.searchParams.get("action")
-
-  if (action === "signout") {
-    await destroySession()
-    return NextResponse.json({ ok: true })
-  }
 
   if (action === "google") {
     try {
