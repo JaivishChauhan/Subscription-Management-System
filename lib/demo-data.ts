@@ -9,6 +9,11 @@ export const DEMO_LOGIN_CREDENTIALS: LoginFormData = {
   password: "Admin@1234!",
 }
 
+export const DEMO_INTERNAL_LOGIN_CREDENTIALS: LoginFormData = {
+  email: "internal@subsms.local",
+  password: "Internal@1234!",
+}
+
 export const DEMO_RESET_PASSWORD_DATA: ResetPasswordFormData = {
   email: DEMO_LOGIN_CREDENTIALS.email,
 }

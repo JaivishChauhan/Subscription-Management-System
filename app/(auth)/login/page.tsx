@@ -13,7 +13,10 @@ import {
   IconBrandGoogle,
 } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { DEMO_LOGIN_CREDENTIALS } from "@/lib/demo-data"
+import {
+  DEMO_LOGIN_CREDENTIALS,
+  DEMO_INTERNAL_LOGIN_CREDENTIALS,
+} from "@/lib/demo-data"
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth"
 import { getDefaultPortalPath } from "@/lib/roles"
 
@@ -105,7 +108,12 @@ function LoginContent() {
 
   function handleAutofillDemo() {
     reset(DEMO_LOGIN_CREDENTIALS)
-    toast.success("Demo login details added.")
+    toast.success("Demo admin login details added.")
+  }
+
+  function handleAutofillInternal() {
+    reset(DEMO_INTERNAL_LOGIN_CREDENTIALS)
+    toast.success("Demo internal login details added.")
   }
 
   /**
@@ -143,7 +151,7 @@ function LoginContent() {
         noValidate
       >
         {/* Demo credentials banner */}
-        <div className="rounded-lg border border-indigo-100 bg-indigo-50/70 p-3">
+        <div className="space-y-3 rounded-lg border border-indigo-100 bg-indigo-50/70 p-3">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold tracking-wide text-indigo-700 uppercase">
@@ -156,6 +164,23 @@ function LoginContent() {
             <button
               type="button"
               onClick={handleAutofillDemo}
+              className="rounded-full border border-indigo-200 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-700 transition-colors hover:bg-indigo-100"
+            >
+              Autofill
+            </button>
+          </div>
+          <div className="flex items-center justify-between gap-3 border-t border-indigo-100 pt-3">
+            <div>
+              <p className="text-xs font-semibold tracking-wide text-indigo-700 uppercase">
+                Demo Internal Account
+              </p>
+              <p className="mt-1 text-xs text-indigo-900">
+                internal@subsms.local / Internal@1234!
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleAutofillInternal}
               className="rounded-full border border-indigo-200 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-700 transition-colors hover:bg-indigo-100"
             >
               Autofill
