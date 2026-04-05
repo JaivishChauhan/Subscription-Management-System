@@ -10,6 +10,9 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts"
 import { CountUp } from "countup.js"
 
@@ -21,7 +24,12 @@ interface DashboardClientProps {
     overdue: number
   }
   revenueData: Array<{ month: string; actual: number; forecast: number }>
-  churnData: Array<{ name: string; sub: string; initials: string | null }>
+  churnData: Array<{
+    name: string
+    sub: string
+    initials: string | null
+    status?: "high" | "ok"
+  }>
   timeline: Array<{
     color: string
     title: string
@@ -29,6 +37,8 @@ interface DashboardClientProps {
     time: string
   }>
   planDist: Array<{ name: string; pct: string; color: string }>
+  billingDist: Array<{ name: string; pct: string; color: string }>
+  statusDist: Array<{ name: string; pct: string; color: string }>
 }
 
 export function DashboardClient({
@@ -37,6 +47,8 @@ export function DashboardClient({
   churnData,
   timeline,
   planDist,
+  billingDist,
+  statusDist,
 }: DashboardClientProps) {
   const subsRef = useRef<HTMLHeadingElement>(null)
   const revRef = useRef<HTMLHeadingElement>(null)
@@ -248,22 +260,172 @@ export function DashboardClient({
           <p className="f-mono text-muted-foreground mb-8 text-[11px]">
             Active users by tier
           </p>
-          <div className="relative flex flex-1 items-center justify-center">
-            <div className="relative h-48 w-48 rounded-full border-[16px] border-slate-100">
-              <div className="absolute inset-0 rotate-45 rounded-full border-[16px] border-indigo-500 border-t-transparent border-r-transparent"></div>
-              <div className="absolute inset-0 -rotate-12 rounded-full border-[16px] border-violet-500 border-b-transparent border-l-transparent"></div>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="f-syne text-foreground text-2xl font-bold">
-                  3 Tiers
-                </span>
-                <span className="f-mono text-muted-foreground text-[10px]">
-                  Scale Ready
-                </span>
-              </div>
+          <div className="relative flex min-h-[240px] flex-1 flex-col items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={planDist.map((p) => ({
+                    ...p,
+                    value: parseFloat(p.pct) || 0,
+                  }))}
+                  innerRadius={70}
+                  outerRadius={90}
+                  paddingAngle={2}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {planDist.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value: number) => [`${value}%`, "Active Users"]}
+                  contentStyle={{ borderRadius: "8px", fontSize: "12px" }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+              <span className="f-syne text-foreground text-2xl font-bold">
+                {planDist.length} Tiers
+              </span>
+              <span className="f-mono text-muted-foreground text-[10px]">
+                Scale Ready
+              </span>
             </div>
           </div>
           <div className="mt-8 space-y-3">
             {planDist.map((p) => (
+              <div
+                key={p.name}
+                className="f-mono flex items-center justify-between text-[11px]"
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className="h-2 w-2 rounded-sm"
+                    style={{ backgroundColor: p.color }}
+                  ></span>
+                  <span className="text-muted-foreground">{p.name}</span>
+                </div>
+                <span className="text-foreground font-bold">{p.pct}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ADDITIONAL DISTRIBUTIONS */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Billing Period Distribution */}
+        <div className="bg-card border-border flex flex-col rounded-lg border p-6 shadow-sm">
+          <h3 className="f-syne text-foreground mb-2 text-lg font-bold">
+            Billing Period
+          </h3>
+          <p className="f-mono text-muted-foreground mb-8 text-[11px]">
+            Active users by period
+          </p>
+          <div className="relative flex min-h-[240px] flex-1 flex-col items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={billingDist.map((p) => ({
+                    ...p,
+                    value: parseFloat(p.pct) || 0,
+                  }))}
+                  innerRadius={70}
+                  outerRadius={90}
+                  paddingAngle={2}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {billingDist.map((entry, index) => (
+                    <Cell key={`cell-billing-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value: number) => [`${value}%`, "Users"]}
+                  contentStyle={{ borderRadius: "8px", fontSize: "12px" }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+              <span className="f-syne text-foreground text-2xl font-bold">
+                {billingDist.length > 0 &&
+                billingDist[0].name !== "No billing periods"
+                  ? billingDist.length
+                  : 0}{" "}
+                Periods
+              </span>
+              <span className="f-mono text-muted-foreground text-[10px]">
+                Distribution
+              </span>
+            </div>
+          </div>
+          <div className="mt-8 space-y-3">
+            {billingDist.map((p) => (
+              <div
+                key={p.name}
+                className="f-mono flex items-center justify-between text-[11px]"
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className="h-2 w-2 rounded-sm"
+                    style={{ backgroundColor: p.color }}
+                  ></span>
+                  <span className="text-muted-foreground">{p.name}</span>
+                </div>
+                <span className="text-foreground font-bold">{p.pct}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Status Distribution */}
+        <div className="bg-card border-border flex flex-col rounded-lg border p-6 shadow-sm">
+          <h3 className="f-syne text-foreground mb-2 text-lg font-bold">
+            Subscription Status
+          </h3>
+          <p className="f-mono text-muted-foreground mb-8 text-[11px]">
+            All subscriptions by status
+          </p>
+          <div className="relative flex min-h-[240px] flex-1 flex-col items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={statusDist.map((p) => ({
+                    ...p,
+                    value: parseFloat(p.pct) || 0,
+                  }))}
+                  innerRadius={70}
+                  outerRadius={90}
+                  paddingAngle={2}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {statusDist.map((entry, index) => (
+                    <Cell key={`cell-status-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value: number) => [`${value}%`, "Subscriptions"]}
+                  contentStyle={{ borderRadius: "8px", fontSize: "12px" }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+              <span className="f-syne text-foreground text-2xl font-bold">
+                {statusDist.length > 0 &&
+                statusDist[0].name !== "No subscriptions"
+                  ? statusDist.length
+                  : 0}{" "}
+                Statuses
+              </span>
+              <span className="f-mono text-muted-foreground text-[10px]">
+                Overview
+              </span>
+            </div>
+          </div>
+          <div className="mt-8 space-y-3">
+            {statusDist.map((p) => (
               <div
                 key={p.name}
                 className="f-mono flex items-center justify-between text-[11px]"
@@ -318,9 +480,16 @@ export function DashboardClient({
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="f-mono rounded border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[9px] font-bold text-red-500 uppercase">
-                    HIGH RISK
-                  </span>
+                  {c.status === "high" && (
+                    <span className="f-mono rounded border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[9px] font-bold text-red-500 uppercase">
+                      HIGH RISK
+                    </span>
+                  )}
+                  {c.status === "ok" && (
+                    <span className="f-mono rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold text-emerald-500 uppercase">
+                      OK
+                    </span>
+                  )}
                   <IconDotsVertical className="text-muted-foreground group-hover:text-foreground h-5 w-5 cursor-pointer transition-colors" />
                 </div>
               </div>

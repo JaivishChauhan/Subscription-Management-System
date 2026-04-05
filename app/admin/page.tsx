@@ -103,7 +103,12 @@ export default async function AdminDashboardPage() {
     orderBy: { dueDate: "asc" },
   })
 
-  let churnData = churnCustomers.map((inv) => {
+  let churnData: Array<{
+    name: string
+    sub: string
+    initials: string
+    status: "high" | "ok"
+  }> = churnCustomers.map((inv) => {
     const name =
       inv.contact?.company ||
       `${inv.contact?.firstName || ""} ${inv.contact?.lastName || ""}`.trim() ||
@@ -115,12 +120,18 @@ export default async function AdminDashboardPage() {
       name,
       sub: `Overdue by ${daysOverdue} days (₹${inv.amountDue.toLocaleString()})`,
       initials: name.substring(0, 2).toUpperCase(),
+      status: "high",
     }
   })
 
   if (churnData.length === 0) {
     churnData = [
-      { name: "Healthy Accounts", sub: "No overdue payments", initials: "OK" },
+      {
+        name: "Healthy Accounts",
+        sub: "No overdue payments",
+        initials: "OK",
+        status: "ok",
+      },
     ]
   }
 
@@ -180,6 +191,48 @@ export default async function AdminDashboardPage() {
     planDist = [{ name: "No active plans", pct: "100%", color: "#1A2535" }]
   }
 
+  // 5. BILLING PERIOD DISTRIBUTION
+  const billingCounts: Record<string, number> = {}
+  activeSubsForPlan.forEach((sub) => {
+    if (sub.recurringPlan?.billingPeriod) {
+      const period = sub.recurringPlan.billingPeriod
+      const capitalized = period.charAt(0).toUpperCase() + period.slice(1)
+      billingCounts[capitalized] = (billingCounts[capitalized] || 0) + 1
+    }
+  })
+
+  let billingDist = Object.entries(billingCounts).map(([name, count], idx) => ({
+    name,
+    pct: Math.round((count / totalActive) * 100) + "%",
+    color: planColors[(idx + 2) % planColors.length],
+  }))
+
+  if (billingDist.length === 0) {
+    billingDist = [
+      { name: "No billing periods", pct: "100%", color: "#1A2535" },
+    ]
+  }
+
+  // 6. SUBSCRIPTION STATUS DISTRIBUTION
+  const allSubs = await prisma.subscription.findMany()
+  const statusCounts: Record<string, number> = {}
+  let totalSubs = 0
+  allSubs.forEach((sub) => {
+    const status = sub.status.charAt(0).toUpperCase() + sub.status.slice(1)
+    statusCounts[status] = (statusCounts[status] || 0) + 1
+    totalSubs++
+  })
+
+  let statusDist = Object.entries(statusCounts).map(([name, count], idx) => ({
+    name,
+    pct: Math.round((count / totalSubs) * 100) + "%",
+    color: planColors[(idx + 1) % planColors.length],
+  }))
+
+  if (statusDist.length === 0) {
+    statusDist = [{ name: "No subscriptions", pct: "100%", color: "#1A2535" }]
+  }
+
   return (
     <DashboardClient
       stats={stats}
@@ -187,6 +240,8 @@ export default async function AdminDashboardPage() {
       churnData={churnData}
       timeline={timeline}
       planDist={planDist}
+      billingDist={billingDist}
+      statusDist={statusDist}
     />
   )
 }

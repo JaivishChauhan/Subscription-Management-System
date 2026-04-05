@@ -63,7 +63,7 @@ export const productFiltersSchema = z.object({
   ),
   status: z.enum(["all", "active", "inactive"]).optional().default("all"),
   page: z.coerce.number().int().min(1).optional().default(1),
-  pageSize: z.coerce.number().int().min(1).max(50).optional().default(10),
+  pageSize: z.coerce.number().int().min(1).max(100).optional().default(10),
 })
 
 export type ProductType = (typeof productTypeValues)[number]

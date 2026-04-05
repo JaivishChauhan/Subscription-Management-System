@@ -3,6 +3,8 @@ import Link from "next/link"
 import { IconArrowRight, IconPuzzle } from "@tabler/icons-react"
 import { requireAdminPage } from "@/lib/admin"
 import { prisma } from "@/lib/db"
+import { bundleFiltersSchema } from "@/lib/validations/bundle"
+import { TablePagination } from "@/components/ui/table-pagination"
 
 export const metadata: Metadata = {
   title: "Bundles",
@@ -10,20 +12,40 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic"
 
-export default async function AdminBundlesPage() {
+export default async function AdminBundlesPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
   await requireAdminPage()
 
-  const [bundles, activeCount, featuredCount] = await prisma.$transaction([
-    prisma.bundle.findMany({
-      orderBy: [{ isFeatured: "desc" }, { updatedAt: "desc" }],
-      include: {
-        services: true,
-      },
-      take: 50,
-    }),
-    prisma.bundle.count({ where: { isActive: true } }),
-    prisma.bundle.count({ where: { isFeatured: true } }),
-  ])
+  const rawSearchParams = await searchParams
+  const firstValue = (v: string | string[] | undefined) =>
+    Array.isArray(v) ? v[0] : v
+
+  const parsed = bundleFiltersSchema.parse({
+    page: firstValue(rawSearchParams.page),
+    pageSize: firstValue(rawSearchParams.pageSize),
+  })
+
+  const { page, pageSize } = parsed
+
+  const [bundles, activeCount, featuredCount, totalBundles] =
+    await prisma.$transaction([
+      prisma.bundle.findMany({
+        orderBy: [{ isFeatured: "desc" }, { updatedAt: "desc" }],
+        include: {
+          services: true,
+        },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.bundle.count({ where: { isActive: true } }),
+      prisma.bundle.count({ where: { isFeatured: true } }),
+      prisma.bundle.count(),
+    ])
+
+  const totalPages = Math.max(1, Math.ceil(totalBundles / pageSize))
 
   return (
     <div className="space-y-8">
@@ -126,6 +148,12 @@ export default async function AdminBundlesPage() {
             </table>
           </div>
         </div>
+        <TablePagination
+          page={page}
+          pageSize={pageSize}
+          totalItems={totalBundles}
+          totalPages={totalPages}
+        />
       </section>
     </div>
   )

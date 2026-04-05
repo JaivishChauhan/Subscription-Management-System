@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { TablePagination } from "@/components/ui/table-pagination"
 import Link from "next/link"
 import { IconApps, IconArrowRight, IconSearch } from "@tabler/icons-react"
 import { requireAdminPage } from "@/lib/admin"
@@ -173,6 +174,13 @@ export default async function AdminServicesPage({
             </table>
           </div>
         </div>
+
+        <TablePagination
+          page={page}
+          pageSize={pageSize}
+          totalItems={totalServices}
+          totalPages={totalPages}
+        />
       </section>
     </div>
   )

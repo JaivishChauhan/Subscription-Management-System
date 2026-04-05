@@ -166,7 +166,9 @@ function SubscriptionCard({ subscription }: { subscription: Subscription }) {
                   )
                 : subscription.recurringPlan.price
             )}{" "}
-            / {subscription.recurringPlan.billingPeriod.charAt(0).toUpperCase() + subscription.recurringPlan.billingPeriod.slice(1)}
+            /{" "}
+            {subscription.recurringPlan.billingPeriod.charAt(0).toUpperCase() +
+              subscription.recurringPlan.billingPeriod.slice(1)}
           </span>
         </div>
         <div className="flex items-center gap-2">

@@ -164,7 +164,9 @@ export async function validateDiscountAction(
       success: true,
       discount: {
         code: discount.code,
-        type: (discount.type === "percentage" ? "percent" : "fixed") as "percent" | "fixed",
+        type: (discount.type === "percentage" ? "percent" : "fixed") as
+          | "percent"
+          | "fixed",
         value: discount.value,
       },
     }

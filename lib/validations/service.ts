@@ -16,7 +16,7 @@ export const serviceFiltersSchema = z.object({
   status: z.enum(["all", "active", "inactive"]).optional().default("all"),
   category: z.preprocess(emptyStringToUndefined, z.string().optional()),
   page: z.coerce.number().int().min(1).optional().default(1),
-  pageSize: z.coerce.number().int().min(1).max(50).optional().default(10),
+  pageSize: z.coerce.number().int().min(1).max(100).optional().default(10),
 })
 
 export type ServiceFilters = z.infer<typeof serviceFiltersSchema>

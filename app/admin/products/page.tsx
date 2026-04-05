@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { TablePagination } from "@/components/ui/table-pagination"
 import Link from "next/link"
 import {
   IconApps,
@@ -276,34 +277,12 @@ export default async function ProductsPage({
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-muted-foreground text-sm">
-            Showing {(page - 1) * pageSize + (products.length ? 1 : 0)}-
-            {(page - 1) * pageSize + products.length} of {totalProducts} product
-            {totalProducts === 1 ? "" : "s"}.
-          </p>
-
-          <div className="flex items-center gap-2">
-            <PaginationLink
-              href={buildPageHref(rawSearchParams, Math.max(1, page - 1))}
-              disabled={page <= 1}
-            >
-              Previous
-            </PaginationLink>
-            <span className="text-muted-foreground text-sm">
-              Page {page} of {totalPages}
-            </span>
-            <PaginationLink
-              href={buildPageHref(
-                rawSearchParams,
-                Math.min(totalPages, page + 1)
-              )}
-              disabled={page >= totalPages}
-            >
-              Next
-            </PaginationLink>
-          </div>
-        </div>
+        <TablePagination
+          page={page}
+          pageSize={pageSize}
+          totalItems={totalProducts}
+          totalPages={totalPages}
+        />
       </section>
 
       <section className="border-border bg-card rounded-[2rem] border p-6 shadow-sm">
@@ -444,33 +423,6 @@ function StatusPill({ active }: { active: boolean }) {
     >
       {active ? "Active" : "Inactive"}
     </span>
-  )
-}
-
-function PaginationLink({
-  href,
-  disabled,
-  children,
-}: {
-  href: string
-  disabled: boolean
-  children: React.ReactNode
-}) {
-  if (disabled) {
-    return (
-      <span className="border-border text-muted-foreground/60 rounded-full border px-4 py-2 text-sm font-semibold">
-        {children}
-      </span>
-    )
-  }
-
-  return (
-    <Link
-      href={href}
-      className="border-border hover:bg-muted rounded-full border px-4 py-2 text-sm font-semibold transition-colors"
-    >
-      {children}
-    </Link>
   )
 }
 

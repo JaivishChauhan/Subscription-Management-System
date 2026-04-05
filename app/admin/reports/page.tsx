@@ -95,26 +95,28 @@ function ReportTable({
     <section className="border-border bg-card rounded-[2rem] border p-6 shadow-sm">
       <h2 className="text-lg font-semibold">{title}</h2>
       <div className="border-border mt-5 overflow-hidden rounded-3xl border">
-        <table className="divide-border min-w-full divide-y">
-          <thead className="bg-muted/40">
-            <tr className="text-muted-foreground text-left text-xs font-semibold tracking-[0.18em] uppercase">
-              <th className="px-5 py-4">Status</th>
-              <th className="px-5 py-4">Count</th>
-              <th className="px-5 py-4">Value</th>
-            </tr>
-          </thead>
-          <tbody className="divide-border bg-card divide-y">
-            {rows.map((row) => (
-              <tr key={row.label}>
-                <td className="px-5 py-4 capitalize">{row.label}</td>
-                <td className="px-5 py-4 font-medium">{row.primary}</td>
-                <td className="text-muted-foreground px-5 py-4 text-sm">
-                  {row.secondary}
-                </td>
+        <div className="overflow-x-auto">
+          <table className="divide-border min-w-full divide-y">
+            <thead className="bg-muted/40">
+              <tr className="text-muted-foreground text-left text-xs font-semibold tracking-[0.18em] uppercase">
+                <th className="px-5 py-4">Status</th>
+                <th className="px-5 py-4">Count</th>
+                <th className="px-5 py-4">Value</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-border bg-card divide-y">
+              {rows.map((row) => (
+                <tr key={row.label}>
+                  <td className="px-5 py-4 capitalize">{row.label}</td>
+                  <td className="px-5 py-4 font-medium">{row.primary}</td>
+                  <td className="text-muted-foreground px-5 py-4 text-sm">
+                    {row.secondary}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   )

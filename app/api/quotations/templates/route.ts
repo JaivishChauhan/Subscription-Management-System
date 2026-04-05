@@ -10,8 +10,17 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { name, validityDays, recurringPlanId, lines } = body
 
-    if (!name || !validityDays || !recurringPlanId || !lines || lines.length === 0) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    if (
+      !name ||
+      !validityDays ||
+      !recurringPlanId ||
+      !lines ||
+      lines.length === 0
+    ) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      )
     }
 
     const template = await prisma.quotationTemplate.create({

@@ -72,21 +72,25 @@ export default async function InternalDashboardPage() {
             name: "Pending renewals",
             sub: "Watch upcoming activations and follow-ups.",
             initials: "PR",
+            status: "ok",
           },
           {
             name: "Billing queue",
             sub: "Confirmed invoices need payment follow-through.",
             initials: "BQ",
+            status: "ok",
           },
           {
             name: "Customer responses",
             sub: "Review recent operational exceptions.",
             initials: "CR",
+            status: "high",
           },
           {
             name: "Provisioning checks",
             sub: "Verify newly activated subscriptions.",
             initials: "PC",
+            status: "ok",
           },
         ]}
         timeline={[
@@ -121,6 +125,17 @@ export default async function InternalDashboardPage() {
             color: "#06b6d4",
           },
           { name: "Overdue Items", pct: `${overdueCount}`, color: "#f97316" },
+        ]}
+        billingDist={[
+          { name: "Daily", pct: "10%", color: "#0ea5e9" },
+          { name: "Weekly", pct: "20%", color: "#06b6d4" },
+          { name: "Monthly", pct: "50%", color: "#f97316" },
+          { name: "Yearly", pct: "20%", color: "#1A2535" },
+        ]}
+        statusDist={[
+          { name: "Active", pct: "70%", color: "#0ea5e9" },
+          { name: "Draft", pct: "10%", color: "#06b6d4" },
+          { name: "Closed", pct: "20%", color: "#f97316" },
         ]}
       />
     </div>

@@ -21,13 +21,16 @@ const optionalDateField = (label: string) =>
       }
 
       if (typeof normalizedValue === "string") {
-        const parsedDate = new Date(`${normalizedValue}T00:00:00`)
+        const dateString = normalizedValue.includes("T")
+          ? normalizedValue
+          : `${normalizedValue}T00:00:00`
+        const parsedDate = new Date(dateString)
         return Number.isNaN(parsedDate.getTime()) ? normalizedValue : parsedDate
       }
 
       return normalizedValue
     },
-    z.date({ error: `${label} must be a valid date.` }).optional()
+    z.date({ message: `${label} must be a valid date.` }).optional()
   )
 
 const recurringPlanBaseSchema = z.object({
@@ -94,7 +97,7 @@ export const recurringPlanFiltersSchema = z.object({
   ),
   status: z.enum(["all", "active", "inactive"]).optional().default("all"),
   page: z.coerce.number().int().min(1).optional().default(1),
-  pageSize: z.coerce.number().int().min(1).max(50).optional().default(10),
+  pageSize: z.coerce.number().int().min(1).max(100).optional().default(10),
 })
 
 export type BillingPeriod = (typeof billingPeriodValues)[number]

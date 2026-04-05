@@ -3,6 +3,8 @@ import Link from "next/link"
 import { IconReceipt2, IconPlus, IconArrowRight } from "@tabler/icons-react"
 import { requireAdminPage } from "@/lib/admin"
 import { prisma } from "@/lib/db"
+import { TablePagination } from "@/components/ui/table-pagination"
+import { subscriptionFiltersSchema } from "@/lib/validations/subscription"
 
 export const metadata: Metadata = {
   title: "Quotations",
@@ -10,8 +12,23 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic"
 
-export default async function AdminQuotationsPage() {
+export default async function AdminQuotationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
   await requireAdminPage()
+
+  const rawSearchParams = await searchParams
+  const firstValue = (v: string | string[] | undefined) =>
+    Array.isArray(v) ? v[0] : v
+
+  const parsed = subscriptionFiltersSchema.parse({
+    page: firstValue(rawSearchParams.page),
+    pageSize: firstValue(rawSearchParams.pageSize),
+  })
+
+  const { page, pageSize } = parsed
 
   const quotations = await prisma.subscription.findMany({
     where: { status: "quotation" },
@@ -28,7 +45,14 @@ export default async function AdminQuotationsPage() {
         select: { name: true },
       },
     },
+    skip: (page - 1) * pageSize,
+    take: pageSize,
   })
+
+  const totalQuotations = await prisma.subscription.count({
+    where: { status: "quotation" },
+  })
+  const totalPages = Math.max(1, Math.ceil(totalQuotations / pageSize))
 
   return (
     <div className="space-y-8">
@@ -131,6 +155,12 @@ export default async function AdminQuotationsPage() {
             </table>
           </div>
         </div>
+        <TablePagination
+          page={page}
+          pageSize={pageSize}
+          totalItems={totalQuotations}
+          totalPages={totalPages}
+        />
       </section>
     </div>
   )

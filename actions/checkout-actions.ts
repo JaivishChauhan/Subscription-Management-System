@@ -50,7 +50,7 @@ export async function processCheckout(
       (sum, item) => sum + item.price * item.quantity,
       0
     )
-    const payloadItems = items.map((i) => ({ id: i.id, quantity: i.quantity })) 
+    const payloadItems = items.map((i) => ({ id: i.id, quantity: i.quantity }))
     const res = await validateDiscountAction(discountCode, {
       subtotal: rawSubtotal,
       items: payloadItems,
@@ -79,7 +79,7 @@ export async function processCheckout(
   for (const item of items) {
     const rawId = item.id.split("-")[0]
 
-    let product = await prisma.product.findUnique({ where: { id: rawId } })     
+    let product = await prisma.product.findUnique({ where: { id: rawId } })
     if (!product) {
       product = await prisma.product.findFirst()
     }
@@ -87,7 +87,7 @@ export async function processCheckout(
     if (!product) continue
 
     const bp = item.plan.toLowerCase()
-    const period = bp === "one-time" || bp === "lifetime" ? "yearly" : bp       
+    const period = bp === "one-time" || bp === "lifetime" ? "yearly" : bp
 
     let resolvedPlan = await prisma.recurringPlan.findFirst({
       where: { billingPeriod: period },
@@ -114,13 +114,18 @@ export async function processCheckout(
     const itemSubtotal = item.price * item.quantity
     let invoiceDiscount = 0
     if (activeDiscount && finalDiscountAmount > 0) {
-      const rawSubtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
+      const rawSubtotal = items.reduce(
+        (sum, i) => sum + i.price * i.quantity,
+        0
+      )
       if (rawSubtotal > 0) {
-        invoiceDiscount = Math.round((itemSubtotal / rawSubtotal) * finalDiscountAmount)
+        invoiceDiscount = Math.round(
+          (itemSubtotal / rawSubtotal) * finalDiscountAmount
+        )
       }
     }
-    const discountedItemSubtotal = Math.max(0, itemSubtotal - invoiceDiscount)  
-    const taxAmount = Math.max(0, Math.round(discountedItemSubtotal * 0.18))    
+    const discountedItemSubtotal = Math.max(0, itemSubtotal - invoiceDiscount)
+    const taxAmount = Math.max(0, Math.round(discountedItemSubtotal * 0.18))
 
     const sub = await prisma.subscription.create({
       data: {
@@ -132,7 +137,7 @@ export async function processCheckout(
         startDate: today,
         expirationDate: expDate,
         notes:
-          "Automatically generated via checkout for cart item: " + item.name,   
+          "Automatically generated via checkout for cart item: " + item.name,
         lines: {
           create: [
             {
@@ -156,7 +161,7 @@ export async function processCheckout(
       where: { id: invoice.id },
     })
 
-    const discountedTotal = Math.max(0, dbInvoice.total - invoiceDiscount)      
+    const discountedTotal = Math.max(0, dbInvoice.total - invoiceDiscount)
 
     await prisma.invoice.update({
       where: { id: invoice.id },
@@ -176,8 +181,8 @@ export async function processCheckout(
         paymentMethod: "credit_card",
         amount: discountedTotal,
         notes: "Automated payment via external checkout flow",
-        gatewayOrderId: "order_mock_" + crypto.randomUUID().substring(0, 8),    
-        gatewayPaymentId: "pay_mock_" + crypto.randomUUID().substring(0, 8),    
+        gatewayOrderId: "order_mock_" + crypto.randomUUID().substring(0, 8),
+        gatewayPaymentId: "pay_mock_" + crypto.randomUUID().substring(0, 8),
       },
     })
   }

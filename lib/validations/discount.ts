@@ -10,7 +10,7 @@ export const discountCreateSchema = z.object({
   code: z
     .string()
     .min(2, "Code must be at least 2 characters")
-    .max(50)
+    .max(100)
     .toUpperCase()
     .regex(
       /^[A-Z0-9_-]+$/,

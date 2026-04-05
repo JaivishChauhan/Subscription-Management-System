@@ -16,7 +16,8 @@
     "db:studio": "prisma studio",
     "db:generate": "prisma generate",
     "db:create-admin": "tsx --env-file=.env scripts/create-admin.ts",
-    "db:clear-sessions": "tsx --env-file=.env scripts/clear-sessions.ts"
+    "db:clear-sessions": "tsx --env-file=.env scripts/clear-sessions.ts",
+    "db:seed:heavy": "tsx --env-file=.env scripts/generate-heavy-dummy-data.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
@@ -48,6 +49,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@faker-js/faker": "^10.4.0",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/node": "^25.5.0",
     "@types/nodemailer": "^8.0.0",

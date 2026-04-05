@@ -39,35 +39,40 @@ export async function POST(request: Request) {
     const firstName = nameParts[0] ?? ""
     const lastName = nameParts.slice(1).join(" ") ?? ""
 
-    const newUser = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      const user = await tx.user.create({
-        data: {
-          email: normalizedEmail,
-          name: name.trim(),
-          password: hashedPassword,
-          role: "portal",
+    const newUser = await prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        const user = await tx.user.create({
+          data: {
+            email: normalizedEmail,
+            name: name.trim(),
+            password: hashedPassword,
+            role: "portal",
+          },
+        })
+
+        await tx.contact.create({
+          data: {
+            userId: user.id,
+            firstName,
+            lastName,
+          },
+        })
+
+        return user
+      }
+    )
+
+    return NextResponse.json(
+      {
+        message: "Account created successfully",
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          name: newUser.name,
         },
-      })
-
-      await tx.contact.create({
-        data: {
-          userId: user.id,
-          firstName,
-          lastName,
-        },
-      })
-
-      return user
-    })
-
-    return NextResponse.json({
-      message: "Account created successfully",
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        name: newUser.name,
       },
-    }, { status: 201 })
+      { status: 201 }
+    )
   } catch (error) {
     console.error("[POST /api/auth/register] error:", error)
     return NextResponse.json(

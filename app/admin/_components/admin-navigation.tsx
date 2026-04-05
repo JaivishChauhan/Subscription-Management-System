@@ -68,7 +68,7 @@ export function AdminNavigation({
         </div>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="text-foreground p-2 rounded-md hover:bg-muted"
+          className="text-foreground hover:bg-muted rounded-md p-2"
         >
           {isOpen ? <IconX stroke={1.5} /> : <IconMenu2 stroke={1.5} />}
         </button>
@@ -84,7 +84,7 @@ export function AdminNavigation({
 
       {/* Sidebar (Mobile & Desktop) */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 shrink-0 transform bg-background border-r border-sidebar-border transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
+        className={`bg-background border-sidebar-border fixed inset-y-0 left-0 z-50 w-64 shrink-0 transform border-r transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -130,7 +130,7 @@ export function AdminNavigation({
           {/* User Info */}
           <div className="border-sidebar-border border-t p-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-xs font-bold text-white shrink-0">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-xs font-bold text-white">
                 {userName.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 overflow-hidden">

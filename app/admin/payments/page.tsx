@@ -3,6 +3,8 @@ import Link from "next/link"
 import { IconCreditCard, IconArrowRight, IconPlus } from "@tabler/icons-react"
 import { requireAdminPage } from "@/lib/admin"
 import { prisma } from "@/lib/db"
+import { paymentFiltersSchema } from "@/lib/validations/payment"
+import { TablePagination } from "@/components/ui/table-pagination"
 
 export const metadata: Metadata = {
   title: "Payments",
@@ -10,8 +12,23 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic"
 
-export default async function AdminPaymentsPage() {
+export default async function AdminPaymentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
   await requireAdminPage()
+
+  const rawSearchParams = await searchParams
+  const firstValue = (v: string | string[] | undefined) =>
+    Array.isArray(v) ? v[0] : v
+
+  const parsed = paymentFiltersSchema.parse({
+    page: firstValue(rawSearchParams.page),
+    pageSize: firstValue(rawSearchParams.pageSize),
+  })
+
+  const { page, pageSize } = parsed
 
   const payments = await prisma.payment.findMany({
     orderBy: { paymentDate: "desc" },
@@ -28,8 +45,12 @@ export default async function AdminPaymentsPage() {
         },
       },
     },
-    take: 100,
+    skip: (page - 1) * pageSize,
+    take: pageSize,
   })
+
+  const totalPayments = await prisma.payment.count()
+  const totalPages = Math.max(1, Math.ceil(totalPayments / pageSize))
 
   return (
     <div className="space-y-8">
@@ -127,6 +148,12 @@ export default async function AdminPaymentsPage() {
             </table>
           </div>
         </div>
+        <TablePagination
+          page={page}
+          pageSize={pageSize}
+          totalItems={totalPayments}
+          totalPages={totalPages}
+        />
       </section>
     </div>
   )

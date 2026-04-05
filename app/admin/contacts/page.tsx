@@ -3,6 +3,8 @@ import Link from "next/link"
 import { IconUsers, IconArrowRight } from "@tabler/icons-react"
 import { requireAdminPage } from "@/lib/admin"
 import { prisma } from "@/lib/db"
+import { contactFiltersSchema } from "@/lib/validations/contact"
+import { TablePagination } from "@/components/ui/table-pagination"
 
 export const metadata: Metadata = {
   title: "Contacts",
@@ -10,8 +12,25 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic"
 
-export default async function AdminContactsPage() {
+export default async function AdminContactsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
   await requireAdminPage()
+
+  const rawSearchParams = await searchParams
+  const firstValue = (v: string | string[] | undefined) =>
+    Array.isArray(v) ? v[0] : v
+
+  const parsed = contactFiltersSchema.parse({
+    q: firstValue(rawSearchParams.q),
+    role: firstValue(rawSearchParams.role),
+    page: firstValue(rawSearchParams.page),
+    pageSize: firstValue(rawSearchParams.pageSize),
+  })
+
+  const { page, pageSize } = parsed
 
   const contacts = await prisma.contact.findMany({
     orderBy: [{ updatedAt: "desc" }],
@@ -29,8 +48,12 @@ export default async function AdminContactsPage() {
         },
       },
     },
-    take: 100,
+    skip: (page - 1) * pageSize,
+    take: pageSize,
   })
+
+  const totalContacts = await prisma.contact.count()
+  const totalPages = Math.max(1, Math.ceil(totalContacts / pageSize))
 
   return (
     <div className="space-y-8">
@@ -122,6 +145,12 @@ export default async function AdminContactsPage() {
             </table>
           </div>
         </div>
+        <TablePagination
+          page={page}
+          pageSize={pageSize}
+          totalItems={totalContacts}
+          totalPages={totalPages}
+        />
       </section>
     </div>
   )
