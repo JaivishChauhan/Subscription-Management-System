@@ -79,7 +79,7 @@ export function CheckoutClient() {
       .toString()
       .padStart(4, "0")}`
 
-    const res = await processCheckout(items)
+    const res = await processCheckout(items, discount?.code)
     if (res.error) {
       toast.error(res.error)
       return

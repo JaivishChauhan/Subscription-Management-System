@@ -21,10 +21,14 @@ export default async function PricingPage() {
 
     // Simulate features depending on description or notes
     const features = p.description
-      ? p.description
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean)
+      ? Array.from(
+          new Set(
+            p.description
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          )
+        )
       : ["High Availability", "Standard Support"]
 
     return {

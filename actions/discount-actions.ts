@@ -99,3 +99,77 @@ export async function updateDiscountAction(id: string, formData: unknown) {
     return { error: "Failed to update discount." }
   }
 }
+
+export async function validateDiscountAction(
+  code: string,
+  payload: { subtotal: number; items: { id: string; quantity: number }[] }
+) {
+  try {
+    const discount = await prisma.discount.findUnique({
+      where: { code: code.toUpperCase() },
+      include: {
+        applicableProducts: true,
+      },
+    })
+
+    if (!discount || !discount.isActive) {
+      return { error: "Invalid or inactive discount code." }
+    }
+
+    const now = new Date()
+    if (now < discount.startDate || now > discount.endDate) {
+      return { error: "Discount code is expired or not yet valid." }
+    }
+
+    if (
+      discount.usageLimit !== null &&
+      discount.usageCount >= discount.usageLimit
+    ) {
+      return { error: "Discount code usage limit reached." }
+    }
+
+    if (discount.minPurchase && payload.subtotal < discount.minPurchase) {
+      return {
+        error: `Minimum purchase amount of ₹${discount.minPurchase} required.`,
+      }
+    }
+
+    const totalQuantity = payload.items.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    )
+    if (discount.minQuantity && totalQuantity < discount.minQuantity) {
+      return {
+        error: `Minimum purchase quantity of ${discount.minQuantity} items required.`,
+      }
+    }
+
+    if (discount.applicableProducts.length > 0) {
+      const applicableProductIds = discount.applicableProducts.map(
+        (p) => p.productId
+      )
+      // Check if any cart item ID includes the applicable product IDs
+      // This is a naive check because cart item IDs are formatted like `${productId}-yearly` or `pre-bundle-${bundleId}-${plan}`
+      const hasApplicableProduct = payload.items.some((item) =>
+        applicableProductIds.some((pId) => item.id.includes(pId))
+      )
+      if (!hasApplicableProduct) {
+        return {
+          error: "Discount code is not applicable to any items in your cart.",
+        }
+      }
+    }
+
+    return {
+      success: true,
+      discount: {
+        code: discount.code,
+        type: (discount.type === "percentage" ? "percent" : "fixed") as "percent" | "fixed",
+        value: discount.value,
+      },
+    }
+  } catch (error) {
+    console.error("Failed to validate discount code:", error)
+    return { error: "Failed to validate discount code." }
+  }
+}

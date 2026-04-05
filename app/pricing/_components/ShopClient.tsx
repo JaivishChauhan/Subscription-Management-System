@@ -32,7 +32,8 @@ export function ShopClient({ products, categories }: ShopClientProps) {
 
   const handleAdd = (p: Product) => {
     const isYearly = billing[p.id]
-    const uniqueId = `${p.id}-${crypto.randomUUID()}`
+    // Use plan-based ID so adding the same product/plan multiple times increments quantity
+    const uniqueId = `${p.id}-${isYearly ? "yearly" : "monthly"}`
     addItem({
       id: uniqueId,
       name: p.name,
@@ -63,7 +64,10 @@ export function ShopClient({ products, categories }: ShopClientProps) {
             <button className="f-syne rounded-full bg-indigo-600 px-8 py-3 font-bold text-white shadow-md transition-transform hover:-translate-y-0.5 active:scale-95">
               Explore Plans →
             </button>
-            <button className="f-syne rounded-full border border-indigo-200 bg-white px-8 py-3 font-bold text-indigo-600 shadow-sm transition-colors hover:bg-slate-50">
+            <button
+              onClick={() => setChatOpen(true)}
+              className="f-syne rounded-full border border-indigo-200 bg-white px-8 py-3 font-bold text-indigo-600 shadow-sm transition-colors hover:bg-slate-50"
+            >
               Talk to AI Assistant
             </button>
           </div>
@@ -157,7 +161,7 @@ export function ShopClient({ products, categories }: ShopClientProps) {
                   </span>
                   <span className="f-mono text-muted-foreground text-xs">
                     {" "}
-                    / month
+                    / {billing[p.id] ? "year" : "month"}
                   </span>
                 </div>
                 <ul className="mb-8 space-y-4">

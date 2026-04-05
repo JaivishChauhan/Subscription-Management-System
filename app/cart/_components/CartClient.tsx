@@ -1,10 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCartStore } from "@/store/cart"
 import { IconShoppingCart, IconPackage, IconCloud } from "@tabler/icons-react"
+import { toast } from "sonner"
+import { validateDiscountAction } from "@/actions/discount-actions"
 
 export function CartClient() {
   const router = useRouter()
@@ -17,6 +19,8 @@ export function CartClient() {
   const [promoInput, setPromoInput] = useState("")
   const [isCheckingAuth, setIsCheckingAuth] = useState(false)
 
+  const [isPending, startTransition] = useTransition()
+
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
   const tax = Math.round(subtotal * 0.18)
   const discountAmount = discount
@@ -24,13 +28,38 @@ export function CartClient() {
       ? Math.round(subtotal * (discount.value / 100))
       : discount.value
     : 0
-  const total = subtotal + tax - discountAmount
+  const total = Math.max(0, subtotal + tax - discountAmount)
 
   const handleApply = () => {
-    if (promoInput.toUpperCase() === "SUMMER10") {
-      applyDiscount({ code: "SUMMER10", type: "percent", value: 10 })
-    }
-    setPromoInput("")
+    if (!promoInput.trim()) return
+
+    startTransition(async () => {
+      const payloadItems = items.map((i) => ({
+        id: i.id,
+        quantity: i.quantity,
+      }))
+      const res = await validateDiscountAction(promoInput.trim(), {
+        subtotal,
+        items: payloadItems,
+      })
+
+      if (res?.error) {
+        toast.error(res.error)
+        return
+      }
+
+      if (res?.success && res.discount) {
+        applyDiscount(
+          res.discount as {
+            code: string
+            type: "percent" | "fixed"
+            value: number
+          }
+        )
+        toast.success("Discount code applied!")
+        setPromoInput("")
+      }
+    })
   }
 
   const handleCheckout = async () => {

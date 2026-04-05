@@ -137,7 +137,14 @@ export default async function SubscriptionDetailPage({
                 <InfoItem
                   icon={IconCreditCard}
                   label="Billing plan"
-                  value={`${INR.format(subscription.recurringPlan.price)} / ${subscription.recurringPlan.billingPeriod}`}
+                  value={`${INR.format(
+                    subscription.lines && subscription.lines.length > 0
+                      ? subscription.lines.reduce(
+                          (sum, line) => sum + line.subtotal + line.taxAmount,
+                          0
+                        )
+                      : subscription.recurringPlan.price
+                  )} / ${subscription.recurringPlan.billingPeriod.charAt(0).toUpperCase() + subscription.recurringPlan.billingPeriod.slice(1)}`}
                 />
                 <InfoItem
                   icon={IconCalendar}

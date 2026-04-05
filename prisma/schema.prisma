@@ -39,6 +39,7 @@ model User {
   invoices            Invoice[]
   createdPayments     Payment[]      @relation("PaymentCreator")
   assignedSalesOrders Subscription[] @relation("Salesperson")
+  activityLogs        ActivityLog[]  @relation("ActorLogs")
 
   @@index([email])
   @@index([role])
@@ -531,4 +532,25 @@ model CartItem {
   bundle  Bundle?  @relation(fields: [bundleId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+// ============================================================================
+// 18. ACTIVITY LOGS — System Audit Trail
+// ============================================================================
+
+/// Generic event tracking for dashboard and audit features.
+model ActivityLog {
+  id          String   @id @default(cuid())
+  type        String   // e.g., "USER_CREATED", "SUBSCRIPTION_CANCELLED"
+  entityType  String   // e.g., "User", "Subscription", "Invoice"
+  entityId    String
+  actorId     String?  // The user who performed the action
+  details     String?  // stringified JSON payload with diffs/metadata
+  createdAt   DateTime @default(now())
+
+  actor User? @relation("ActorLogs", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([type])
+  @@index([entityType, entityId])
+  @@index([createdAt])
 }
